@@ -1,0 +1,6 @@
+@Eduprompt.API_HostAddress = http://localhost:5217
+
+GET {{Eduprompt.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
