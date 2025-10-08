@@ -7,7 +7,7 @@ using System.Security.Claims;
 namespace Eduprompt.API.Controllers;
 
 /// <summary>
-/// ❤️ Wishlists - Danh sách yêu thích của người dùng
+/// User wishlist management for favorite templates
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -24,8 +24,11 @@ public class WishlistsController : ControllerBase
     }
 
     /// <summary>
-    /// [AUTH] Get current user's wishlist
+    /// Get current user's wishlist
     /// </summary>
+    /// <returns>List of items in user's wishlist</returns>
+    /// <response code="200">Wishlist retrieved successfully</response>
+    /// <response code="401">User not authenticated</response>
     [HttpGet("my-wishlist")]
     public async Task<IActionResult> GetMyWishlist()
     {

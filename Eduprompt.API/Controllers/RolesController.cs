@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Eduprompt.API.Controllers;
 
 /// <summary>
-/// 🎭 Roles - Quản lý vai trò (Admin Only)
+/// Role management for user permissions (Admin only)
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -23,8 +23,12 @@ public class RolesController : ControllerBase
     }
 
     /// <summary>
-    /// Get all roles
+    /// Get all roles in the system
     /// </summary>
+    /// <returns>List of all roles</returns>
+    /// <response code="200">Roles retrieved successfully</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="403">User not authorized (Admin role required)</response>
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -33,8 +37,14 @@ public class RolesController : ControllerBase
     }
 
     /// <summary>
-    /// Get role by ID
+    /// Get role details by ID
     /// </summary>
+    /// <param name="id">Role ID</param>
+    /// <returns>Role details</returns>
+    /// <response code="200">Role found</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="403">User not authorized (Admin role required)</response>
+    /// <response code="404">Role not found</response>
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {

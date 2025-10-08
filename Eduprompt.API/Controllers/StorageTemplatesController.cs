@@ -7,7 +7,7 @@ using System.Security.Claims;
 namespace Eduprompt.API.Controllers;
 
 /// <summary>
-/// 💾 Storage Templates - Thư viện cá nhân đã mua
+/// Personal storage library for purchased templates
 /// </summary>
 [ApiController]
 [Route("api/storage-templates")]
@@ -24,8 +24,11 @@ public class StorageTemplatesController : ControllerBase
     }
 
     /// <summary>
-    /// [AUTH] Get current user's storage/library
+    /// Get current user's personal storage library
     /// </summary>
+    /// <returns>List of templates in user's storage</returns>
+    /// <response code="200">Storage retrieved successfully</response>
+    /// <response code="401">User not authenticated</response>
     [HttpGet("my-storage")]
     public async Task<IActionResult> GetMyStorage()
     {

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Eduprompt.API.Controllers;
 
 /// <summary>
-/// 🤖 AI History - Quản lý lịch sử AI
+/// AI interaction history management
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -23,8 +23,13 @@ public class AIHistoryController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách lịch sử AI của user
+    /// Get AI history by user ID
     /// </summary>
+    /// <param name="userId">User ID</param>
+    /// <returns>List of AI interactions for the user</returns>
+    /// <response code="200">AI history retrieved successfully</response>
+    /// <response code="400">Error retrieving AI history</response>
+    /// <response code="401">User not authenticated</response>
     [HttpGet("user/{userId}")]
     public async Task<IActionResult> GetByUserId(int userId)
     {
@@ -40,8 +45,13 @@ public class AIHistoryController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy lịch sử AI theo prompt instance
+    /// Get AI history by prompt instance ID
     /// </summary>
+    /// <param name="instanceId">Prompt instance ID</param>
+    /// <returns>List of AI interactions for the prompt instance</returns>
+    /// <response code="200">AI history retrieved successfully</response>
+    /// <response code="400">Error retrieving AI history</response>
+    /// <response code="401">User not authenticated</response>
     [HttpGet("instance/{instanceId}")]
     public async Task<IActionResult> GetByPromptInstanceId(int instanceId)
     {

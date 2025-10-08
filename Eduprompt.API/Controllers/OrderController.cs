@@ -17,6 +17,14 @@ public class OrderController : ControllerBase
         _orderService = orderService;
     }
 
+    /// <summary>
+    /// Create order from user's cart
+    /// </summary>
+    /// <param name="notes">Optional order notes</param>
+    /// <returns>Created order details</returns>
+    /// <response code="200">Order created successfully</response>
+    /// <response code="400">Invalid cart or order data</response>
+    /// <response code="401">User not authenticated</response>
     [HttpPost("create-from-cart")]
     [Authorize]
     public async Task<IActionResult> CreateFromCart([FromQuery] string? notes)
@@ -26,6 +34,13 @@ public class OrderController : ControllerBase
         return Ok(result);
     }
 
+    /// <summary>
+    /// Get all orders (Admin only)
+    /// </summary>
+    /// <returns>List of all orders</returns>
+    /// <response code="200">Orders retrieved successfully</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="403">User not authorized (Admin role required)</response>
     [HttpGet]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetAll()

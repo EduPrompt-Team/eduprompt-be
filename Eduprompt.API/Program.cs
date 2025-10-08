@@ -112,8 +112,6 @@ Nhập 'Bearer' [space] và sau đó là token của bạn.
     options.OrderActionsBy((apiDesc) => 
         $"{GetTagOrder(apiDesc.GroupName ?? apiDesc.ActionDescriptor.RouteValues["controller"] ?? "")}{apiDesc.RelativePath}");
 
-    // Vietnamese auto summaries for endpoints
-    options.OperationFilter<Eduprompt.API.Swagger.VietnameseSummaryOperationFilter>();
 });
 
 // Helper function to order tags

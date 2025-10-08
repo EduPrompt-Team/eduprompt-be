@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Eduprompt.API.Controllers;
 
 /// <summary>
-/// 👤 Users - Quản lý người dùng
+/// User management endpoints for CRUD operations
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -23,8 +23,12 @@ public class UsersController : ControllerBase
     }
 
     /// <summary>
-    /// Get all users (Admin only)
+    /// Get all users in the system (Admin only)
     /// </summary>
+    /// <returns>List of all users</returns>
+    /// <response code="200">Users retrieved successfully</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="403">User not authorized (Admin role required)</response>
     [HttpGet]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetAll()
@@ -34,8 +38,13 @@ public class UsersController : ControllerBase
     }
 
     /// <summary>
-    /// Get user by ID
+    /// Get user details by user ID
     /// </summary>
+    /// <param name="id">User ID</param>
+    /// <returns>User details</returns>
+    /// <response code="200">User found</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="404">User not found</response>
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
@@ -48,8 +57,14 @@ public class UsersController : ControllerBase
     }
 
     /// <summary>
-    /// Create a new user (Admin only)
+    /// Create a new user account (Admin only)
     /// </summary>
+    /// <param name="userDto">User creation details</param>
+    /// <returns>Created user details</returns>
+    /// <response code="201">User created successfully</response>
+    /// <response code="400">Invalid user data</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="403">User not authorized (Admin role required)</response>
     [HttpPost]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromBody] UserCreateDto userDto)
@@ -66,8 +81,15 @@ public class UsersController : ControllerBase
     }
 
     /// <summary>
-    /// Update user information
+    /// Update user information by user ID
     /// </summary>
+    /// <param name="id">User ID to update</param>
+    /// <param name="userDto">Updated user information</param>
+    /// <returns>Updated user details</returns>
+    /// <response code="200">User updated successfully</response>
+    /// <response code="400">Invalid user data</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="404">User not found</response>
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] UserUpdateDto userDto)
     {
@@ -83,8 +105,14 @@ public class UsersController : ControllerBase
     }
 
     /// <summary>
-    /// Delete a user (Admin only)
+    /// Delete a user account (Admin only)
     /// </summary>
+    /// <param name="id">User ID to delete</param>
+    /// <returns>No content</returns>
+    /// <response code="204">User deleted successfully</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="403">User not authorized (Admin role required)</response>
+    /// <response code="404">User not found</response>
     [HttpDelete("{id}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)

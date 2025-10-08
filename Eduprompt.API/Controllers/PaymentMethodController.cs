@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Eduprompt.API.Controllers;
 
 /// <summary>
-/// 💳 Payment Methods - Quản lý phương thức thanh toán
+/// Payment method management for user transactions
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -23,8 +23,13 @@ public class PaymentMethodController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách phương thức thanh toán của user
+    /// Get payment methods by user ID
     /// </summary>
+    /// <param name="userId">User ID</param>
+    /// <returns>List of user's payment methods</returns>
+    /// <response code="200">Payment methods retrieved successfully</response>
+    /// <response code="400">Error retrieving payment methods</response>
+    /// <response code="401">User not authenticated</response>
     [HttpGet("user/{userId}")]
     public async Task<IActionResult> GetByUserId(int userId)
     {
@@ -40,8 +45,14 @@ public class PaymentMethodController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy chi tiết phương thức thanh toán
+    /// Get payment method by ID
     /// </summary>
+    /// <param name="id">Payment method ID</param>
+    /// <returns>Payment method details</returns>
+    /// <response code="200">Payment method found</response>
+    /// <response code="400">Error retrieving payment method</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="404">Payment method not found</response>
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
