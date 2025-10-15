@@ -1,6 +1,7 @@
 using AutoMapper;
 using Eduprompt.Domain.DTOs.Auth;
 using Eduprompt.Domain.Entities;
+using Eduprompt.Domain.DTOs.User;
 using Eduprompt.Domain.Interface.Repository;
 using Eduprompt.Domain.Interface.Service;
 using Microsoft.Extensions.Configuration;
@@ -63,7 +64,7 @@ public class AuthService : IAuthService
         return response;
     }
 
-    public async Task<AuthResponseDto> LoginAsync(LoginRequestDto request)
+    public async Task<TokenResponseDto> LoginAsync(LoginRequestDto request)
     {
         // Get user by email
         var user = await _userRepository.GetByEmailAsync(request.Email);
@@ -84,11 +85,22 @@ public class AuthService : IAuthService
             throw new UnauthorizedAccessException("User account is not active");
         }
 
-        // Generate token
-        var response = _mapper.Map<AuthResponseDto>(user);
-        response.Token = GenerateJwtToken(user);
+        // Generate access + refresh token (align with Google flow)
+        var accessToken = GenerateJwtToken(user);
+        var refreshToken = GenerateRefreshToken();
 
-        return response;
+        user.RefreshToken = HashToken(refreshToken);
+        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+        await _userRepository.UpdateAsync(user);
+
+        return new TokenResponseDto
+        {
+            AccessToken = accessToken,
+            RefreshToken = refreshToken,
+            TokenType = "Bearer",
+            ExpiresIn = Convert.ToInt32(_configuration.GetSection("Jwt")["ExpiresInSeconds"] ?? "3600"),
+            User = _mapper.Map<UserDto>(user)
+        };
     }
 
     private string HashPassword(string password)
@@ -131,6 +143,21 @@ public class AuthService : IAuthService
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    private static string HashToken(string token)
+    {
+        using var sha256 = SHA256.Create();
+        var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(token));
+        return Convert.ToBase64String(bytes);
+    }
+
+    private string GenerateRefreshToken()
+    {
+        var randomNumber = new byte[64];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomNumber);
+        return Convert.ToBase64String(randomNumber);
     }
 
     public Task<bool> DeleteAsync(int id)
