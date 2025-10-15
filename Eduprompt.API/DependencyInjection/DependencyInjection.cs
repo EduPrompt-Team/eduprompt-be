@@ -71,6 +71,7 @@ public static class DependencyInjection
         services.AddScoped<IAIHistoryService, AIHistoryService>();
         services.AddScoped<IFeedbackService, FeedbackService>();
         services.AddScoped<IPackageCategoryService, PackageCategoryService>();
+        services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IAPIKeyService, APIKeyService>();
         services.AddScoped<IPackageDetailService, PackageDetailService>();
         services.AddScoped<ITemplateArchitectureService, TemplateArchitectureService>();
