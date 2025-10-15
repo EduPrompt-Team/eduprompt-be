@@ -34,6 +34,8 @@ public class MappingProfile : Profile
         CreateMap<User, UserDto>().ReverseMap();
         CreateMap<User, UserCreateDto>().ReverseMap();
         CreateMap<User, UserUpdateDto>().ReverseMap();
+        CreateMap<User, AuthResponseDto>()
+            .ForMember(d => d.RoleName, opt => opt.MapFrom(s => s.Role != null ? s.Role.RoleName : null));
 
         // Role mappings
         CreateMap<Role, RoleDto>().ReverseMap();
