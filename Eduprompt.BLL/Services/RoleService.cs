@@ -44,7 +44,7 @@ public class RoleService : IRoleService
     public async Task<RoleDto> UpdateAsync(int roleId, RoleCreateUpdateDto updateDto)
     {
         var role = await _roleRepository.GetByIdAsync(roleId);
-        if (role == null) return null;
+        if (role == null) throw new KeyNotFoundException("Role not found");
 
         role.RoleName = updateDto.RoleName;
         role.Status = updateDto.Status ?? role.Status;
@@ -59,10 +59,9 @@ public class RoleService : IRoleService
     }
 
 
-        public async Task<object> UpdateAsync(int id, object updateDto)
+        public Task<object?> UpdateAsync(int id, object updateDto)
     {
-        // Implementation will be added based on specific service needs
-        return null;
+        return Task.FromResult<object?>(null);
     }
 } 
 

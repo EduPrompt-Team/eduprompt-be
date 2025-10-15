@@ -58,7 +58,7 @@ public class PackageService : IPackageService
     public async Task<PackageDto> UpdateAsync(int packageId, UpdatePackageDto updateDto)
     {
         var package = await _packageRepository.GetByIdAsync(packageId);
-        if (package == null) return null;
+        if (package == null) throw new KeyNotFoundException("Package not found");
 
         package.CategoryID = updateDto.CategoryID ?? package.CategoryID;
         package.PackageName = updateDto.PackageName ?? package.PackageName;

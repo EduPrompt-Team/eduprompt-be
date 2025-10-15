@@ -7,6 +7,7 @@ namespace Eduprompt.BLL.Services;
 public class TemplateArchitectureService : ITemplateArchitectureService
 {
     private readonly ITemplateArchitectureRepository _architectureRepository;
+    // Using instance repository as originally wired; do not depend on StorageTemplate DTOs here
     private readonly IPromptInstanceRepository _instanceRepository;
 
     public TemplateArchitectureService(
@@ -37,7 +38,7 @@ public class TemplateArchitectureService : ITemplateArchitectureService
 
         var e = new Eduprompt.Domain.Entities.TemplateArchitecture
         {
-            StorageID = 0, // not set here; architecture links to StorageTemplate via StorageID if applicable
+            StorageID = 0,
             ArchitectureName = createDto.ArchitectureName,
             ArchitectureType = "Sequential",
             ConfigurationJson = createDto.Configuration
@@ -50,7 +51,7 @@ public class TemplateArchitectureService : ITemplateArchitectureService
     public async Task<TemplateArchitectureDto> UpdateAsync(int architectureId, CreateTemplateArchitectureDto updateDto)
     {
         var architecture = await _architectureRepository.GetByIdAsync(architectureId);
-        if (architecture == null) return null;
+        if (architecture == null) throw new KeyNotFoundException("Template architecture not found");
 
         architecture.ArchitectureName = updateDto.ArchitectureName;
         architecture.ArchitectureType = "Sequential";

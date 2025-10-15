@@ -58,19 +58,17 @@ public class ExpectedOutputService : IExpectedOutputService
     {
         return new ExpectedOutputDto
         {
-            OutputID = output.OutputID,
-            PromptInstanceID = output.PromptInstanceID,
+            OutputId = output.OutputID,
+            InstanceID = output.PromptInstanceID,
             OutputName = output.OutputName,
-            ValidationRules = output.ValidationRules,
-            ExampleOutput = output.ExampleOutput,
-            InstanceName = output.PromptInstance?.PromptName,
             OutputDetails = output.OutputDetails?.Select(od => new OutputDetailDto
             {
-                DetailID = od.DetailID,
-                OutputID = od.OutputID,
-                DetailKey = od.DetailKey,
-                DetailValue = od.DetailValue,
-                DetailType = od.DetailType
+                DetailId = od.DetailID,
+                OutputId = od.OutputID,
+                Description = od.DetailValue,
+                OutputSize = null,
+                CreatedDate = DateTime.UtcNow,
+                UpdatedDate = null
             }).ToList()
         };
     }

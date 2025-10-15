@@ -73,7 +73,6 @@ public class PackageCategoryService : IPackageCategoryService
             CategoryID = category.CategoryID,
             CategoryName = category.CategoryName,
             Description = category.Description,
-            DisplayOrder = category.DisplayOrder,
             PackageCount = category.Packages?.Count ?? 0
         };
     }

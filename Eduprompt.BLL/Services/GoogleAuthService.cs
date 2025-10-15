@@ -214,14 +214,14 @@ public class GoogleAuthService : IGoogleAuthService
         return Convert.ToBase64String(bytes);
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public Task<bool> DeleteAsync(int id)
     {
-        return await _userRepository.DeleteAsync(id);
+        return _userRepository.DeleteAsync(id);
     }
 
-    public async Task<object?> UpdateAsync(int id, object updateDto)
+    public Task<object?> UpdateAsync(int id, object updateDto)
     {
-        return null;
+        return Task.FromResult<object?>(null);
     }
 }
 

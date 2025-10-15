@@ -46,8 +46,8 @@ public class WalletService : IWalletService
         var wallet = await _walletRepository.GetByIdAsync(walletId);
         if (wallet == null) throw new KeyNotFoundException("Wallet not found");
 
-        wallet.Balance = updateDto.Balance ?? wallet.Balance;
-        wallet.Currency = updateDto.Currency ?? wallet.Currency;
+        wallet.Balance = updateDto.Balance;
+        wallet.Currency = updateDto.Currency;
         wallet.Status = updateDto.Status ?? wallet.Status;
         wallet.UpdatedDate = DateTime.UtcNow;
 

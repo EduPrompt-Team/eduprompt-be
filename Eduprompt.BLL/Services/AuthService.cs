@@ -133,15 +133,15 @@ public class AuthService : IAuthService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public Task<bool> DeleteAsync(int id)
     {
-        return await _userRepository.DeleteAsync(id);
+        return _userRepository.DeleteAsync(id);
     }
 
-    public async Task<object?> UpdateAsync(int id, object updateDto)
+    public Task<object?> UpdateAsync(int id, object updateDto)
     {
         // Implementation will be added based on specific service needs
-        return null;
+        return Task.FromResult<object?>(null);
     }
 } 
 
