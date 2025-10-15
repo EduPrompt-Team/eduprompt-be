@@ -18,11 +18,11 @@ public partial class Message
     [Required]
     public string Content { get; set; } = string.Empty;
 
-    [StringLength(50)]
-    public string? MessageType { get; set; } = "Text"; // 'Text', 'Image', 'File', 'Prompt'
+    [Required]
+    public DateTime SentAt { get; set; } = DateTime.UtcNow;
 
     [Required]
-    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+    public bool IsRead { get; set; } = false;
 
     [StringLength(50)]
     public string? Status { get; set; } = "Sent";

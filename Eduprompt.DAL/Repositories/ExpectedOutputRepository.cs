@@ -17,14 +17,14 @@ public class ExpectedOutputRepository : IExpectedOutputRepository
     {
         return await _context.Set<ExpectedOutput>()
             .Include(e => e.OutputDetails)
-            .FirstOrDefaultAsync(e => e.OutputId == outputId);
+            .FirstOrDefaultAsync(e => e.OutputID == outputId);
     }
 
     public async Task<IEnumerable<ExpectedOutput>> GetByInstanceIdAsync(int instanceId)
     {
         return await _context.Set<ExpectedOutput>()
             .Include(e => e.OutputDetails)
-            .Where(e => e.InstanceID == instanceId)
+            .Where(e => e.PromptInstanceID == instanceId)
             .ToListAsync();
     }
 

@@ -26,7 +26,7 @@ public class PostRepository : IPostRepository
         return await _context.Posts
             .Include(p => p.User)
             .Include(p => p.Feedbacks)
-            .OrderByDescending(p => p.CreatedDate)
+            .OrderByDescending(p => p.PublishedAt)
             .ToListAsync();
     }
 
@@ -36,7 +36,7 @@ public class PostRepository : IPostRepository
             .Include(p => p.User)
             .Include(p => p.Feedbacks)
             .Where(p => p.UserID == userId)
-            .OrderByDescending(p => p.CreatedDate)
+            .OrderByDescending(p => p.PublishedAt)
             .ToListAsync();
     }
 
@@ -46,7 +46,7 @@ public class PostRepository : IPostRepository
             .Include(p => p.User)
             .Include(p => p.Feedbacks)
             .Where(p => p.Status == "Published")
-            .OrderByDescending(p => p.CreatedDate)
+            .OrderByDescending(p => p.PublishedAt)
             .ToListAsync();
     }
 
@@ -55,8 +55,8 @@ public class PostRepository : IPostRepository
         return await _context.Posts
             .Include(p => p.User)
             .Include(p => p.Feedbacks)
-            .Where(p => p.PostType == postType)
-            .OrderByDescending(p => p.CreatedDate)
+            .Where(p => p.PostID.ToString() == postType)
+            .OrderByDescending(p => p.PublishedAt)
             .ToListAsync();
     }
 
@@ -96,8 +96,8 @@ public class PostRepository : IPostRepository
             .Include(p => p.Feedbacks)
             .Where(p => p.Title.Contains(searchTerm) || 
                        p.Content.Contains(searchTerm) ||
-                       (p.Tags != null && p.Tags.Contains(searchTerm)))
-            .OrderByDescending(p => p.CreatedDate)
+                       (p.PostID.ToString().Contains(searchTerm)))
+            .OrderByDescending(p => p.PublishedAt)
             .ToListAsync();
     }
 
@@ -111,13 +111,7 @@ public class PostRepository : IPostRepository
         return true;
     }
 
-    public async Task<bool> IncrementLikeCountAsync(int postId)
-    {
-        var post = await _context.Posts.FindAsync(postId);
-        if (post == null) return false;
-
-        post.LikeCount++;
-        await _context.SaveChangesAsync();
-        return true;
-    }
+    // IncrementLikeCountAsync removed - LikeCount property no longer exists
+    // Use ViewCount instead if needed
 }
+

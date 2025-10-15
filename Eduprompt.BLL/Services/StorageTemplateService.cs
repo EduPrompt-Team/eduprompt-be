@@ -8,61 +8,48 @@ namespace Eduprompt.BLL.Services;
 public class StorageTemplateService : IStorageTemplateService
 {
     private readonly IStorageTemplateRepository _storageRepository;
-        private readonly IStorageTemplateRepository _templateRepository;
     private readonly IMapper _mapper;
 
     public StorageTemplateService(
         IStorageTemplateRepository storageRepository,
-        IStorageTemplateRepository templateRepository,
         IMapper mapper)
     {
         _storageRepository = storageRepository;
-        _templateRepository = templateRepository;
         _mapper = mapper;
     }
 
     public async Task<IEnumerable<StorageTemplateServiceDto>> GetUserStorageAsync(int userId)
     {
         var storage = await _storageRepository.GetByUserIdAsync(userId);
-        return _mapper.Map<IEnumerable<StorageTemplateServiceDto>>(storage);
+        return storage.Select(MapToDto);
     }
 
     public async Task<StorageTemplateServiceDto> AddToStorageAsync(int userId, StorageTemplateCreateServiceDto storageDto)
     {
-        // Validate template exists
-        if (!await _templateRepository.ExistsAsync(storageDto.TemplateId, userId))
-        {
-            throw new InvalidOperationException($"Template with ID {storageDto.TemplateId} not found");
-        }
-
-        // Check if already in storage
+        // Check if already exists
         if (await _storageRepository.ExistsAsync(userId, storageDto.TemplateId))
         {
-            throw new InvalidOperationException("Template is already in your storage");
+            throw new InvalidOperationException("Template already in storage");
         }
 
         var storage = new StorageTemplate
         {
-            UserId = userId,
-            TemplateId = storageDto.TemplateId
+            UserID = userId,
+            PackageID = storageDto.TemplateId,
+            TemplateName = "",
+            IsFavorite = false,
+            CreatedAt = DateTime.UtcNow
         };
 
-        var createdStorage = await _storageRepository.CreateAsync(storage);
-        return _mapper.Map<StorageTemplateServiceDto>(createdStorage);
+        var created = await _storageRepository.CreateAsync(storage);
+        return MapToDto(created);
     }
 
     public async Task<bool> RemoveFromStorageAsync(int id, int userId)
     {
         var storage = await _storageRepository.GetByIdAsync(id);
-        
-        if (storage == null)
+        if (storage == null || storage.UserID != userId)
             return false;
-
-        // Only the owner can remove
-        if (storage.UserId != userId)
-        {
-            throw new UnauthorizedAccessException("You can only remove items from your own storage");
-        }
 
         return await _storageRepository.DeleteAsync(id);
     }
@@ -71,4 +58,29 @@ public class StorageTemplateService : IStorageTemplateService
     {
         return await _storageRepository.ExistsAsync(userId, templateId);
     }
+
+    private static StorageTemplateServiceDto MapToDto(StorageTemplate s)
+    {
+        return new StorageTemplateServiceDto
+        {
+            StorageId = s.StorageID,
+            UserId = s.UserID,
+            TemplateId = s.PackageID,
+            UploadDate = s.CreatedAt,
+            UpdatedDate = null,
+            Status = null,
+            UserName = s.User?.FullName,
+            TemplateName = s.Package?.PackageName,
+            TemplateDescription = s.Package?.Description,
+            TemplatePrice = s.Package?.Price,
+            TemplatePreviewUrl = null
+        };
+    }
 } 
+
+
+
+
+
+
+

@@ -14,12 +14,7 @@ public class UpdatePackageDto
     [Range(0, double.MaxValue, ErrorMessage = "Price must be non-negative")]
     public decimal? Price { get; set; }
 
-    public int? Duration { get; set; }
+    public int? DurationDays { get; set; }
 
-    public int? MaxUsage { get; set; }
-
-    public string? Features { get; set; }
-
-    [StringLength(50)]
-    public string? Status { get; set; }
+    public bool? IsActive { get; set; }
 }

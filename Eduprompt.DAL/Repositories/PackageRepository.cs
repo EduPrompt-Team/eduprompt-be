@@ -46,7 +46,7 @@ public class PackageRepository : IPackageRepository
         return await _context.Packages
             .Include(p => p.PackageCategory)
             .Include(p => p.PackageDetails)
-            .Where(p => p.Status == "Active")
+            .Where(p => p.IsActive == true)
             .OrderBy(p => p.PackageName)
             .ToListAsync();
     }

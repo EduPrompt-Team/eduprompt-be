@@ -16,8 +16,8 @@ public class PromptInstanceRepository : IPromptInstanceRepository
     public async Task<PromptInstance?> GetByIdAsync(int instanceId)
     {
         return await _context.PromptInstances
-            .Include(pi => pi.User)
-            .Include(pi => pi.StorageTemplate)
+            .Include(pi => pi.PromptInstanceDetails)
+            .Include(pi => pi.Package)
             .Include(pi => pi.PromptInstanceDetails)
             .FirstOrDefaultAsync(pi => pi.InstanceID == instanceId);
     }
@@ -25,22 +25,22 @@ public class PromptInstanceRepository : IPromptInstanceRepository
     public async Task<IEnumerable<PromptInstance>> GetByUserIdAsync(int userId)
     {
         return await _context.PromptInstances
-            .Include(pi => pi.User)
-            .Include(pi => pi.StorageTemplate)
+            .Include(pi => pi.PromptInstanceDetails)
+            .Include(pi => pi.Package)
             .Include(pi => pi.PromptInstanceDetails)
             .Where(pi => pi.UserID == userId)
-            .OrderByDescending(pi => pi.CreatedDate)
+            .OrderByDescending(pi => pi.ExecutedAt)
             .ToListAsync();
     }
 
     public async Task<IEnumerable<PromptInstance>> GetByTemplateIdAsync(int templateId)
     {
         return await _context.PromptInstances
-            .Include(pi => pi.User)
-            .Include(pi => pi.StorageTemplate)
             .Include(pi => pi.PromptInstanceDetails)
-            .Where(pi => pi.TemplateID == templateId)
-            .OrderByDescending(pi => pi.CreatedDate)
+            .Include(pi => pi.Package)
+            .Include(pi => pi.PromptInstanceDetails)
+            .Where(pi => pi.PackageID == templateId)
+            .OrderByDescending(pi => pi.ExecutedAt)
             .ToListAsync();
     }
 
@@ -76,22 +76,22 @@ public class PromptInstanceRepository : IPromptInstanceRepository
     public async Task<IEnumerable<PromptInstance>> GetByStatusAsync(string status)
     {
         return await _context.PromptInstances
-            .Include(pi => pi.User)
-            .Include(pi => pi.StorageTemplate)
+            .Include(pi => pi.PromptInstanceDetails)
+            .Include(pi => pi.Package)
             .Include(pi => pi.PromptInstanceDetails)
             .Where(pi => pi.Status == status)
-            .OrderByDescending(pi => pi.CreatedDate)
+            .OrderByDescending(pi => pi.ExecutedAt)
             .ToListAsync();
     }
 
     public async Task<IEnumerable<PromptInstance>> GetRecentInstancesAsync(int userId, int count = 10)
     {
         return await _context.PromptInstances
-            .Include(pi => pi.User)
-            .Include(pi => pi.StorageTemplate)
+            .Include(pi => pi.PromptInstanceDetails)
+            .Include(pi => pi.Package)
             .Include(pi => pi.PromptInstanceDetails)
             .Where(pi => pi.UserID == userId)
-            .OrderByDescending(pi => pi.CreatedDate)
+            .OrderByDescending(pi => pi.ExecutedAt)
             .Take(count)
             .ToListAsync();
     }

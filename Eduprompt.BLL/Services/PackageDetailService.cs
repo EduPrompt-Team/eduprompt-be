@@ -1,4 +1,5 @@
-using Eduprompt.Domain.DTOs.PackageDetail;
+﻿using Eduprompt.Domain.DTOs.PackageDetail;
+using Eduprompt.Domain.Entities;
 using Eduprompt.Domain.Interface.Repository;
 using Eduprompt.Domain.Interface.Service;
 
@@ -6,79 +7,69 @@ namespace Eduprompt.BLL.Services;
 
 public class PackageDetailService : IPackageDetailService
 {
-    private readonly IPackageDetailRepository _detailRepository;
-    private readonly IPackageRepository _packageRepository;
+    private readonly IPackageDetailRepository _packageDetailRepository;
 
-    public PackageDetailService(IPackageDetailRepository detailRepository, IPackageRepository packageRepository)
+    public PackageDetailService(IPackageDetailRepository packageDetailRepository)
     {
-        _detailRepository = detailRepository;
-        _packageRepository = packageRepository;
+        _packageDetailRepository = packageDetailRepository;
     }
 
     public async Task<PackageDetailDto?> GetByIdAsync(int detailId)
     {
-        var e = await _detailRepository.GetByIdAsync(detailId);
-        return e == null ? null : Map(e);
+        var detail = await _packageDetailRepository.GetByIdAsync(detailId);
+        return detail != null ? MapToDto(detail) : null;
     }
 
     public async Task<IEnumerable<PackageDetailDto>> GetByPackageIdAsync(int packageId)
     {
-        var list = await _detailRepository.GetByPackageIdAsync(packageId);
-        return list.Select(Map);
+        var details = await _packageDetailRepository.GetByPackageIdAsync(packageId);
+        return details.Select(MapToDto);
     }
 
     public async Task<PackageDetailDto> CreateAsync(CreatePackageDetailDto createDto)
     {
-        var pkg = await _packageRepository.GetByIdAsync(createDto.PackageID);
-        if (pkg == null) throw new ArgumentException("Package not found");
-
-        var e = new Eduprompt.Domain.Entities.PackageDetail
+        var detail = new PackageDetail
         {
             PackageID = createDto.PackageID,
-            DetailType = createDto.Unit ?? "Feature",
-            DetailContent = createDto.FeatureDescription ?? createDto.FeatureName,
-            OrderIndex = createDto.Limit ?? 0,
-            Status = "Active",
-            CreatedDate = DateTime.UtcNow
+            FeatureName = createDto.FeatureName,
+            FeatureValue = createDto.FeatureDescription ?? (createDto.IsIncluded ? "Included" : "Excluded"),
+            FeatureType = createDto.Unit ?? "Text"
         };
-        var created = await _detailRepository.CreateAsync(e);
-        return Map(created);
+
+        var createdDetail = await _packageDetailRepository.CreateAsync(detail);
+        return MapToDto(createdDetail);
     }
 
     public async Task<PackageDetailDto> UpdateAsync(int detailId, CreatePackageDetailDto updateDto)
     {
-        var e = await _detailRepository.GetByIdAsync(detailId);
-        if (e == null) throw new KeyNotFoundException("Package detail not found");
+        var detail = await _packageDetailRepository.GetByIdAsync(detailId);
+        if (detail == null) throw new KeyNotFoundException("Package detail not found");
 
-        if (updateDto.PackageID != 0) e.PackageID = updateDto.PackageID;
-        if (updateDto.FeatureDescription != null) e.DetailContent = updateDto.FeatureDescription;
-        if (!string.IsNullOrEmpty(updateDto.FeatureName)) e.DetailContent = updateDto.FeatureName;
-        if (updateDto.Unit != null) e.DetailType = updateDto.Unit;
-        if (updateDto.Limit.HasValue) e.OrderIndex = updateDto.Limit.Value;
+        detail.FeatureName = updateDto.FeatureName;
+        detail.FeatureValue = updateDto.FeatureDescription ?? (updateDto.IsIncluded ? "Included" : "Excluded");
+        detail.FeatureType = updateDto.Unit ?? "Text";
 
-        var updated = await _detailRepository.UpdateAsync(e);
-        return Map(updated);
+        var updatedDetail = await _packageDetailRepository.UpdateAsync(detail);
+        return MapToDto(updatedDetail);
     }
 
     public async Task<bool> DeleteAsync(int detailId)
     {
-        return await _detailRepository.DeleteAsync(detailId);
+        return await _packageDetailRepository.DeleteAsync(detailId);
     }
 
-    private static PackageDetailDto Map(Eduprompt.Domain.Entities.PackageDetail e)
+    private static PackageDetailDto MapToDto(PackageDetail detail)
     {
         return new PackageDetailDto
         {
-            DetailID = e.DetailID,
-            PackageID = e.PackageID,
-            FeatureName = e.DetailContent,
-            FeatureDescription = e.DetailContent,
-            IsIncluded = e.Status == "Active",
-            Limit = e.OrderIndex,
-            Unit = e.DetailType,
-            PackageName = e.Package?.PackageName
+            DetailID = detail.DetailID,
+            PackageID = detail.PackageID,
+            FeatureName = detail.FeatureName,
+            FeatureDescription = detail.FeatureValue,
+            IsIncluded = detail.FeatureValue?.Equals("Included", StringComparison.OrdinalIgnoreCase) == true,
+            Limit = null,
+            Unit = detail.FeatureType,
+            PackageName = detail.Package?.PackageName
         };
     }
 }
-
-

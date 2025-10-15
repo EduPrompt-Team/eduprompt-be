@@ -10,5 +10,5 @@ public interface ITemplateArchitectureRepository
     Task<TemplateArchitecture> UpdateAsync(TemplateArchitecture architecture);
     Task<bool> DeleteAsync(int architectureId);
     Task<bool> ExistsAsync(int architectureId);
-    Task<IEnumerable<TemplateArchitecture>> GetActiveArchitecturesByInstanceIdAsync(int instanceId);
+    Task<IEnumerable<TemplateArchitecture>> GetByStorageIdAsync(int storageId);
 }

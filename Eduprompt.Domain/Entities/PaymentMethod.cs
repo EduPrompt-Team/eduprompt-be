@@ -9,36 +9,19 @@ public partial class PaymentMethod
     public int PaymentMethodID { get; set; }
 
     [Required]
-    public int UserID { get; set; }
-
-    [Required]
     [StringLength(100)]
     public string MethodName { get; set; } = string.Empty;
 
     [Required]
     [StringLength(50)]
-    public string MethodType { get; set; } = string.Empty; // 'Bank', 'CreditCard', 'E-Wallet', 'Crypto'
-
-    [StringLength(255)]
-    public string? AccountNumber { get; set; }
-
-    [StringLength(100)]
-    public string? BankName { get; set; }
+    public string Provider { get; set; } = string.Empty; // 'VNPay', 'Momo', 'ZaloPay', 'Bank', etc.
 
     [Required]
-    public bool IsDefault { get; set; } = false;
+    public bool IsActive { get; set; } = true;
 
-    [Required]
-    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-
-    public DateTime? UpdatedDate { get; set; }
-
-    [StringLength(50)]
-    public string? Status { get; set; } = "Active";
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal? ProcessingFee { get; set; } = 0.00m;
 
     // Navigation properties
-    [ForeignKey("UserID")]
-    public virtual User User { get; set; } = null!;
-
     public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
 }

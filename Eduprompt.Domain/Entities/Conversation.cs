@@ -15,9 +15,9 @@ public partial class Conversation
     public string? Title { get; set; }
 
     [Required]
-    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+    public DateTime StartedAt { get; set; } = DateTime.UtcNow;
 
-    public DateTime? UpdatedDate { get; set; }
+    public DateTime? LastActivity { get; set; }
 
     [StringLength(50)]
     public string? Status { get; set; } = "Active";
@@ -27,4 +27,5 @@ public partial class Conversation
     public virtual User User { get; set; } = null!;
 
     public virtual ICollection<Message> Messages { get; set; } = new List<Message>();
+    public virtual ICollection<AIHistory> AIHistories { get; set; } = new List<AIHistory>();
 }

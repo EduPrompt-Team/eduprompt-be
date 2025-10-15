@@ -8,9 +8,9 @@ public class CreateAPIKeyValidator : AbstractValidator<CreateAPIKeyDto>
     public CreateAPIKeyValidator()
     {
         RuleFor(x => x.PackageID).GreaterThan(0);
-        RuleFor(x => x.KeyName).NotEmpty().MaximumLength(100);
-        When(x => x.KeyValue != null, () => RuleFor(x => x.KeyValue!).MaximumLength(500));
-        When(x => x.Provider != null, () => RuleFor(x => x.Provider!).MaximumLength(50));
+        RuleFor(x => x.APIProvider).NotEmpty().MaximumLength(100);
+        RuleFor(x => x.KeyHash).NotEmpty().MaximumLength(500);
+        When(x => x.UsageLimit.HasValue, () => RuleFor(x => x.UsageLimit!.Value).GreaterThan(0));
     }
 }
 

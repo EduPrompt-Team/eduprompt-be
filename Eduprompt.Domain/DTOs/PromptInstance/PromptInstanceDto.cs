@@ -4,14 +4,13 @@ public class PromptInstanceDto
 {
     public int InstanceID { get; set; }
     public int UserID { get; set; }
-    public int TemplateID { get; set; }
-    public string InstanceName { get; set; } = string.Empty;
-    public string? InputData { get; set; }
-    public string? OutputData { get; set; }
+    public int PackageID { get; set; }
+    public string PromptName { get; set; } = string.Empty;
+    public string? InputJson { get; set; }
+    public string? OutputJson { get; set; }
+    public DateTime ExecutedAt { get; set; }
+    public int? ProcessingTimeMs { get; set; }
     public string? Status { get; set; }
-    public DateTime CreatedDate { get; set; }
-    public DateTime? UpdatedDate { get; set; }
-    public DateTime? CompletedDate { get; set; }
-    public string? TemplateName { get; set; }
     public string? UserName { get; set; }
+    public string? PackageName { get; set; }
 }

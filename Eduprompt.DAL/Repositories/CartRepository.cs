@@ -17,7 +17,7 @@ public class CartRepository : ICartRepository
     {
         return await _context.Carts
             .Include(c => c.CartDetails)
-                .ThenInclude(cd => cd.Template)
+                .ThenInclude(cd => cd.Package)
             .FirstOrDefaultAsync(c => c.UserId == userId);
     }
 
@@ -25,7 +25,7 @@ public class CartRepository : ICartRepository
     {
         return await _context.Carts
             .Include(c => c.CartDetails)
-                .ThenInclude(cd => cd.Template)
+                .ThenInclude(cd => cd.Package)
             .FirstOrDefaultAsync(c => c.CartId == cartId);
     }
 
@@ -33,7 +33,6 @@ public class CartRepository : ICartRepository
     {
         cart.CreatedDate = DateTime.Now;
         cart.TotalItem = 0;
-        cart.Status = cart.Status ?? "Active";
 
         await _context.Carts.AddAsync(cart);
         await _context.SaveChangesAsync();
@@ -69,21 +68,21 @@ public class CartRepository : ICartRepository
     public async Task<CartDetail?> GetCartItemAsync(int cartDetailId)
     {
         return await _context.CartDetails
-            .Include(cd => cd.Template)
+            .Include(cd => cd.Package)
             .FirstOrDefaultAsync(cd => cd.CartDetailId == cartDetailId);
     }
 
-    public async Task<CartDetail?> GetCartItemByTemplateAsync(int cartId, int templateId)
+    public async Task<CartDetail?> GetCartItemByPackageAsync(int cartId, int packageId)
     {
         return await _context.CartDetails
-            .Include(cd => cd.Template)
-            .FirstOrDefaultAsync(cd => cd.CartId == cartId && cd.TemplateId == templateId);
+            .Include(cd => cd.Package)
+            .FirstOrDefaultAsync(cd => cd.CartId == cartId && cd.PackageID == packageId);
     }
 
     public async Task<CartDetail> AddItemAsync(CartDetail cartDetail)
     {
         cartDetail.AddedDate = DateTime.Now;
-        cartDetail.Status = cartDetail.Status ?? "Active";
+        // CartDetailId is auto-generated
 
         await _context.CartDetails.AddAsync(cartDetail);
         
@@ -121,7 +120,7 @@ public class CartRepository : ICartRepository
 
         // Update cart total items
         var cart = await _context.Carts.FindAsync(cartDetail.CartId);
-        if (cart != null && cart.TotalItem > 0)
+        if (cart != null && (cart.TotalItem ?? 0) > 0)
         {
             cart.TotalItem = (cart.TotalItem ?? 0) - 1;
             cart.UpdatedDate = DateTime.Now;

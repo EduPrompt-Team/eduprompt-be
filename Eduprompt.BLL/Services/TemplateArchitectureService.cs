@@ -31,18 +31,16 @@ public class TemplateArchitectureService : ITemplateArchitectureService
 
     public async Task<TemplateArchitectureDto> CreateAsync(CreateTemplateArchitectureDto createDto)
     {
-        // Ensure instance exists (mapping PromptInstanceID -> underlying foreign key as per model)
+        // Ensure instance exists
         var instance = await _instanceRepository.GetByIdAsync(createDto.PromptInstanceID);
         if (instance == null) throw new ArgumentException("Prompt instance not found");
 
         var e = new Eduprompt.Domain.Entities.TemplateArchitecture
         {
-            TemplateID = createDto.PromptInstanceID, // note: entity currently references TemplateID
+            StorageID = 0, // not set here; architecture links to StorageTemplate via StorageID if applicable
             ArchitectureName = createDto.ArchitectureName,
             ArchitectureType = "Sequential",
-            Configuration = createDto.Configuration,
-            Status = createDto.Status,
-            CreatedDate = DateTime.UtcNow
+            ConfigurationJson = createDto.Configuration
         };
 
         var created = await _architectureRepository.CreateAsync(e);
@@ -51,22 +49,15 @@ public class TemplateArchitectureService : ITemplateArchitectureService
 
     public async Task<TemplateArchitectureDto> UpdateAsync(int architectureId, CreateTemplateArchitectureDto updateDto)
     {
-        var e = await _architectureRepository.GetByIdAsync(architectureId);
-        if (e == null) throw new KeyNotFoundException("Template architecture not found");
+        var architecture = await _architectureRepository.GetByIdAsync(architectureId);
+        if (architecture == null) return null;
 
-        if (updateDto.PromptInstanceID != 0) e.TemplateID = updateDto.PromptInstanceID;
-        if (!string.IsNullOrEmpty(updateDto.ArchitectureName)) e.ArchitectureName = updateDto.ArchitectureName;
-        // Entity does not have Description; ignore mapping from DTO to entity here
-        if (updateDto.Configuration != null) e.Configuration = updateDto.Configuration;
-        if (updateDto.Status != null) e.Status = updateDto.Status;
+        architecture.ArchitectureName = updateDto.ArchitectureName;
+        architecture.ArchitectureType = "Sequential";
+        architecture.ConfigurationJson = updateDto.Configuration;
 
-        var updated = await _architectureRepository.UpdateAsync(e);
-        return Map(updated);
-    }
-
-    public async Task<bool> DeleteAsync(int architectureId)
-    {
-        return await _architectureRepository.DeleteAsync(architectureId);
+        var updatedArchitecture = await _architectureRepository.UpdateAsync(architecture);
+        return Map(updatedArchitecture);
     }
 
     private static TemplateArchitectureDto Map(Eduprompt.Domain.Entities.TemplateArchitecture e)
@@ -74,16 +65,29 @@ public class TemplateArchitectureService : ITemplateArchitectureService
         return new TemplateArchitectureDto
         {
             ArchitectureID = e.ArchitectureID,
-            PromptInstanceID = e.TemplateID,
+            PromptInstanceID = 0,
             ArchitectureName = e.ArchitectureName,
-            // Entity does not have Description field; DTO Description left null
-            Configuration = e.Configuration,
-            CreatedDate = e.CreatedDate,
-            UpdatedDate = e.UpdatedDate,
-            Status = e.Status,
+            Description = null,
+            Configuration = e.ConfigurationJson,
+            CreatedDate = DateTime.UtcNow,
+            UpdatedDate = null,
+            Status = null,
             InstanceName = null
         };
     }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        return await _architectureRepository.DeleteAsync(id);
+    }
 }
+
+
+
+
+
+
+
+
 
 

@@ -11,6 +11,8 @@ public partial class Post
     [Required]
     public int UserID { get; set; }
 
+    public int? PackageID { get; set; }
+
     [Required]
     [StringLength(200)]
     public string Title { get; set; } = string.Empty;
@@ -18,20 +20,10 @@ public partial class Post
     [Required]
     public string Content { get; set; } = string.Empty;
 
-    [StringLength(50)]
-    public string? PostType { get; set; } = "General"; // 'General', 'Question', 'Share', 'Review'
-
-    [StringLength(500)]
-    public string? Tags { get; set; }
-
     public int ViewCount { get; set; } = 0;
 
-    public int LikeCount { get; set; } = 0;
-
     [Required]
-    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-
-    public DateTime? UpdatedDate { get; set; }
+    public DateTime PublishedAt { get; set; } = DateTime.UtcNow;
 
     [StringLength(50)]
     public string? Status { get; set; } = "Published";
@@ -39,6 +31,9 @@ public partial class Post
     // Navigation properties
     [ForeignKey("UserID")]
     public virtual User User { get; set; } = null!;
+
+    [ForeignKey("PackageID")]
+    public virtual Package? Package { get; set; }
 
     public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
 }

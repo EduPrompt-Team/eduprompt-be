@@ -25,7 +25,7 @@ public class APIKeyRepository : IAPIKeyRepository
         return await _context.APIKeys
             .Include(k => k.Package)
             .Where(k => k.PackageID == packageId)
-            .OrderBy(k => k.CreatedDate)
+            .OrderBy(k => k.APIKeyID)
             .ToListAsync();
     }
 
@@ -62,8 +62,8 @@ public class APIKeyRepository : IAPIKeyRepository
     {
         return await _context.APIKeys
             .Include(k => k.Package)
-            .Where(k => k.PackageID == packageId && k.Status == "Active")
-            .OrderBy(k => k.CreatedDate)
+            .Where(k => k.PackageID == packageId)
+            .OrderBy(k => k.APIKeyID)
             .ToListAsync();
     }
 
@@ -71,6 +71,6 @@ public class APIKeyRepository : IAPIKeyRepository
     {
         return await _context.APIKeys
             .Include(k => k.Package)
-            .FirstOrDefaultAsync(k => k.Provider == provider && k.Status == "Active");
+            .FirstOrDefaultAsync(k => k.APIProvider == provider);
     }
 }

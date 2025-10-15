@@ -7,20 +7,15 @@ public class CreateAIHistoryDto
     [Required]
     public int UserID { get; set; }
 
+    public int? ConversationID { get; set; }
+
     public int? PromptInstanceID { get; set; }
 
-    [Required]
-    public string InputText { get; set; } = string.Empty;
+    public string? UserMessage { get; set; }
 
-    public string? OutputText { get; set; }
+    public string? AIResponse { get; set; }
 
-    [StringLength(100)]
-    public string? ModelUsed { get; set; }
-
-    public int? TokensUsed { get; set; }
-
-    [Range(0, double.MaxValue, ErrorMessage = "Cost must be non-negative")]
-    public decimal? Cost { get; set; }
+    public int? ProcessingTimeMs { get; set; }
 
     [StringLength(50)]
     public string? Status { get; set; } = "Completed";

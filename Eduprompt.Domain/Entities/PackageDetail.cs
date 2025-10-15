@@ -12,19 +12,16 @@ public partial class PackageDetail
     public int PackageID { get; set; }
 
     [Required]
-    [StringLength(50)]
-    public string DetailType { get; set; } = string.Empty; // 'Feature', 'Benefit', 'Requirement'
+    [StringLength(100)]
+    public string FeatureName { get; set; } = string.Empty;
 
     [Required]
-    public string DetailContent { get; set; } = string.Empty;
-
-    public int OrderIndex { get; set; } = 0;
+    [StringLength(500)]
+    public string FeatureValue { get; set; } = string.Empty;
 
     [Required]
-    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-
     [StringLength(50)]
-    public string? Status { get; set; } = "Active";
+    public string FeatureType { get; set; } = string.Empty; // 'Text', 'Number', 'Boolean', 'List'
 
     // Navigation properties
     [ForeignKey("PackageID")]

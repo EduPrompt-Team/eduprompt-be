@@ -38,6 +38,8 @@ public partial class EdupromptContext : DbContext
     public virtual DbSet<PromptInstanceDetail> PromptInstanceDetails { get; set; }
     public virtual DbSet<TemplateArchitecture> TemplateArchitectures { get; set; }
     public virtual DbSet<AIHistory> AIHistories { get; set; }
+    public virtual DbSet<ExpectedOutput> ExpectedOutputs { get; set; }
+    public virtual DbSet<OutputDetail> OutputDetails { get; set; }
     
     // Package entities
     public virtual DbSet<Package> Packages { get; set; }

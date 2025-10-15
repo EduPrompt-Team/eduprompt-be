@@ -4,15 +4,12 @@ public class CartItemDto
 {
     public int CartDetailId { get; set; }
     public int CartId { get; set; }
-    public int TemplateId { get; set; }
+    public int PackageID { get; set; }
     public int Quantity { get; set; }
     public decimal UnitPrice { get; set; }
-    public decimal? SubTotal { get; set; }
-    public DateTime? AddedDate { get; set; }
-    public string? Status { get; set; }
+    public DateTime AddedDate { get; set; }
     
-    // Template info
-    public string? TemplateName { get; set; }
-    public string? TemplateDescription { get; set; }
-    public string? PreviewUrl { get; set; }
+    // Package info
+    public string? PackageName { get; set; }
+    public string? PackageDescription { get; set; }
 } 

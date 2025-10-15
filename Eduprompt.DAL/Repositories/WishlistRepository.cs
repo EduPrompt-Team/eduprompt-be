@@ -18,7 +18,7 @@ public class WishlistRepository : IWishlistRepository
     {
         return await _context.Wishlists
             .Include(w => w.User)
-            .Include(w => w.Template)
+            .Include(w => w.Package)
             .FirstOrDefaultAsync(w => w.WishlistId == id);
     }
 
@@ -26,9 +26,9 @@ public class WishlistRepository : IWishlistRepository
     {
         return await _context.Wishlists
             .Include(w => w.User)
-            .Include(w => w.Template)
-            .Where(w => w.UserId == userId && w.Status == "Active")
-            .OrderByDescending(w => w.CreatedDate)
+            .Include(w => w.Package)
+            .Where(w => w.UserId == userId)
+            .OrderByDescending(w => w.AddedAt)
             .ToListAsync();
     }
 
@@ -36,14 +36,13 @@ public class WishlistRepository : IWishlistRepository
     {
         return await _context.Wishlists
             .Include(w => w.User)
-            .Include(w => w.Template)
-            .FirstOrDefaultAsync(w => w.UserId == userId && w.TemplateId == templateId);
+            .Include(w => w.Package)
+            .FirstOrDefaultAsync(w => w.UserId == userId && w.PackageID == templateId);
     }
 
     public async Task<Wishlist> CreateAsync(Wishlist wishlist)
     {
-        wishlist.CreatedDate = DateTime.Now;
-        wishlist.Status = wishlist.Status ?? "Active";
+        wishlist.AddedAt = DateTime.Now;
 
         await _context.Wishlists.AddAsync(wishlist);
         await _context.SaveChangesAsync();
@@ -65,6 +64,6 @@ public class WishlistRepository : IWishlistRepository
     public async Task<bool> ExistsAsync(int userId, int templateId)
     {
         return await _context.Wishlists
-            .AnyAsync(w => w.UserId == userId && w.TemplateId == templateId && w.Status == "Active");
+            .AnyAsync(w => w.UserId == userId && w.PackageID == templateId);
     }
 } 

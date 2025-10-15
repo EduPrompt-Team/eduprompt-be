@@ -1,4 +1,5 @@
-using Eduprompt.Domain.DTOs.PromptInstanceDetail;
+﻿using Eduprompt.Domain.DTOs.PromptInstanceDetail;
+using Eduprompt.Domain.Entities;
 using Eduprompt.Domain.Interface.Repository;
 using Eduprompt.Domain.Interface.Service;
 
@@ -6,81 +7,68 @@ namespace Eduprompt.BLL.Services;
 
 public class PromptInstanceDetailService : IPromptInstanceDetailService
 {
-    private readonly IPromptInstanceDetailRepository _detailRepository;
-    private readonly IPromptInstanceRepository _instanceRepository;
+    private readonly IPromptInstanceDetailRepository _promptInstanceDetailRepository;
 
-    public PromptInstanceDetailService(
-        IPromptInstanceDetailRepository detailRepository,
-        IPromptInstanceRepository instanceRepository)
+    public PromptInstanceDetailService(IPromptInstanceDetailRepository promptInstanceDetailRepository)
     {
-        _detailRepository = detailRepository;
-        _instanceRepository = instanceRepository;
+        _promptInstanceDetailRepository = promptInstanceDetailRepository;
     }
 
     public async Task<PromptInstanceDetailDto?> GetByIdAsync(int detailId)
     {
-        var e = await _detailRepository.GetByIdAsync(detailId);
-        return e == null ? null : Map(e);
+        var detail = await _promptInstanceDetailRepository.GetByIdAsync(detailId);
+        return detail != null ? MapToDto(detail) : null;
     }
 
     public async Task<IEnumerable<PromptInstanceDetailDto>> GetByInstanceIdAsync(int instanceId)
     {
-        var list = await _detailRepository.GetByInstanceIdAsync(instanceId);
-        return list.Select(Map);
+        var details = await _promptInstanceDetailRepository.GetByInstanceIdAsync(instanceId);
+        return details.Select(MapToDto);
     }
 
     public async Task<PromptInstanceDetailDto> CreateAsync(CreatePromptInstanceDetailDto createDto)
     {
-        var instance = await _instanceRepository.GetByIdAsync(createDto.InstanceID);
-        if (instance == null) throw new ArgumentException("Prompt instance not found");
-
-        var e = new Eduprompt.Domain.Entities.PromptInstanceDetail
+        var detail = new PromptInstanceDetail
         {
             InstanceID = createDto.InstanceID,
-            FieldName = createDto.FieldName,
-            FieldValue = createDto.FieldValue,
-            FieldType = createDto.FieldType,
-            CreatedDate = DateTime.UtcNow,
-            Status = "Active"
+            ParameterName = createDto.FieldName,
+            ParameterValue = createDto.FieldValue ?? string.Empty,
+            ParameterType = createDto.FieldType ?? "Text"
         };
 
-        var created = await _detailRepository.CreateAsync(e);
-        return Map(created);
+        var createdDetail = await _promptInstanceDetailRepository.CreateAsync(detail);
+        return MapToDto(createdDetail);
     }
 
     public async Task<PromptInstanceDetailDto> UpdateAsync(int detailId, CreatePromptInstanceDetailDto updateDto)
     {
-        var e = await _detailRepository.GetByIdAsync(detailId);
-        if (e == null) throw new KeyNotFoundException("Prompt instance detail not found");
+        var detail = await _promptInstanceDetailRepository.GetByIdAsync(detailId);
+        if (detail == null) throw new KeyNotFoundException("Prompt instance detail not found");
 
-        if (updateDto.InstanceID != 0) e.InstanceID = updateDto.InstanceID;
-        if (!string.IsNullOrEmpty(updateDto.FieldName)) e.FieldName = updateDto.FieldName;
-        if (updateDto.FieldValue != null) e.FieldValue = updateDto.FieldValue;
-        if (updateDto.FieldType != null) e.FieldType = updateDto.FieldType;
+        detail.ParameterName = updateDto.FieldName;
+        detail.ParameterValue = updateDto.FieldValue ?? string.Empty;
+        detail.ParameterType = updateDto.FieldType ?? detail.ParameterType;
 
-        var updated = await _detailRepository.UpdateAsync(e);
-        return Map(updated);
+        var updatedDetail = await _promptInstanceDetailRepository.UpdateAsync(detail);
+        return MapToDto(updatedDetail);
     }
 
     public async Task<bool> DeleteAsync(int detailId)
     {
-        return await _detailRepository.DeleteAsync(detailId);
+        return await _promptInstanceDetailRepository.DeleteAsync(detailId);
     }
 
-    private static PromptInstanceDetailDto Map(Eduprompt.Domain.Entities.PromptInstanceDetail e)
+    private static PromptInstanceDetailDto MapToDto(PromptInstanceDetail detail)
     {
         return new PromptInstanceDetailDto
         {
-            DetailID = e.DetailID,
-            InstanceID = e.InstanceID,
-            FieldName = e.FieldName,
-            FieldValue = e.FieldValue,
-            FieldType = e.FieldType,
-            CreatedDate = e.CreatedDate,
-            UpdatedDate = null,
-            InstanceName = e.PromptInstance?.InstanceName
+            DetailID = detail.DetailID,
+            InstanceID = detail.InstanceID,
+            FieldName = detail.ParameterName,
+            FieldValue = detail.ParameterValue,
+            FieldType = detail.ParameterType,
+            OrderIndex = null,
+            InstanceName = detail.PromptInstance?.PromptName
         };
     }
 }
-
-

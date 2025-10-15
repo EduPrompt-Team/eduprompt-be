@@ -2,6 +2,10 @@ using Eduprompt.Domain.DTOs.PromptInstance;
 using Eduprompt.Domain.Entities;
 using Eduprompt.Domain.Interface.Repository;
 using Eduprompt.Domain.Interface.Service;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System;
 
 namespace Eduprompt.BLL.Services;
 
@@ -28,7 +32,7 @@ public class PromptInstanceService : IPromptInstanceService
 
     public async Task<IEnumerable<PromptInstanceDto>> GetByTemplateIdAsync(int templateId)
     {
-        var instances = await _promptInstanceRepository.GetByTemplateIdAsync(templateId);
+        var instances = await _promptInstanceRepository.GetByPackageIdAsync(templateId);
         return instances.Select(MapToDto);
     }
 
@@ -37,44 +41,29 @@ public class PromptInstanceService : IPromptInstanceService
         var instance = new PromptInstance
         {
             UserID = createPromptInstanceDto.UserID,
-            TemplateID = createPromptInstanceDto.TemplateID,
-            InstanceName = createPromptInstanceDto.InstanceName,
-            InputData = createPromptInstanceDto.InputData,
-            Status = createPromptInstanceDto.Status,
-            CreatedDate = DateTime.UtcNow
+            PackageID = createPromptInstanceDto.PackageID,
+            PromptName = createPromptInstanceDto.PromptName,
+            InputJson = createPromptInstanceDto.InputJson,
+            Status = createPromptInstanceDto.Status ?? "Pending",
+            ExecutedAt = DateTime.UtcNow
         };
 
         var createdInstance = await _promptInstanceRepository.CreateAsync(instance);
         return MapToDto(createdInstance);
     }
 
-    public async Task<PromptInstanceDto> UpdateAsync(int instanceId, UpdatePromptInstanceDto updatePromptInstanceDto)
+    public async Task<PromptInstanceDto> UpdateAsync(int instanceId, UpdatePromptInstanceDto updateDto)
     {
         var instance = await _promptInstanceRepository.GetByIdAsync(instanceId);
-        if (instance == null)
-            throw new ArgumentException("Prompt instance not found");
+        if (instance == null) return null;
 
-        if (!string.IsNullOrEmpty(updatePromptInstanceDto.InstanceName))
-            instance.InstanceName = updatePromptInstanceDto.InstanceName;
-
-        if (updatePromptInstanceDto.InputData != null)
-            instance.InputData = updatePromptInstanceDto.InputData;
-
-        if (updatePromptInstanceDto.OutputData != null)
-            instance.OutputData = updatePromptInstanceDto.OutputData;
-
-        if (!string.IsNullOrEmpty(updatePromptInstanceDto.Status))
-            instance.Status = updatePromptInstanceDto.Status;
-
-        instance.UpdatedDate = DateTime.UtcNow;
+        instance.PromptName = updateDto.PromptName;
+        instance.InputJson = updateDto.InputJson;
+        instance.OutputJson = updateDto.OutputJson;
+        instance.Status = updateDto.Status ?? instance.Status;
 
         var updatedInstance = await _promptInstanceRepository.UpdateAsync(instance);
         return MapToDto(updatedInstance);
-    }
-
-    public async Task<bool> DeleteAsync(int instanceId)
-    {
-        return await _promptInstanceRepository.DeleteAsync(instanceId);
     }
 
     public async Task<IEnumerable<PromptInstanceDto>> GetByStatusAsync(string status)
@@ -94,31 +83,47 @@ public class PromptInstanceService : IPromptInstanceService
         var instance = await _promptInstanceRepository.GetByIdAsync(instanceId);
         if (instance == null) return false;
 
-        instance.OutputData = outputData;
+        instance.OutputJson = outputData;
         instance.Status = "Completed";
-        instance.CompletedDate = DateTime.UtcNow;
-        instance.UpdatedDate = DateTime.UtcNow;
+        instance.ExecutedAt = DateTime.UtcNow;
 
         await _promptInstanceRepository.UpdateAsync(instance);
         return true;
     }
 
-    private static PromptInstanceDto MapToDto(PromptInstance instance)
+    private static PromptInstanceDto MapToDto(PromptInstance promptInstance)
     {
         return new PromptInstanceDto
         {
-            InstanceID = instance.InstanceID,
-            UserID = instance.UserID,
-            TemplateID = instance.TemplateID,
-            InstanceName = instance.InstanceName,
-            InputData = instance.InputData,
-            OutputData = instance.OutputData,
-            Status = instance.Status,
-            CreatedDate = instance.CreatedDate,
-            UpdatedDate = instance.UpdatedDate,
-            CompletedDate = instance.CompletedDate,
-            TemplateName = "Template " + instance.TemplateID, // StorageTemplate doesn't have TemplateName property
-            UserName = instance.User?.FullName
+            InstanceID = promptInstance.InstanceID,
+            UserID = promptInstance.UserID,
+            PackageID = promptInstance.PackageID,
+            PromptName = promptInstance.PromptName,
+            InputJson = promptInstance.InputJson,
+            OutputJson = promptInstance.OutputJson,
+            Status = promptInstance.Status,
+            ExecutedAt = promptInstance.ExecutedAt,
+            ProcessingTimeMs = promptInstance.ProcessingTimeMs,
+            UserName = promptInstance.User?.FullName,
+            PackageName = promptInstance.Package?.PackageName
         };
     }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        return await _promptInstanceRepository.DeleteAsync(id);
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

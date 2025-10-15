@@ -2,17 +2,16 @@ namespace Eduprompt.Domain.DTOs.StorageTemplate;
 
 public class StorageTemplateDto
 {
-    public int StorageId { get; set; }
-    public int UserId { get; set; }
-    public int TemplateId { get; set; }
-    public DateTime? UploadDate { get; set; }
-    public DateTime? UpdatedDate { get; set; }
-    public string? Status { get; set; }
+    public int StorageID { get; set; }
+    public int UserID { get; set; }
+    public int PackageID { get; set; }
+    public string TemplateName { get; set; } = string.Empty;
+    public bool IsFavorite { get; set; }
+    public DateTime CreatedAt { get; set; }
     
     // Navigation properties
     public string? UserName { get; set; }
-    public string? TemplateName { get; set; }
-    public string? TemplateDescription { get; set; }
-    public decimal? TemplatePrice { get; set; }
-    public string? TemplatePreviewUrl { get; set; }
+    public string? PackageName { get; set; }
+    public string? PackageDescription { get; set; }
+    public decimal? PackagePrice { get; set; }
 } 

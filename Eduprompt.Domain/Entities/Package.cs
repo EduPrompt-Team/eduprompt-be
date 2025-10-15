@@ -20,19 +20,13 @@ public partial class Package
     [Column(TypeName = "decimal(18,2)")]
     public decimal Price { get; set; }
 
-    public int? Duration { get; set; } // Duration in days
+    public int? DurationDays { get; set; } // Duration in days
 
-    public int? MaxUsage { get; set; } // Maximum usage count
-
-    public string? Features { get; set; } // JSON string of features
+    [Required]
+    public bool IsActive { get; set; } = true;
 
     [Required]
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-
-    public DateTime? UpdatedDate { get; set; }
-
-    [StringLength(50)]
-    public string? Status { get; set; } = "Active";
 
     // Navigation properties
     [ForeignKey("CategoryID")]
@@ -41,6 +35,8 @@ public partial class Package
     public virtual ICollection<PackageDetail> PackageDetails { get; set; } = new List<PackageDetail>();
     public virtual ICollection<APIKey> APIKeys { get; set; } = new List<APIKey>();
     public virtual ICollection<CartDetail> CartDetails { get; set; } = new List<CartDetail>();
-    // public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>(); // Removed - OrderDetail entity deleted
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+    public virtual ICollection<Wishlist> Wishlists { get; set; } = new List<Wishlist>();
+    public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
+    public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
 }

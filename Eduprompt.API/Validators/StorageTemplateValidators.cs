@@ -7,7 +7,7 @@ public class StorageTemplateCreateValidator : AbstractValidator<StorageTemplateC
 {
     public StorageTemplateCreateValidator()
     {
-        RuleFor(x => x.TemplateId).GreaterThan(0);
+        RuleFor(x => x.PackageID).GreaterThan(0);
     }
 }
 

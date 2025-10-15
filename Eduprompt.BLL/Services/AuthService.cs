@@ -4,6 +4,7 @@ using Eduprompt.Domain.Entities;
 using Eduprompt.Domain.Interface.Repository;
 using Eduprompt.Domain.Interface.Service;
 using Microsoft.Extensions.Configuration;
+
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -66,7 +67,6 @@ public class AuthService : IAuthService
     {
         // Get user by email
         var user = await _userRepository.GetByEmailAsync(request.Email);
-        
         if (user == null)
         {
             throw new UnauthorizedAccessException("Invalid email or password");
@@ -132,4 +132,22 @@ public class AuthService : IAuthService
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        return await _userRepository.DeleteAsync(id);
+    }
+
+    public async Task<object?> UpdateAsync(int id, object updateDto)
+    {
+        // Implementation will be added based on specific service needs
+        return null;
+    }
 } 
+
+
+
+
+
+
+

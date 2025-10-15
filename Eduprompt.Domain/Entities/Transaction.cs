@@ -14,6 +14,8 @@ public partial class Transaction
     [Required]
     public int WalletID { get; set; }
 
+    public int? OrderID { get; set; }
+
     [Required]
     [Column(TypeName = "decimal(18,2)")]
     public decimal Amount { get; set; }
@@ -22,9 +24,6 @@ public partial class Transaction
     [StringLength(50)]
     public string TransactionType { get; set; } = string.Empty; // 'Deposit', 'Withdraw', 'Transfer', 'Payment'
 
-    [StringLength(500)]
-    public string? Description { get; set; }
-
     [Required]
     public DateTime TransactionDate { get; set; } = DateTime.UtcNow;
 
@@ -32,7 +31,7 @@ public partial class Transaction
     public string? Status { get; set; } = "Pending";
 
     [StringLength(100)]
-    public string? ReferenceNumber { get; set; }
+    public string? TransactionReference { get; set; }
 
     // Navigation properties
     [ForeignKey("PaymentMethodID")]
@@ -40,4 +39,7 @@ public partial class Transaction
 
     [ForeignKey("WalletID")]
     public virtual Wallet Wallet { get; set; } = null!;
+
+    [ForeignKey("OrderID")]
+    public virtual Order? Order { get; set; }
 }

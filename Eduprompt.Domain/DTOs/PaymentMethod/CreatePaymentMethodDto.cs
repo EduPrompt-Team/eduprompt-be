@@ -5,32 +5,15 @@ namespace Eduprompt.Domain.DTOs.PaymentMethod;
 public class CreatePaymentMethodDto
 {
     [Required]
-    public int UserID { get; set; }
+    [StringLength(100)]
+    public string MethodName { get; set; } = string.Empty;
 
     [Required]
     [StringLength(50)]
-    public string MethodType { get; set; } = string.Empty;
+    public string Provider { get; set; } = string.Empty;
 
-    // [StringLength(20)]
-    // public string? CardNumber { get; set; } // Removed - PaymentMethod entity doesn't have Card properties
+    public bool IsActive { get; set; } = true;
 
-    // [StringLength(100)]
-    // public string? CardHolderName { get; set; }
-
-    // [StringLength(10)]
-    // public string? ExpiryDate { get; set; }
-
-    // [StringLength(5)]
-    // public string? CVV { get; set; }
-
-    [StringLength(100)]
-    public string? BankName { get; set; }
-
-    [StringLength(20)]
-    public string? AccountNumber { get; set; }
-
-    public bool IsDefault { get; set; } = false;
-
-    [StringLength(50)]
-    public string? Status { get; set; } = "Active";
+    [Range(0, double.MaxValue, ErrorMessage = "Processing fee must be non-negative")]
+    public decimal? ProcessingFee { get; set; } = 0.00m;
 }

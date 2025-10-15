@@ -4,9 +4,9 @@ namespace Eduprompt.Domain.DTOs.Wishlist;
 
 public class WishlistCreateDto
 {
-    [Required(ErrorMessage = "Template ID is required")]
-    public int TemplateId { get; set; }
+    [Required(ErrorMessage = "Package ID is required")]
+    public int PackageID { get; set; }
     
-    [StringLength(100, ErrorMessage = "Wishlist name cannot exceed 100 characters")]
-    public string? WishlistName { get; set; }
+    [StringLength(500, ErrorMessage = "Notes cannot exceed 500 characters")]
+    public string? Notes { get; set; }
 } 

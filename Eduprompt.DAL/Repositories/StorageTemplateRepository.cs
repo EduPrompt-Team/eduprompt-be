@@ -19,7 +19,7 @@ public class StorageTemplateRepository : IStorageTemplateRepository
         return await _context.StorageTemplates
             .Include(s => s.User)
             // .Include(s => s.Template) // Removed - Template navigation property deleted
-            .FirstOrDefaultAsync(s => s.StorageId == id);
+            .FirstOrDefaultAsync(s => s.StorageID == id);
     }
 
     public async Task<IEnumerable<StorageTemplate>> GetByUserIdAsync(int userId)
@@ -27,8 +27,8 @@ public class StorageTemplateRepository : IStorageTemplateRepository
         return await _context.StorageTemplates
             .Include(s => s.User)
             // .Include(s => s.Template) // Removed - Template navigation property deleted
-            .Where(s => s.UserId == userId && s.Status == "Active")
-            .OrderByDescending(s => s.UploadDate)
+            .Where(s => s.UserID == userId)
+            .OrderByDescending(s => s.CreatedAt)
             .ToListAsync();
     }
 
@@ -37,18 +37,17 @@ public class StorageTemplateRepository : IStorageTemplateRepository
         return await _context.StorageTemplates
             .Include(s => s.User)
             // .Include(s => s.Template) // Removed - Template navigation property deleted
-            .FirstOrDefaultAsync(s => s.UserId == userId && s.TemplateId == templateId);
+            .FirstOrDefaultAsync(s => s.UserID == userId && s.PackageID == templateId);
     }
 
     public async Task<StorageTemplate> CreateAsync(StorageTemplate storage)
     {
-        storage.UploadDate = DateTime.Now;
-        storage.Status = storage.Status ?? "Active";
+        storage.CreatedAt = DateTime.Now;
 
         await _context.StorageTemplates.AddAsync(storage);
         await _context.SaveChangesAsync();
 
-        return await GetByIdAsync(storage.StorageId) ?? storage;
+        return await GetByIdAsync(storage.StorageID) ?? storage;
     }
 
     public async Task<bool> DeleteAsync(int id)
@@ -65,6 +64,6 @@ public class StorageTemplateRepository : IStorageTemplateRepository
     public async Task<bool> ExistsAsync(int userId, int templateId)
     {
         return await _context.StorageTemplates
-            .AnyAsync(s => s.UserId == userId && s.TemplateId == templateId && s.Status == "Active");
+            .AnyAsync(s => s.UserID == userId && s.PackageID == templateId);
     }
 } 

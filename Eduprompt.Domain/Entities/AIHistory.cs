@@ -11,22 +11,18 @@ public partial class AIHistory
     [Required]
     public int UserID { get; set; }
 
+    public int? ConversationID { get; set; }
+
     public int? PromptInstanceID { get; set; }
 
-    public string? InputText { get; set; }
+    public string? UserMessage { get; set; }
 
-    public string? OutputText { get; set; }
-
-    [StringLength(100)]
-    public string? ModelUsed { get; set; }
-
-    public int? TokensUsed { get; set; }
-
-    [Column(TypeName = "decimal(18,4)")]
-    public decimal? Cost { get; set; }
+    public string? AIResponse { get; set; }
 
     [Required]
-    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+    public DateTime ExecutedAt { get; set; } = DateTime.UtcNow;
+
+    public int? ProcessingTimeMs { get; set; }
 
     [StringLength(50)]
     public string? Status { get; set; } = "Completed";
@@ -34,6 +30,9 @@ public partial class AIHistory
     // Navigation properties
     [ForeignKey("UserID")]
     public virtual User User { get; set; } = null!;
+
+    [ForeignKey("ConversationID")]
+    public virtual Conversation? Conversation { get; set; }
 
     [ForeignKey("PromptInstanceID")]
     public virtual PromptInstance? PromptInstance { get; set; }
