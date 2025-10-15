@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Eduprompt.API.Controllers;
 
 /// <summary>
-/// 📂 Categories - Quản lý danh mục Prompt Templates
+/// Category management for prompt templates (Admin only)
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -23,8 +23,12 @@ public class CategoriesController : ControllerBase
     }
 
     /// <summary>
-    /// Get all categories
+    /// Get all categories with hierarchical structure
     /// </summary>
+    /// <returns>List of all categories with subcategories</returns>
+    /// <response code="200">Categories retrieved successfully</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="403">User not authorized (Admin role required)</response>
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {

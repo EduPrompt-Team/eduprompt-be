@@ -19,8 +19,11 @@ public class PostController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy tất cả bài đăng
+    /// Get all posts
     /// </summary>
+    /// <returns>List of all posts</returns>
+    /// <response code="200">Posts retrieved successfully</response>
+    /// <response code="400">Error retrieving posts</response>
     [HttpGet]
     [AllowAnonymous]
     public async Task<IActionResult> GetAll()
@@ -37,8 +40,13 @@ public class PostController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy bài đăng theo ID
+    /// Get post by ID
     /// </summary>
+    /// <param name="postId">Post ID</param>
+    /// <returns>Post details</returns>
+    /// <response code="200">Post found</response>
+    /// <response code="400">Error retrieving post</response>
+    /// <response code="404">Post not found</response>
     [HttpGet("{postId}")]
     [AllowAnonymous]
     public async Task<IActionResult> GetById(int postId)

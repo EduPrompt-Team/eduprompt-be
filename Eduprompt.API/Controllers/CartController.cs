@@ -7,7 +7,7 @@ using System.Security.Claims;
 namespace Eduprompt.API.Controllers;
 
 /// <summary>
-/// 🛒 Cart - Giỏ hàng của người dùng
+/// Shopping cart management for authenticated users
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -24,8 +24,11 @@ public class CartController : ControllerBase
     }
 
     /// <summary>
-    /// [AUTH] Get current user's cart
+    /// Get current user's shopping cart
     /// </summary>
+    /// <returns>User's cart with all items</returns>
+    /// <response code="200">Cart retrieved successfully</response>
+    /// <response code="401">User not authenticated</response>
     [HttpGet]
     public async Task<IActionResult> GetCart()
     {
@@ -61,8 +64,13 @@ public class CartController : ControllerBase
     }
 
     /// <summary>
-    /// [AUTH] Add item to cart
+    /// Add item to shopping cart
     /// </summary>
+    /// <param name="itemDto">Item details to add to cart</param>
+    /// <returns>Updated cart with new item</returns>
+    /// <response code="200">Item added to cart successfully</response>
+    /// <response code="400">Invalid item data</response>
+    /// <response code="401">User not authenticated</response>
     [HttpPost("items")]
     public async Task<IActionResult> AddItem([FromBody] AddCartItemDto itemDto)
     {
@@ -112,8 +120,15 @@ public class CartController : ControllerBase
     }
 
     /// <summary>
-    /// [AUTH] Update cart item quantity
+    /// Update quantity of cart item
     /// </summary>
+    /// <param name="cartDetailId">Cart detail ID to update</param>
+    /// <param name="itemDto">Updated item quantity</param>
+    /// <returns>Updated cart with modified item</returns>
+    /// <response code="200">Item updated successfully</response>
+    /// <response code="400">Invalid item data</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="404">Cart item not found</response>
     [HttpPut("items/{cartDetailId}")]
     public async Task<IActionResult> UpdateItem(int cartDetailId, [FromBody] UpdateCartItemDto itemDto)
     {
@@ -163,8 +178,13 @@ public class CartController : ControllerBase
     }
 
     /// <summary>
-    /// [AUTH] Remove item from cart
+    /// Remove item from shopping cart
     /// </summary>
+    /// <param name="cartDetailId">Cart detail ID to remove</param>
+    /// <returns>No content</returns>
+    /// <response code="204">Item removed successfully</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="404">Cart item not found</response>
     [HttpDelete("items/{cartDetailId}")]
     public async Task<IActionResult> RemoveItem(int cartDetailId)
     {
@@ -179,8 +199,12 @@ public class CartController : ControllerBase
     }
 
     /// <summary>
-    /// [AUTH] Clear all items from cart
+    /// Clear all items from shopping cart
     /// </summary>
+    /// <returns>No content</returns>
+    /// <response code="204">Cart cleared successfully</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="404">Cart not found</response>
     [HttpDelete]
     public async Task<IActionResult> ClearCart()
     {

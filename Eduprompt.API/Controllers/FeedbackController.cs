@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Eduprompt.API.Controllers;
 
 /// <summary>
-/// ⭐ Feedback - Quản lý đánh giá và phản hồi
+/// Feedback and rating management for posts and templates
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -23,8 +23,13 @@ public class FeedbackController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách phản hồi theo bài đăng
+    /// Get feedback by post ID
     /// </summary>
+    /// <param name="postId">Post ID</param>
+    /// <returns>List of feedback for the post</returns>
+    /// <response code="200">Feedback retrieved successfully</response>
+    /// <response code="400">Error retrieving feedback</response>
+    /// <response code="401">User not authenticated</response>
     [HttpGet("post/{postId}")]
     public async Task<IActionResult> GetByPostId(int postId)
     {
@@ -40,8 +45,13 @@ public class FeedbackController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách phản hồi của user
+    /// Get feedback by user ID
     /// </summary>
+    /// <param name="userId">User ID</param>
+    /// <returns>List of feedback by the user</returns>
+    /// <response code="200">Feedback retrieved successfully</response>
+    /// <response code="400">Error retrieving feedback</response>
+    /// <response code="401">User not authenticated</response>
     [HttpGet("user/{userId}")]
     public async Task<IActionResult> GetByUserId(int userId)
     {

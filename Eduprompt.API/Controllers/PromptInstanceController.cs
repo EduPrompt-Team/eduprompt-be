@@ -20,8 +20,14 @@ public class PromptInstanceController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy instance theo ID
+    /// Get prompt instance by ID
     /// </summary>
+    /// <param name="instanceId">Prompt instance ID</param>
+    /// <returns>Prompt instance details</returns>
+    /// <response code="200">Instance found</response>
+    /// <response code="400">Error retrieving instance</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="404">Instance not found</response>
     [HttpGet("{instanceId}")]
     public async Task<IActionResult> GetById(int instanceId)
     {
@@ -40,8 +46,13 @@ public class PromptInstanceController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy instances theo User ID
+    /// Get prompt instances by user ID
     /// </summary>
+    /// <param name="userId">User ID</param>
+    /// <returns>List of user's prompt instances</returns>
+    /// <response code="200">Instances retrieved successfully</response>
+    /// <response code="400">Error retrieving instances</response>
+    /// <response code="401">User not authenticated</response>
     [HttpGet("user/{userId}")]
     public async Task<IActionResult> GetByUserId(int userId)
     {

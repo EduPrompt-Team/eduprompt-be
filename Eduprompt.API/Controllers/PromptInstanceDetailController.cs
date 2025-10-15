@@ -18,6 +18,12 @@ public class PromptInstanceDetailController : ControllerBase
         _service = service;
     }
 
+    /// <summary>
+    /// Get prompt instance details by instance ID (Public)
+    /// </summary>
+    /// <param name="instanceId">Prompt instance ID</param>
+    /// <returns>List of details for the prompt instance</returns>
+    /// <response code="200">Prompt instance details retrieved successfully</response>
     [HttpGet("instance/{instanceId}")]
     [AllowAnonymous]
     public async Task<IActionResult> GetByInstance(int instanceId)
@@ -25,6 +31,14 @@ public class PromptInstanceDetailController : ControllerBase
         return Ok(await _service.GetByInstanceIdAsync(instanceId));
     }
 
+    /// <summary>
+    /// Create new prompt instance detail
+    /// </summary>
+    /// <param name="dto">Prompt instance detail creation details</param>
+    /// <returns>Created prompt instance detail</returns>
+    /// <response code="201">Prompt instance detail created successfully</response>
+    /// <response code="400">Invalid prompt instance detail data</response>
+    /// <response code="401">User not authenticated</response>
     [HttpPost]
     [Authorize]
     public async Task<IActionResult> Create([FromBody] CreatePromptInstanceDetailDto dto)

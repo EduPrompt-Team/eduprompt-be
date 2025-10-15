@@ -19,8 +19,11 @@ public class PackageController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy tất cả gói
+    /// Get all packages
     /// </summary>
+    /// <returns>List of all packages</returns>
+    /// <response code="200">Packages retrieved successfully</response>
+    /// <response code="400">Error retrieving packages</response>
     [HttpGet]
     [AllowAnonymous]
     public async Task<IActionResult> GetAll()
@@ -37,8 +40,13 @@ public class PackageController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy gói theo ID
+    /// Get package by ID
     /// </summary>
+    /// <param name="packageId">Package ID</param>
+    /// <returns>Package details</returns>
+    /// <response code="200">Package found</response>
+    /// <response code="400">Error retrieving package</response>
+    /// <response code="404">Package not found</response>
     [HttpGet("{packageId}")]
     [AllowAnonymous]
     public async Task<IActionResult> GetById(int packageId)
@@ -58,8 +66,12 @@ public class PackageController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy gói theo danh mục
+    /// Get packages by category ID
     /// </summary>
+    /// <param name="categoryId">Category ID</param>
+    /// <returns>List of packages in the category</returns>
+    /// <response code="200">Packages retrieved successfully</response>
+    /// <response code="400">Error retrieving packages</response>
     [HttpGet("category/{categoryId}")]
     [AllowAnonymous]
     public async Task<IActionResult> GetByCategory(int categoryId)
@@ -76,8 +88,11 @@ public class PackageController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy gói đang hoạt động
+    /// Get active packages only
     /// </summary>
+    /// <returns>List of active packages</returns>
+    /// <response code="200">Active packages retrieved successfully</response>
+    /// <response code="400">Error retrieving packages</response>
     [HttpGet("active")]
     [AllowAnonymous]
     public async Task<IActionResult> GetActivePackages()
@@ -94,8 +109,12 @@ public class PackageController : ControllerBase
     }
 
     /// <summary>
-    /// Tìm kiếm gói
+    /// Search packages by search term
     /// </summary>
+    /// <param name="searchTerm">Search term to filter packages</param>
+    /// <returns>List of matching packages</returns>
+    /// <response code="200">Search results retrieved successfully</response>
+    /// <response code="400">Search term is required or error occurred</response>
     [HttpGet("search")]
     [AllowAnonymous]
     public async Task<IActionResult> Search([FromQuery] string searchTerm)
@@ -115,8 +134,13 @@ public class PackageController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy gói theo khoảng giá
+    /// Get packages within price range
     /// </summary>
+    /// <param name="minPrice">Minimum price</param>
+    /// <param name="maxPrice">Maximum price</param>
+    /// <returns>List of packages within price range</returns>
+    /// <response code="200">Packages retrieved successfully</response>
+    /// <response code="400">Error retrieving packages</response>
     [HttpGet("price-range")]
     [AllowAnonymous]
     public async Task<IActionResult> GetByPriceRange([FromQuery] decimal minPrice, [FromQuery] decimal maxPrice)
@@ -133,8 +157,14 @@ public class PackageController : ControllerBase
     }
 
     /// <summary>
-    /// Tạo gói mới
+    /// Create a new package (Admin only)
     /// </summary>
+    /// <param name="createPackageDto">Package creation details</param>
+    /// <returns>Created package details</returns>
+    /// <response code="201">Package created successfully</response>
+    /// <response code="400">Invalid package data</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="403">User not authorized (Admin role required)</response>
     [HttpPost]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromBody] CreatePackageDto createPackageDto)
@@ -151,8 +181,16 @@ public class PackageController : ControllerBase
     }
 
     /// <summary>
-    /// Cập nhật gói
+    /// Update package by ID (Admin only)
     /// </summary>
+    /// <param name="packageId">Package ID to update</param>
+    /// <param name="updatePackageDto">Updated package information</param>
+    /// <returns>Updated package details</returns>
+    /// <response code="200">Package updated successfully</response>
+    /// <response code="400">Invalid package data</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="403">User not authorized (Admin role required)</response>
+    /// <response code="404">Package not found</response>
     [HttpPut("{packageId}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(int packageId, [FromBody] UpdatePackageDto updatePackageDto)
@@ -173,8 +211,15 @@ public class PackageController : ControllerBase
     }
 
     /// <summary>
-    /// Xóa gói
+    /// Delete package by ID (Admin only)
     /// </summary>
+    /// <param name="packageId">Package ID to delete</param>
+    /// <returns>Success message</returns>
+    /// <response code="200">Package deleted successfully</response>
+    /// <response code="400">Error deleting package</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="403">User not authorized (Admin role required)</response>
+    /// <response code="404">Package not found</response>
     [HttpDelete("{packageId}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int packageId)

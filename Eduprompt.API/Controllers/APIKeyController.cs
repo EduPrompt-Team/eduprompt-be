@@ -18,6 +18,14 @@ public class APIKeyController : ControllerBase
         _service = service;
     }
 
+    /// <summary>
+    /// Get API keys by package ID (Admin only)
+    /// </summary>
+    /// <param name="packageId">Package ID</param>
+    /// <returns>List of API keys for the package</returns>
+    /// <response code="200">API keys retrieved successfully</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="403">User not authorized (Admin role required)</response>
     [HttpGet("package/{packageId}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> GetByPackage(int packageId)
@@ -25,6 +33,12 @@ public class APIKeyController : ControllerBase
         return Ok(await _service.GetByPackageIdAsync(packageId));
     }
 
+    /// <summary>
+    /// Get active API keys by package ID (Public)
+    /// </summary>
+    /// <param name="packageId">Package ID</param>
+    /// <returns>List of active API keys for the package</returns>
+    /// <response code="200">Active API keys retrieved successfully</response>
     [HttpGet("active/package/{packageId}")]
     [AllowAnonymous]
     public async Task<IActionResult> GetActiveByPackage(int packageId)

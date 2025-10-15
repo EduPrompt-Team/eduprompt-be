@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Eduprompt.API.Controllers;
 
 /// <summary>
-/// 📨 Messages - Quản lý tin nhắn trong cuộc trò chuyện
+/// Message management for chat conversations
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -23,8 +23,13 @@ public class MessageController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách tin nhắn trong cuộc trò chuyện
+    /// Get messages by conversation ID
     /// </summary>
+    /// <param name="conversationId">Conversation ID</param>
+    /// <returns>List of messages in the conversation</returns>
+    /// <response code="200">Messages retrieved successfully</response>
+    /// <response code="400">Error retrieving messages</response>
+    /// <response code="401">User not authenticated</response>
     [HttpGet("conversation/{conversationId}")]
     public async Task<IActionResult> GetByConversationId(int conversationId)
     {
@@ -40,8 +45,14 @@ public class MessageController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy chi tiết tin nhắn
+    /// Get message details by ID
     /// </summary>
+    /// <param name="id">Message ID</param>
+    /// <returns>Message details</returns>
+    /// <response code="200">Message found</response>
+    /// <response code="400">Error retrieving message</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="404">Message not found</response>
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {

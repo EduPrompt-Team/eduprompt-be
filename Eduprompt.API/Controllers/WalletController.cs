@@ -20,8 +20,14 @@ public class WalletController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy ví theo User ID
+    /// Get wallet by user ID
     /// </summary>
+    /// <param name="userId">User ID</param>
+    /// <returns>User's wallet details</returns>
+    /// <response code="200">Wallet found</response>
+    /// <response code="400">Error retrieving wallet</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="404">Wallet not found</response>
     [HttpGet("user/{userId}")]
     public async Task<IActionResult> GetByUserId(int userId)
     {
@@ -40,8 +46,14 @@ public class WalletController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy ví theo ID
+    /// Get wallet by wallet ID
     /// </summary>
+    /// <param name="walletId">Wallet ID</param>
+    /// <returns>Wallet details</returns>
+    /// <response code="200">Wallet found</response>
+    /// <response code="400">Error retrieving wallet</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="404">Wallet not found</response>
     [HttpGet("{walletId}")]
     public async Task<IActionResult> GetById(int walletId)
     {

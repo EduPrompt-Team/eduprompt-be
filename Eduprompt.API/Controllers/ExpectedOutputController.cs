@@ -18,6 +18,12 @@ public class ExpectedOutputController : ControllerBase
         _service = service;
     }
 
+    /// <summary>
+    /// Get expected outputs by instance ID (Public)
+    /// </summary>
+    /// <param name="instanceId">Prompt instance ID</param>
+    /// <returns>List of expected outputs for the instance</returns>
+    /// <response code="200">Expected outputs retrieved successfully</response>
     [HttpGet("instance/{instanceId}")]
     [AllowAnonymous]
     public async Task<IActionResult> GetByInstance(int instanceId)
@@ -25,6 +31,14 @@ public class ExpectedOutputController : ControllerBase
         return Ok(await _service.GetByInstanceIdAsync(instanceId));
     }
 
+    /// <summary>
+    /// Create new expected output
+    /// </summary>
+    /// <param name="dto">Expected output creation details</param>
+    /// <returns>Created expected output</returns>
+    /// <response code="201">Expected output created successfully</response>
+    /// <response code="400">Invalid expected output data</response>
+    /// <response code="401">User not authenticated</response>
     [HttpPost]
     [Authorize]
     public async Task<IActionResult> Create([FromBody] CreateExpectedOutputDto dto)

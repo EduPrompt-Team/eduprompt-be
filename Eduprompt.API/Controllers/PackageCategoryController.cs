@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Eduprompt.API.Controllers;
 
 /// <summary>
-/// 📦 Package Categories - Quản lý danh mục gói sản phẩm
+/// Package category management for product organization
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -23,8 +23,12 @@ public class PackageCategoryController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách tất cả danh mục
+    /// Get all package categories
     /// </summary>
+    /// <returns>List of all package categories</returns>
+    /// <response code="200">Categories retrieved successfully</response>
+    /// <response code="400">Error retrieving categories</response>
+    /// <response code="401">User not authenticated</response>
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -40,8 +44,12 @@ public class PackageCategoryController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách danh mục đang hoạt động
+    /// Get active package categories only
     /// </summary>
+    /// <returns>List of active package categories</returns>
+    /// <response code="200">Active categories retrieved successfully</response>
+    /// <response code="400">Error retrieving categories</response>
+    /// <response code="401">User not authenticated</response>
     [HttpGet("active")]
     public async Task<IActionResult> GetActive()
     {

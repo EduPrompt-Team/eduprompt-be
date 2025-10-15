@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Eduprompt.API.Controllers;
 
 /// <summary>
-/// 💰 Transactions - Quản lý giao dịch
+/// Transaction management for payments and wallet operations
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -23,8 +23,13 @@ public class TransactionController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách giao dịch theo ví
+    /// Get transactions by wallet ID
     /// </summary>
+    /// <param name="walletId">Wallet ID</param>
+    /// <returns>List of transactions for the wallet</returns>
+    /// <response code="200">Transactions retrieved successfully</response>
+    /// <response code="400">Error retrieving transactions</response>
+    /// <response code="401">User not authenticated</response>
     [HttpGet("wallet/{walletId}")]
     public async Task<IActionResult> GetByWalletId(int walletId)
     {
@@ -40,8 +45,13 @@ public class TransactionController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách giao dịch theo user
+    /// Get transactions by user ID
     /// </summary>
+    /// <param name="userId">User ID</param>
+    /// <returns>List of transactions for the user</returns>
+    /// <response code="200">Transactions retrieved successfully</response>
+    /// <response code="400">Error retrieving transactions</response>
+    /// <response code="401">User not authenticated</response>
     [HttpGet("user/{userId}")]
     public async Task<IActionResult> GetByUserId(int userId)
     {

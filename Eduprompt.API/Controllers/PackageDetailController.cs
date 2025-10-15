@@ -18,6 +18,12 @@ public class PackageDetailController : ControllerBase
         _service = service;
     }
 
+    /// <summary>
+    /// Get package details by package ID (Public)
+    /// </summary>
+    /// <param name="packageId">Package ID</param>
+    /// <returns>List of details for the package</returns>
+    /// <response code="200">Package details retrieved successfully</response>
     [HttpGet("package/{packageId}")]
     [AllowAnonymous]
     public async Task<IActionResult> GetByPackage(int packageId)
@@ -25,6 +31,15 @@ public class PackageDetailController : ControllerBase
         return Ok(await _service.GetByPackageIdAsync(packageId));
     }
 
+    /// <summary>
+    /// Create new package detail (Admin only)
+    /// </summary>
+    /// <param name="dto">Package detail creation details</param>
+    /// <returns>Created package detail</returns>
+    /// <response code="201">Package detail created successfully</response>
+    /// <response code="400">Invalid package detail data</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="403">User not authorized (Admin role required)</response>
     [HttpPost]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromBody] CreatePackageDetailDto dto)
