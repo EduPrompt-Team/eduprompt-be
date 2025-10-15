@@ -9,7 +9,7 @@ public partial class TemplateArchitecture
     public int ArchitectureID { get; set; }
 
     [Required]
-    public int TemplateID { get; set; }
+    public int StorageID { get; set; }
 
     [Required]
     [StringLength(100)]
@@ -17,19 +17,11 @@ public partial class TemplateArchitecture
 
     [Required]
     [StringLength(50)]
-    public string ArchitectureType { get; set; } = string.Empty; // 'Sequential', 'Conditional', 'Loop', 'Parallel'
+    public string ArchitectureType { get; set; } = "Sequential"; // e.g., 'Sequential', 'Conditional', 'Loop', 'Parallel'
 
-    public string? Configuration { get; set; } // JSON configuration
-
-    [Required]
-    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-
-    public DateTime? UpdatedDate { get; set; }
-
-    [StringLength(50)]
-    public string? Status { get; set; } = "Active";
+    public string? ConfigurationJson { get; set; } // JSON configuration for the architecture
 
     // Navigation properties
-    [ForeignKey("TemplateID")]
+    [ForeignKey("StorageID")]
     public virtual StorageTemplate StorageTemplate { get; set; } = null!;
 }

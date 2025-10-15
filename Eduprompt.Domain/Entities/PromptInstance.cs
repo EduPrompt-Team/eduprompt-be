@@ -12,34 +12,32 @@ public partial class PromptInstance
     public int UserID { get; set; }
 
     [Required]
-    public int TemplateID { get; set; }
+    public int PackageID { get; set; }
 
     [Required]
     [StringLength(200)]
-    public string InstanceName { get; set; } = string.Empty;
+    public string PromptName { get; set; } = string.Empty;
 
-    public string? InputData { get; set; } // JSON string of user input
+    public string? InputJson { get; set; } // JSON string of user input
 
-    public string? OutputData { get; set; } // JSON string of AI output
-
-    [StringLength(50)]
-    public string? Status { get; set; } = "Draft"; // 'Draft', 'Completed', 'Failed'
+    public string? OutputJson { get; set; } // JSON string of AI output
 
     [Required]
-    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+    public DateTime ExecutedAt { get; set; } = DateTime.UtcNow;
 
-    public DateTime? UpdatedDate { get; set; }
+    public int? ProcessingTimeMs { get; set; }
 
-    public DateTime? CompletedDate { get; set; }
+    [StringLength(50)]
+    public string? Status { get; set; } = "Completed"; // 'Pending', 'Completed', 'Failed'
 
     // Navigation properties
     [ForeignKey("UserID")]
     public virtual User User { get; set; } = null!;
 
-    [ForeignKey("TemplateID")]
-    public virtual StorageTemplate StorageTemplate { get; set; } = null!;
+    [ForeignKey("PackageID")]
+    public virtual Package Package { get; set; } = null!;
 
     public virtual ICollection<PromptInstanceDetail> PromptInstanceDetails { get; set; } = new List<PromptInstanceDetail>();
     public virtual ICollection<AIHistory> AIHistories { get; set; } = new List<AIHistory>();
-    public virtual ICollection<Wishlist> Wishlists { get; set; } = new List<Wishlist>();
+    public virtual ICollection<ExpectedOutput> ExpectedOutputs { get; set; } = new List<ExpectedOutput>();
 }

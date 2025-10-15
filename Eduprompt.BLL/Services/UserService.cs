@@ -33,7 +33,6 @@ public class UserService : IUserService
 
     public async Task<UserDto> CreateAsync(UserCreateDto userDto)
     {
-        // Check if user already exists
         if (await _userRepository.ExistsAsync(userDto.Email))
         {
             throw new InvalidOperationException("User with this email already exists");
@@ -72,3 +71,7 @@ public class UserService : IUserService
         return Convert.ToBase64String(hashedBytes);
     }
 } 
+
+
+
+

@@ -7,11 +7,8 @@ public class PackageDto
     public string PackageName { get; set; } = string.Empty;
     public string? Description { get; set; }
     public decimal Price { get; set; }
-    public int? Duration { get; set; }
-    public int? MaxUsage { get; set; }
-    public string? Features { get; set; }
+    public int? DurationDays { get; set; }
+    public bool IsActive { get; set; }
     public DateTime CreatedDate { get; set; }
-    public DateTime? UpdatedDate { get; set; }
-    public string? Status { get; set; }
     public string? CategoryName { get; set; }
 }

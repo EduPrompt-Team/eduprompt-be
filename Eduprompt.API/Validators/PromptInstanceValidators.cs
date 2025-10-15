@@ -9,7 +9,7 @@ public class CreatePromptInstanceValidator : AbstractValidator<CreatePromptInsta
     public CreatePromptInstanceValidator()
     {
         RuleFor(x => x.UserID).GreaterThan(0);
-        RuleFor(x => x.InstanceName).NotEmpty().MaximumLength(100);
+        RuleFor(x => x.PromptName).NotEmpty().MaximumLength(200);
     }
 }
 
@@ -17,7 +17,7 @@ public class UpdatePromptInstanceValidator : AbstractValidator<UpdatePromptInsta
 {
     public UpdatePromptInstanceValidator()
     {
-        When(x => x.InstanceName != null, () => RuleFor(x => x.InstanceName!).NotEmpty().MaximumLength(100));
+        When(x => x.PromptName != null, () => RuleFor(x => x.PromptName!).NotEmpty().MaximumLength(200));
     }
 }
 

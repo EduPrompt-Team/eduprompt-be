@@ -13,26 +13,18 @@ public partial class APIKey
 
     [Required]
     [StringLength(100)]
-    public string KeyName { get; set; } = string.Empty;
+    public string APIProvider { get; set; } = string.Empty; // 'OpenAI', 'Anthropic', 'Google', 'Gemini'
 
     [Required]
     [StringLength(500)]
-    public string KeyValue { get; set; } = string.Empty;
+    public string KeyHash { get; set; } = string.Empty;
+
+    public int? UsageLimit { get; set; }
 
     [Required]
-    [StringLength(50)]
-    public string Provider { get; set; } = string.Empty; // 'OpenAI', 'Anthropic', 'Google', 'Custom'
+    public int CurrentUsage { get; set; } = 0;
 
-    [Required]
-    public bool IsActive { get; set; } = true;
-
-    [Required]
-    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-
-    public DateTime? ExpiryDate { get; set; }
-
-    [StringLength(50)]
-    public string? Status { get; set; } = "Active";
+    public DateTime? ExpiresAt { get; set; }
 
     // Navigation properties
     [ForeignKey("PackageID")]

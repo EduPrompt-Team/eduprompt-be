@@ -13,5 +13,4 @@ public interface IAIHistoryRepository
     Task<bool> ExistsAsync(int historyId);
     Task<IEnumerable<AIHistory>> GetRecentHistoriesAsync(int userId, int count = 10);
     Task<int> GetHistoryCountByUserAsync(int userId);
-    Task<decimal> GetTotalCostByUserAsync(int userId);
 }

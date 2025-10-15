@@ -8,14 +8,14 @@ public class CreatePromptInstanceDto
     public int UserID { get; set; }
 
     [Required]
-    public int TemplateID { get; set; }
+    public int PackageID { get; set; }
 
     [Required]
     [StringLength(200)]
-    public string InstanceName { get; set; } = string.Empty;
+    public string PromptName { get; set; } = string.Empty;
 
-    public string? InputData { get; set; }
+    public string? InputJson { get; set; }
 
     [StringLength(50)]
-    public string? Status { get; set; } = "Draft";
+    public string? Status { get; set; } = "Pending";
 }

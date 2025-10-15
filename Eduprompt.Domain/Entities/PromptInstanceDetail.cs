@@ -13,18 +13,14 @@ public partial class PromptInstanceDetail
 
     [Required]
     [StringLength(100)]
-    public string FieldName { get; set; } = string.Empty;
-
-    public string? FieldValue { get; set; }
-
-    [StringLength(50)]
-    public string? FieldType { get; set; } = "Text"; // 'Text', 'Number', 'Date', 'Boolean', 'JSON'
+    public string ParameterName { get; set; } = string.Empty;
 
     [Required]
-    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+    public string ParameterValue { get; set; } = string.Empty;
 
+    [Required]
     [StringLength(50)]
-    public string? Status { get; set; } = "Active";
+    public string ParameterType { get; set; } = "Text"; // e.g., 'Text', 'Number', 'Boolean', 'JSON'
 
     // Navigation properties
     [ForeignKey("InstanceID")]

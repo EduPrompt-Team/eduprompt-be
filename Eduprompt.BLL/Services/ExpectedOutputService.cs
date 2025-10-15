@@ -1,4 +1,5 @@
 using Eduprompt.Domain.DTOs.ExpectedOutput;
+using Eduprompt.Domain.Entities;
 using Eduprompt.Domain.Interface.Repository;
 using Eduprompt.Domain.Interface.Service;
 
@@ -6,105 +7,69 @@ namespace Eduprompt.BLL.Services;
 
 public class ExpectedOutputService : IExpectedOutputService
 {
-    private readonly IExpectedOutputRepository _outputRepository;
-    private readonly IOutputDetailRepository _detailRepository;
-    private readonly IPromptInstanceRepository _instanceRepository;
+    private readonly IExpectedOutputRepository _expectedOutputRepository;
 
-    public ExpectedOutputService(
-        IExpectedOutputRepository outputRepository,
-        IOutputDetailRepository detailRepository,
-        IPromptInstanceRepository instanceRepository)
+    public ExpectedOutputService(IExpectedOutputRepository expectedOutputRepository)
     {
-        _outputRepository = outputRepository;
-        _detailRepository = detailRepository;
-        _instanceRepository = instanceRepository;
+        _expectedOutputRepository = expectedOutputRepository;
     }
 
     public async Task<ExpectedOutputDto?> GetByIdAsync(int outputId)
     {
-        var e = await _outputRepository.GetByIdAsync(outputId);
-        return e == null ? null : Map(e);
+        var output = await _expectedOutputRepository.GetByIdAsync(outputId);
+        return output != null ? MapToDto(output) : null;
     }
 
     public async Task<IEnumerable<ExpectedOutputDto>> GetByInstanceIdAsync(int instanceId)
     {
-        var list = await _outputRepository.GetByInstanceIdAsync(instanceId);
-        return list.Select(Map);
+        var outputs = await _expectedOutputRepository.GetByInstanceIdAsync(instanceId);
+        return outputs.Select(MapToDto);
     }
 
     public async Task<ExpectedOutputDto> CreateAsync(CreateExpectedOutputDto createDto)
     {
-        var instance = await _instanceRepository.GetByIdAsync(createDto.InstanceID);
-        if (instance == null) throw new ArgumentException("Prompt instance not found");
-
-        var e = new Eduprompt.Domain.Entities.ExpectedOutput
+        var output = new ExpectedOutput
         {
-            InstanceID = createDto.InstanceID,
-            OutputName = createDto.OutputName,
-            Status = createDto.Status,
-            CreatedDate = DateTime.UtcNow
+            PromptInstanceID = createDto.InstanceID,
+            OutputName = createDto.OutputName
         };
 
-        var created = await _outputRepository.CreateAsync(e);
-
-        if (createDto.OutputDetails != null && createDto.OutputDetails.Any())
-        {
-            foreach (var d in createDto.OutputDetails)
-            {
-                await _detailRepository.CreateAsync(new Eduprompt.Domain.Entities.OutputDetail
-                {
-                    OutputId = created.OutputId,
-                    Description = d.Description,
-                    OutputSize = d.OutputSize,
-                    CreatedDate = DateTime.UtcNow
-                });
-            }
-        }
-
-        var withDetails = await _outputRepository.GetByIdAsync(created.OutputId)!;
-        return Map(withDetails!);
+        var createdOutput = await _expectedOutputRepository.CreateAsync(output);
+        return MapToDto(createdOutput);
     }
 
     public async Task<ExpectedOutputDto> UpdateAsync(int outputId, CreateExpectedOutputDto updateDto)
     {
-        var e = await _outputRepository.GetByIdAsync(outputId);
-        if (e == null) throw new KeyNotFoundException("Expected output not found");
+        var output = await _expectedOutputRepository.GetByIdAsync(outputId);
+        if (output == null) throw new KeyNotFoundException("Expected output not found");
 
-        if (updateDto.InstanceID != 0) e.InstanceID = updateDto.InstanceID;
-        if (!string.IsNullOrEmpty(updateDto.OutputName)) e.OutputName = updateDto.OutputName;
-        if (updateDto.Status != null) e.Status = updateDto.Status;
-        e.UpdatedDate = DateTime.UtcNow;
+        output.OutputName = updateDto.OutputName;
 
-        var updated = await _outputRepository.UpdateAsync(e);
-        return Map(updated);
+        var updatedOutput = await _expectedOutputRepository.UpdateAsync(output);
+        return MapToDto(updatedOutput);
     }
 
     public async Task<bool> DeleteAsync(int outputId)
     {
-        return await _outputRepository.DeleteAsync(outputId);
+        return await _expectedOutputRepository.DeleteAsync(outputId);
     }
 
-    private static ExpectedOutputDto Map(Eduprompt.Domain.Entities.ExpectedOutput e)
+    private static ExpectedOutputDto MapToDto(ExpectedOutput output)
     {
         return new ExpectedOutputDto
         {
-            OutputId = e.OutputId,
-            InstanceID = e.InstanceID,
-            OutputName = e.OutputName,
-            Status = e.Status,
-            CreatedDate = e.CreatedDate,
-            UpdatedDate = e.UpdatedDate,
-            OutputDetails = e.OutputDetails?.Select(d => new OutputDetailDto
+            OutputId = output.OutputID,
+            InstanceID = output.PromptInstanceID,
+            OutputName = output.OutputName,
+            OutputDetails = output.OutputDetails?.Select(od => new OutputDetailDto
             {
-                DetailId = d.DetailId,
-                OutputId = d.OutputId,
-                Description = d.Description,
-                OutputSize = d.OutputSize,
-                CreatedDate = d.CreatedDate,
-                UpdatedDate = d.UpdatedDate
+                DetailId = od.DetailID,
+                OutputId = od.OutputID,
+                Description = od.DetailValue,
+                OutputSize = null,
+                CreatedDate = DateTime.UtcNow,
+                UpdatedDate = null
             }).ToList()
         };
     }
 }
-
-

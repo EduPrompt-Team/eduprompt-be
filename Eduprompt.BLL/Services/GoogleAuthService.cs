@@ -1,11 +1,13 @@
 using AutoMapper;
 using Eduprompt.Domain.DTOs.Auth;
+using Eduprompt.Domain.DTOs;
 using Eduprompt.Domain.DTOs.User;
 using Eduprompt.Domain.Entities;
 using Eduprompt.Domain.Interface.Repository;
 using Eduprompt.Domain.Interface.Service;
-using Google.Apis.Auth;
 using Microsoft.Extensions.Configuration;
+using Google.Apis.Auth;
+
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -40,7 +42,6 @@ public class GoogleAuthService : IGoogleAuthService
     {
         try
         {
-            // Verify Google ID token with audience binding
             var validationSettings = new GoogleJsonWebSignature.ValidationSettings
             {
                 Audience = new[] { _configuration["Google:ClientId"] ?? string.Empty }
@@ -52,7 +53,6 @@ public class GoogleAuthService : IGoogleAuthService
                 throw new UnauthorizedAccessException("Invalid Google ID token");
             }
 
-            // Get user info from Google
             var googleUserInfo = new GoogleUserInfoDto
             {
                 Id = payload.Subject,
@@ -64,19 +64,16 @@ public class GoogleAuthService : IGoogleAuthService
                 VerifiedEmail = payload.EmailVerified
             };
 
-            // Check if user exists by Google ID or email
             var existingUser = await _userRepository.GetByGoogleIdAsync(googleUserInfo.Id) 
                               ?? await _userRepository.GetByEmailAsync(googleUserInfo.Email);
 
             User user;
             if (existingUser == null)
             {
-                // Create new user
                 user = await CreateGoogleUserAsync(googleUserInfo);
             }
             else
             {
-                // Update existing user with Google ID if not already set
                 if (string.IsNullOrEmpty(existingUser.GoogleId))
                 {
                     existingUser.GoogleId = googleUserInfo.Id;
@@ -89,13 +86,11 @@ public class GoogleAuthService : IGoogleAuthService
                 }
             }
 
-            // Generate tokens
             var accessToken = GenerateJwtToken(user);
             var refreshToken = GenerateRefreshToken();
             
-            // Save refresh token hash to user for security
             user.RefreshToken = HashToken(refreshToken);
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7); // 7 days expiry
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
             await _userRepository.UpdateAsync(user);
 
             var response = new TokenResponseDto
@@ -117,18 +112,16 @@ public class GoogleAuthService : IGoogleAuthService
 
     public async Task<TokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto request)
     {
-        var user = await _userRepository.GetByRefreshTokenAsync(HashToken(request.RefreshToken));
+        var user = await _userRepository.GetByRefreshTokenAsync(request.RefreshToken);
         
         if (user == null || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
         {
             throw new UnauthorizedAccessException("Invalid or expired refresh token");
         }
 
-        // Generate new tokens
         var newAccessToken = GenerateJwtToken(user);
         var newRefreshToken = GenerateRefreshToken();
         
-        // Update refresh token
         user.RefreshToken = HashToken(newRefreshToken);
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
         await _userRepository.UpdateAsync(user);
@@ -145,7 +138,7 @@ public class GoogleAuthService : IGoogleAuthService
 
     public async Task<bool> RevokeTokenAsync(string refreshToken)
     {
-        var user = await _userRepository.GetByRefreshTokenAsync(HashToken(refreshToken));
+        var user = await _userRepository.GetByRefreshTokenAsync(refreshToken);
         
         if (user == null)
         {
@@ -161,7 +154,6 @@ public class GoogleAuthService : IGoogleAuthService
 
     private async Task<User> CreateGoogleUserAsync(GoogleUserInfoDto googleUserInfo)
     {
-        // Get default role (User)
         var defaultRole = await _roleRepository.GetByNameAsync("User");
         
         var user = new User
@@ -221,4 +213,20 @@ public class GoogleAuthService : IGoogleAuthService
         var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(token));
         return Convert.ToBase64String(bytes);
     }
+
+    public Task<bool> DeleteAsync(int id)
+    {
+        return _userRepository.DeleteAsync(id);
+    }
+
+    public Task<object?> UpdateAsync(int id, object updateDto)
+    {
+        return Task.FromResult<object?>(null);
+    }
 }
+
+
+
+
+
+

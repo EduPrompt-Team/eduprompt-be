@@ -27,7 +27,7 @@ public class ConversationRepository : IConversationRepository
             .Include(c => c.User)
             .Include(c => c.Messages)
             .Where(c => c.UserID == userId)
-            .OrderByDescending(c => c.CreatedDate)
+            .OrderByDescending(c => c.StartedAt)
             .ToListAsync();
     }
 
@@ -66,7 +66,7 @@ public class ConversationRepository : IConversationRepository
             .Include(c => c.User)
             .Include(c => c.Messages)
             .Where(c => c.UserID == userId)
-            .OrderByDescending(c => c.CreatedDate)
+            .OrderByDescending(c => c.StartedAt)
             .Take(count)
             .ToListAsync();
     }

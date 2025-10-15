@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using Eduprompt.Domain.DTOs.Order;
 using Eduprompt.Domain.Entities;
 using Eduprompt.Domain.Interface.Repository;
 using Eduprompt.Domain.Interface.Service;
@@ -9,156 +9,89 @@ public class OrderService : IOrderService
 {
     private readonly IOrderRepository _orderRepository;
     private readonly ICartRepository _cartRepository;
-    private readonly IStorageTemplateRepository _storageRepository;
-    private readonly IMapper _mapper;
 
-    public OrderService(
-        IOrderRepository orderRepository,
-        ICartRepository cartRepository,
-        IStorageTemplateRepository storageRepository,
-        IMapper mapper)
+    public OrderService(IOrderRepository orderRepository, ICartRepository cartRepository)
     {
         _orderRepository = orderRepository;
         _cartRepository = cartRepository;
-        _storageRepository = storageRepository;
-        _mapper = mapper;
     }
 
     public async Task<OrderServiceDto> CreateOrderFromCartAsync(int userId, string? notes)
     {
-        // Get user's cart
         var cart = await _cartRepository.GetByUserIdAsync(userId);
-        
-        if (cart == null || cart.CartDetails == null || !cart.CartDetails.Any())
-        {
-            throw new InvalidOperationException("Cart is empty");
-        }
+        var totalAmount = cart?.CartDetails?.Sum(cd => cd.Quantity * cd.UnitPrice) ?? 0m;
 
-        // Generate order number
-        var orderNumber = await _orderRepository.GenerateOrderNumberAsync();
-
-        // Calculate total
-        decimal totalAmount = cart.CartDetails.Sum(cd => cd.SubTotal ?? 0);
-
-        // Create order
         var order = new Order
         {
             UserId = userId,
-            OrderNumber = orderNumber,
+            PackageID = null,
             TotalAmount = totalAmount,
+            OrderDate = DateTime.UtcNow,
+            Notes = notes,
             Status = "Pending"
         };
 
-        var createdOrder = await _orderRepository.CreateAsync(order);
-
-        // Create order details from cart items
-        // foreach (var cartItem in cart.CartDetails)
-        // {
-        //     var orderDetail = new OrderDetail
-        //     {
-        //         OrderId = createdOrder.OrderId,
-        //         TemplateId = cartItem.TemplateId,
-        //         Quantity = cartItem.Quantity,
-        //         Price = cartItem.UnitPrice,
-        //         Status = "Active"
-        //     };
-
-        //     // Note: OrderDetails will be added through EF navigation
-        //     createdOrder.OrderDetails.Add(orderDetail);
-        // } // Removed - OrderDetail entity deleted
-
-        await _orderRepository.UpdateAsync(createdOrder);
-
-        // Clear cart after successful order
+        var created = await _orderRepository.CreateAsync(order);
         await _cartRepository.ClearCartAsync(userId);
-
-        return _mapper.Map<OrderServiceDto>(await _orderRepository.GetByIdAsync(createdOrder.OrderId));
+        return MapToServiceDto(created);
     }
 
     public async Task<OrderServiceDto?> GetByIdAsync(int orderId, int userId)
     {
         var order = await _orderRepository.GetByIdAsync(orderId);
-        
-        if (order == null)
-            return null;
-
-        // Only return if user owns the order
-        if (order.UserId != userId)
-        {
-            throw new UnauthorizedAccessException("You can only view your own orders");
-        }
-
-        return _mapper.Map<OrderServiceDto>(order);
+        if (order == null || order.UserId != userId) return null;
+        return MapToServiceDto(order);
     }
 
     public async Task<IEnumerable<OrderServiceDto>> GetUserOrdersAsync(int userId)
     {
         var orders = await _orderRepository.GetByUserIdAsync(userId);
-        return _mapper.Map<IEnumerable<OrderServiceDto>>(orders);
+        return orders.Select(MapToServiceDto);
     }
 
     public async Task<IEnumerable<OrderServiceDto>> GetAllOrdersAsync()
     {
         var orders = await _orderRepository.GetAllAsync();
-        return _mapper.Map<IEnumerable<OrderServiceDto>>(orders);
+        return orders.Select(MapToServiceDto);
     }
 
     public async Task<OrderServiceDto> CancelOrderAsync(int orderId, int userId)
     {
         var order = await _orderRepository.GetByIdAsync(orderId);
-        
-        if (order == null)
-        {
-            throw new KeyNotFoundException($"Order with ID {orderId} not found");
-        }
-
-        // Verify ownership
-        if (order.UserId != userId)
-        {
-            throw new UnauthorizedAccessException("You can only cancel your own orders");
-        }
-
-        // Can only cancel pending orders
-        if (order.Status != "Pending")
-        {
-            throw new InvalidOperationException($"Cannot cancel order with status: {order.Status}");
-        }
+        if (order == null || order.UserId != userId)
+            throw new KeyNotFoundException("Order not found");
 
         order.Status = "Cancelled";
-        var updatedOrder = await _orderRepository.UpdateAsync(order);
-
-        return _mapper.Map<OrderServiceDto>(updatedOrder);
+        var updated = await _orderRepository.UpdateAsync(order);
+        return MapToServiceDto(updated);
     }
 
     public async Task<OrderServiceDto> UpdateOrderStatusAsync(int orderId, string status)
     {
         var order = await _orderRepository.GetByIdAsync(orderId);
-        
         if (order == null)
-        {
-            throw new KeyNotFoundException($"Order with ID {orderId} not found");
-        }
+            throw new KeyNotFoundException("Order not found");
 
         order.Status = status;
-
-        // If order is completed, add templates to user's storage
-        // if (status == "Completed" && order.OrderDetails != null)
-        // {
-        //     foreach (var item in order.OrderDetails)
-        //     {
-        //         // Check if not already in storage
-        //         if (!await _storageRepository.ExistsAsync(order.UserId, item.TemplateId))
-        //         {
-        //             await _storageRepository.CreateAsync(new StorageTemplate
-        //             {
-        //                 UserId = order.UserId,
-        //                 TemplateId = item.TemplateId
-        //             });
-        //         }
-        //     }
-        // } // Removed - OrderDetails navigation property deleted
-
-        var updatedOrder = await _orderRepository.UpdateAsync(order);
-        return _mapper.Map<OrderServiceDto>(updatedOrder);
+        var updated = await _orderRepository.UpdateAsync(order);
+        return MapToServiceDto(updated);
     }
-} 
+
+    private static OrderServiceDto MapToServiceDto(Order order)
+    {
+        return new OrderServiceDto
+        {
+            OrderId = order.OrderId,
+            UserId = order.UserId,
+            OrderNumber = order.OrderId.ToString(),
+            TotalAmount = order.TotalAmount,
+            CreatedDate = null,
+            OrderDate = order.OrderDate,
+            Status = order.Status,
+            UserName = order.User?.FullName,
+            UserEmail = order.User?.Email,
+            Items = new List<OrderItemServiceDto>(),
+            Payments = new List<PaymentServiceDto>()
+        };
+    }
+}

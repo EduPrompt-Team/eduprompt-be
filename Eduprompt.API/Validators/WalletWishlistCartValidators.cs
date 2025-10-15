@@ -27,8 +27,8 @@ public class CreateWishlistValidator : AbstractValidator<WishlistCreateDto>
 {
     public CreateWishlistValidator()
     {
-        RuleFor(x => x.TemplateId).GreaterThan(0);
-        RuleFor(x => x.WishlistName).MaximumLength(100).When(x => x.WishlistName != null);
+        RuleFor(x => x.PackageID).GreaterThan(0);
+        RuleFor(x => x.Notes).MaximumLength(500).When(x => x.Notes != null);
     }
 }
 
@@ -36,7 +36,7 @@ public class AddCartItemValidator : AbstractValidator<AddCartItemDto>
 {
     public AddCartItemValidator()
     {
-        RuleFor(x => x.TemplateId).GreaterThan(0);
+        RuleFor(x => x.PackageID).GreaterThan(0);
         RuleFor(x => x.Quantity).GreaterThan(0);
     }
 }

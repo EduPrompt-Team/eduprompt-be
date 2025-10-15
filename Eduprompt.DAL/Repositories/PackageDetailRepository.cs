@@ -25,7 +25,7 @@ public class PackageDetailRepository : IPackageDetailRepository
         return await _context.PackageDetails
             .Include(d => d.Package)
             .Where(d => d.PackageID == packageId)
-            .OrderBy(d => d.OrderIndex)
+            .OrderBy(d => d.DetailID)
             .ToListAsync();
     }
 
@@ -63,7 +63,7 @@ public class PackageDetailRepository : IPackageDetailRepository
         return await _context.PackageDetails
             .Include(d => d.Package)
             .Where(d => d.PackageID == packageId)
-            .OrderBy(d => d.OrderIndex)
+            .OrderBy(d => d.DetailID)
             .ToListAsync();
     }
 

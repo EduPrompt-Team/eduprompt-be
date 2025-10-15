@@ -14,6 +14,8 @@ public partial class Feedback
     [Required]
     public int UserID { get; set; }
 
+    public int? PackageID { get; set; }
+
     [Required]
     [Range(1, 5)]
     public int Rating { get; set; } // 1-5 stars
@@ -22,6 +24,9 @@ public partial class Feedback
 
     [Required]
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+
+    [Required]
+    public bool IsVerified { get; set; } = false;
 
     [StringLength(50)]
     public string? Status { get; set; } = "Active";
@@ -32,4 +37,7 @@ public partial class Feedback
 
     [ForeignKey("UserID")]
     public virtual User User { get; set; } = null!;
+
+    [ForeignKey("PackageID")]
+    public virtual Package? Package { get; set; }
 }

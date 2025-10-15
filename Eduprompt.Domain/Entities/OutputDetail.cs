@@ -3,26 +3,26 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Eduprompt.Domain.Entities;
 
-public class OutputDetail
+public partial class OutputDetail
 {
     [Key]
-    public int DetailId { get; set; }
+    public int DetailID { get; set; }
 
     [Required]
-    public int OutputId { get; set; }
-
-    [StringLength(255)]
-    public string? Description { get; set; }
-
-    public int? OutputSize { get; set; }
+    public int OutputID { get; set; }
 
     [Required]
-    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+    [StringLength(100)]
+    public string DetailKey { get; set; } = string.Empty;
 
-    public DateTime? UpdatedDate { get; set; }
+    [Required]
+    public string DetailValue { get; set; } = string.Empty;
 
-    [ForeignKey("OutputId")]
+    [Required]
+    [StringLength(50)]
+    public string DetailType { get; set; } = "Text"; // e.g., 'Text', 'Number', 'Boolean', 'JSON'
+
+    // Navigation properties
+    [ForeignKey("OutputID")]
     public virtual ExpectedOutput ExpectedOutput { get; set; } = null!;
 }
-
-

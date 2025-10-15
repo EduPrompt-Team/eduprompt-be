@@ -9,16 +9,13 @@ public class CreateAPIKeyDto
 
     [Required]
     [StringLength(100)]
-    public string KeyName { get; set; } = string.Empty;
+    public string APIProvider { get; set; } = string.Empty;
 
+    [Required]
     [StringLength(500)]
-    public string? KeyValue { get; set; }
+    public string KeyHash { get; set; } = string.Empty;
 
-    [StringLength(50)]
-    public string? Provider { get; set; }
+    public int? UsageLimit { get; set; }
 
-    public DateTime? ExpiryDate { get; set; }
-
-    [StringLength(50)]
-    public string? Status { get; set; } = "Active";
+    public DateTime? ExpiresAt { get; set; }
 }

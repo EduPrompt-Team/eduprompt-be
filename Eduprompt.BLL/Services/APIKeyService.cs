@@ -1,4 +1,5 @@
 using Eduprompt.Domain.DTOs.APIKey;
+using Eduprompt.Domain.Entities;
 using Eduprompt.Domain.Interface.Repository;
 using Eduprompt.Domain.Interface.Service;
 
@@ -18,85 +19,78 @@ public class APIKeyService : IAPIKeyService
     public async Task<APIKeyDto?> GetByIdAsync(int apiKeyId)
     {
         var entity = await _apiKeyRepository.GetByIdAsync(apiKeyId);
-        return entity == null ? null : Map(entity);
+        return entity == null ? null : MapToDto(entity);
     }
 
     public async Task<IEnumerable<APIKeyDto>> GetByPackageIdAsync(int packageId)
     {
         var items = await _apiKeyRepository.GetByPackageIdAsync(packageId);
-        return items.Select(Map);
+        return items.Select(MapToDto);
     }
 
     public async Task<IEnumerable<APIKeyDto>> GetActiveKeysByPackageIdAsync(int packageId)
     {
         var items = await _apiKeyRepository.GetActiveKeysByPackageIdAsync(packageId);
-        return items.Select(Map);
+        return items.Select(MapToDto);
     }
 
     public async Task<APIKeyDto?> GetActiveKeyByProviderAsync(string provider)
     {
         var item = await _apiKeyRepository.GetActiveKeyByProviderAsync(provider);
-        return item == null ? null : Map(item);
+        return item == null ? null : MapToDto(item);
     }
 
     public async Task<APIKeyDto> CreateAsync(CreateAPIKeyDto createDto)
     {
-        // ensure package exists
-        var pkg = await _packageRepository.GetByIdAsync(createDto.PackageID);
-        if (pkg == null) throw new ArgumentException("Package not found");
+        // Ensure package exists
+        var package = await _packageRepository.GetByIdAsync(createDto.PackageID);
+        if (package == null) throw new ArgumentException("Package not found");
 
-        var entity = new Eduprompt.Domain.Entities.APIKey
+        var entity = new APIKey
         {
             PackageID = createDto.PackageID,
-            KeyName = createDto.KeyName,
-            KeyValue = createDto.KeyValue ?? string.Empty,
-            Provider = createDto.Provider ?? string.Empty,
-            ExpiryDate = createDto.ExpiryDate,
-            Status = createDto.Status,
-            CreatedDate = DateTime.UtcNow,
-            IsActive = true
+            APIProvider = createDto.APIProvider,
+            KeyHash = createDto.KeyHash,
+            UsageLimit = createDto.UsageLimit,
+            CurrentUsage = 0,
+            ExpiresAt = createDto.ExpiresAt
         };
 
         var created = await _apiKeyRepository.CreateAsync(entity);
-        return Map(created);
+        return MapToDto(created);
     }
 
     public async Task<APIKeyDto> UpdateAsync(int apiKeyId, CreateAPIKeyDto updateDto)
     {
-        var entity = await _apiKeyRepository.GetByIdAsync(apiKeyId);
-        if (entity == null) throw new KeyNotFoundException("API key not found");
+        var apiKey = await _apiKeyRepository.GetByIdAsync(apiKeyId);
+        if (apiKey == null) throw new KeyNotFoundException("API key not found");
 
-        if (updateDto.PackageID != 0) entity.PackageID = updateDto.PackageID;
-        if (!string.IsNullOrEmpty(updateDto.KeyName)) entity.KeyName = updateDto.KeyName;
-        if (updateDto.KeyValue != null) entity.KeyValue = updateDto.KeyValue;
-        if (updateDto.Provider != null) entity.Provider = updateDto.Provider;
-        entity.ExpiryDate = updateDto.ExpiryDate;
-        if (updateDto.Status != null) entity.Status = updateDto.Status;
+        apiKey.APIProvider = updateDto.APIProvider;
+        apiKey.KeyHash = updateDto.KeyHash;
+        apiKey.UsageLimit = updateDto.UsageLimit;
+        apiKey.ExpiresAt = updateDto.ExpiresAt;
 
-        var updated = await _apiKeyRepository.UpdateAsync(entity);
-        return Map(updated);
+        var updatedApiKey = await _apiKeyRepository.UpdateAsync(apiKey);
+        return MapToDto(updatedApiKey);
     }
 
-    public async Task<bool> DeleteAsync(int apiKeyId)
+    public async Task<bool> DeleteAsync(int id)
     {
-        return await _apiKeyRepository.DeleteAsync(apiKeyId);
+        return await _apiKeyRepository.DeleteAsync(id);
     }
 
-    private static APIKeyDto Map(Eduprompt.Domain.Entities.APIKey e)
+    private static APIKeyDto MapToDto(APIKey entity)
     {
         return new APIKeyDto
         {
-            APIKeyID = e.APIKeyID,
-            PackageID = e.PackageID,
-            KeyName = e.KeyName,
-            KeyValue = e.KeyValue,
-            Provider = e.Provider,
-            CreatedDate = e.CreatedDate,
-            ExpiryDate = e.ExpiryDate,
-            Status = e.Status,
-            PackageName = e.Package?.PackageName
+            APIKeyID = entity.APIKeyID,
+            PackageID = entity.PackageID,
+            APIProvider = entity.APIProvider,
+            KeyHash = entity.KeyHash,
+            UsageLimit = entity.UsageLimit,
+            CurrentUsage = entity.CurrentUsage,
+            ExpiresAt = entity.ExpiresAt,
+            PackageName = entity.Package?.PackageName
         };
     }
 }
-
-

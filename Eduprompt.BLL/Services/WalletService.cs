@@ -1,4 +1,4 @@
-using Eduprompt.Domain.DTOs.Wallet;
+﻿using Eduprompt.Domain.DTOs.Wallet;
 using Eduprompt.Domain.Entities;
 using Eduprompt.Domain.Interface.Repository;
 using Eduprompt.Domain.Interface.Service;
@@ -14,15 +14,15 @@ public class WalletService : IWalletService
         _walletRepository = walletRepository;
     }
 
-    public async Task<WalletDto?> GetByUserIdAsync(int userId)
-    {
-        var wallet = await _walletRepository.GetByUserIdAsync(userId);
-        return wallet != null ? MapToDto(wallet) : null;
-    }
-
     public async Task<WalletDto?> GetByIdAsync(int walletId)
     {
         var wallet = await _walletRepository.GetByIdAsync(walletId);
+        return wallet != null ? MapToDto(wallet) : null;
+    }
+
+    public async Task<WalletDto?> GetByUserIdAsync(int userId)
+    {
+        var wallet = await _walletRepository.GetByUserIdAsync(userId);
         return wallet != null ? MapToDto(wallet) : null;
     }
 
@@ -41,51 +41,56 @@ public class WalletService : IWalletService
         return MapToDto(createdWallet);
     }
 
-    public async Task<WalletDto> UpdateAsync(int walletId, UpdateWalletDto updateWalletDto)
+    public async Task<WalletDto> UpdateAsync(int walletId, UpdateWalletDto updateDto)
     {
         var wallet = await _walletRepository.GetByIdAsync(walletId);
-        if (wallet == null)
-            throw new ArgumentException("Wallet not found");
+        if (wallet == null) throw new KeyNotFoundException("Wallet not found");
 
-        wallet.Balance = updateWalletDto.Balance;
-        wallet.Currency = updateWalletDto.Currency;
-        wallet.Status = updateWalletDto.Status;
+        wallet.Balance = updateDto.Balance;
+        wallet.Currency = updateDto.Currency;
+        wallet.Status = updateDto.Status ?? wallet.Status;
         wallet.UpdatedDate = DateTime.UtcNow;
 
         var updatedWallet = await _walletRepository.UpdateAsync(wallet);
         return MapToDto(updatedWallet);
     }
 
+    public async Task<bool> AddFundsAsync(int walletId, decimal amount)
+    {
+        var wallet = await _walletRepository.GetByIdAsync(walletId);
+        if (wallet == null) return false;
+
+        wallet.Balance += amount;
+        wallet.UpdatedDate = DateTime.UtcNow;
+        await _walletRepository.UpdateAsync(wallet);
+        return true;
+    }
+
+    public async Task<bool> DeductFundsAsync(int walletId, decimal amount)
+    {
+        var wallet = await _walletRepository.GetByIdAsync(walletId);
+        if (wallet == null || wallet.Balance < amount) return false;
+        
+        wallet.Balance -= amount;
+        wallet.UpdatedDate = DateTime.UtcNow;
+        await _walletRepository.UpdateAsync(wallet);
+        return true;
+    }
+
+    public async Task<decimal> GetBalanceAsync(int walletId)
+    {
+        var wallet = await _walletRepository.GetByIdAsync(walletId);
+        return wallet?.Balance ?? 0;
+    }
+
+    public async Task<bool> UpdateBalanceAsync(int walletId, decimal amount)
+    {
+        return await _walletRepository.UpdateBalanceAsync(walletId, amount);
+    }
+
     public async Task<bool> DeleteAsync(int walletId)
     {
         return await _walletRepository.DeleteAsync(walletId);
-    }
-
-    public async Task<decimal> GetBalanceAsync(int userId)
-    {
-        return await _walletRepository.GetBalanceAsync(userId);
-    }
-
-    public async Task<bool> UpdateBalanceAsync(int userId, decimal newBalance)
-    {
-        return await _walletRepository.UpdateBalanceAsync(userId, newBalance);
-    }
-
-    public async Task<bool> AddFundsAsync(int userId, decimal amount)
-    {
-        var currentBalance = await _walletRepository.GetBalanceAsync(userId);
-        var newBalance = currentBalance + amount;
-        return await _walletRepository.UpdateBalanceAsync(userId, newBalance);
-    }
-
-    public async Task<bool> DeductFundsAsync(int userId, decimal amount)
-    {
-        var currentBalance = await _walletRepository.GetBalanceAsync(userId);
-        if (currentBalance < amount)
-            return false; // Insufficient funds
-
-        var newBalance = currentBalance - amount;
-        return await _walletRepository.UpdateBalanceAsync(userId, newBalance);
     }
 
     private static WalletDto MapToDto(Wallet wallet)

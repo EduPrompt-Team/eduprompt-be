@@ -46,10 +46,8 @@ public class PackageService : IPackageService
             PackageName = createPackageDto.PackageName,
             Description = createPackageDto.Description,
             Price = createPackageDto.Price,
-            Duration = createPackageDto.Duration,
-            MaxUsage = createPackageDto.MaxUsage,
-            Features = createPackageDto.Features,
-            Status = createPackageDto.Status,
+            DurationDays = createPackageDto.DurationDays,
+            IsActive = createPackageDto.IsActive,
             CreatedDate = DateTime.UtcNow
         };
 
@@ -57,45 +55,20 @@ public class PackageService : IPackageService
         return MapToDto(createdPackage);
     }
 
-    public async Task<PackageDto> UpdateAsync(int packageId, UpdatePackageDto updatePackageDto)
+    public async Task<PackageDto> UpdateAsync(int packageId, UpdatePackageDto updateDto)
     {
         var package = await _packageRepository.GetByIdAsync(packageId);
-        if (package == null)
-            throw new ArgumentException("Package not found");
+        if (package == null) throw new KeyNotFoundException("Package not found");
 
-        if (updatePackageDto.CategoryID.HasValue)
-            package.CategoryID = updatePackageDto.CategoryID.Value;
-
-        if (!string.IsNullOrEmpty(updatePackageDto.PackageName))
-            package.PackageName = updatePackageDto.PackageName;
-
-        if (updatePackageDto.Description != null)
-            package.Description = updatePackageDto.Description;
-
-        if (updatePackageDto.Price.HasValue)
-            package.Price = updatePackageDto.Price.Value;
-
-        if (updatePackageDto.Duration.HasValue)
-            package.Duration = updatePackageDto.Duration.Value;
-
-        if (updatePackageDto.MaxUsage.HasValue)
-            package.MaxUsage = updatePackageDto.MaxUsage.Value;
-
-        if (updatePackageDto.Features != null)
-            package.Features = updatePackageDto.Features;
-
-        if (!string.IsNullOrEmpty(updatePackageDto.Status))
-            package.Status = updatePackageDto.Status;
-
-        package.UpdatedDate = DateTime.UtcNow;
+        package.CategoryID = updateDto.CategoryID ?? package.CategoryID;
+        package.PackageName = updateDto.PackageName ?? package.PackageName;
+        package.Description = updateDto.Description ?? package.Description;
+        package.Price = updateDto.Price ?? package.Price;
+        package.DurationDays = updateDto.DurationDays ?? package.DurationDays;
+        package.IsActive = updateDto.IsActive ?? package.IsActive;
 
         var updatedPackage = await _packageRepository.UpdateAsync(package);
         return MapToDto(updatedPackage);
-    }
-
-    public async Task<bool> DeleteAsync(int packageId)
-    {
-        return await _packageRepository.DeleteAsync(packageId);
     }
 
     public async Task<IEnumerable<PackageDto>> SearchAsync(string searchTerm)
@@ -110,6 +83,11 @@ public class PackageService : IPackageService
         return packages.Select(MapToDto);
     }
 
+    public async Task<bool> DeleteAsync(int packageId)
+    {
+        return await _packageRepository.DeleteAsync(packageId);
+    }
+
     private static PackageDto MapToDto(Package package)
     {
         return new PackageDto
@@ -119,12 +97,9 @@ public class PackageService : IPackageService
             PackageName = package.PackageName,
             Description = package.Description,
             Price = package.Price,
-            Duration = package.Duration,
-            MaxUsage = package.MaxUsage,
-            Features = package.Features,
+            DurationDays = package.DurationDays,
+            IsActive = package.IsActive,
             CreatedDate = package.CreatedDate,
-            UpdatedDate = package.UpdatedDate,
-            Status = package.Status,
             CategoryName = package.PackageCategory?.CategoryName
         };
     }

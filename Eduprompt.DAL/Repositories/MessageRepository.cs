@@ -25,7 +25,7 @@ public class MessageRepository : IMessageRepository
         return await _context.Messages
             .Include(m => m.Conversation)
             .Where(m => m.ConversationID == conversationId)
-            .OrderBy(m => m.CreatedDate)
+            .OrderBy(m => m.SentAt)
             .ToListAsync();
     }
 
@@ -63,7 +63,7 @@ public class MessageRepository : IMessageRepository
         return await _context.Messages
             .Include(m => m.Conversation)
             .Where(m => m.ConversationID == conversationId)
-            .OrderByDescending(m => m.CreatedDate)
+            .OrderByDescending(m => m.SentAt)
             .Take(count)
             .ToListAsync();
     }
@@ -73,7 +73,7 @@ public class MessageRepository : IMessageRepository
         return await _context.Messages
             .Include(m => m.Conversation)
             .Where(m => m.ConversationID == conversationId)
-            .OrderByDescending(m => m.CreatedDate)
+            .OrderByDescending(m => m.SentAt)
             .FirstOrDefaultAsync();
     }
 }

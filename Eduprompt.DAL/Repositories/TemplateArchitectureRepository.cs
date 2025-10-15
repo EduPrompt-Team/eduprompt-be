@@ -16,16 +16,16 @@ public class TemplateArchitectureRepository : ITemplateArchitectureRepository
     public async Task<TemplateArchitecture?> GetByIdAsync(int architectureId)
     {
         return await _context.TemplateArchitectures
-            .Include(a => a.StorageTemplate)
+            // StorageTemplate navigation removed
             .FirstOrDefaultAsync(a => a.ArchitectureID == architectureId);
     }
 
     public async Task<IEnumerable<TemplateArchitecture>> GetByInstanceIdAsync(int instanceId)
     {
         return await _context.TemplateArchitectures
-            .Include(a => a.StorageTemplate)
-            .Where(a => a.TemplateID == instanceId)
-            .OrderBy(a => a.CreatedDate)
+            // StorageTemplate navigation removed
+            .Where(a => a.StorageID == instanceId)
+            .OrderBy(a => a.ArchitectureID)
             .ToListAsync();
     }
 
@@ -58,12 +58,13 @@ public class TemplateArchitectureRepository : ITemplateArchitectureRepository
         return await _context.TemplateArchitectures.AnyAsync(a => a.ArchitectureID == architectureId);
     }
 
-    public async Task<IEnumerable<TemplateArchitecture>> GetActiveArchitecturesByInstanceIdAsync(int instanceId)
+    public async Task<IEnumerable<TemplateArchitecture>> GetByStorageIdAsync(int storageId)
     {
         return await _context.TemplateArchitectures
-            .Include(a => a.StorageTemplate)
-            .Where(a => a.TemplateID == instanceId && a.Status == "Active")
-            .OrderBy(a => a.CreatedDate)
+            // StorageTemplate navigation removed
+            .Where(a => a.StorageID == storageId)
+            .OrderBy(a => a.ArchitectureID)
             .ToListAsync();
     }
 }
+

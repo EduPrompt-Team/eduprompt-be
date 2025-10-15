@@ -30,7 +30,7 @@ public class OrderRepository : IOrderRepository
             //     .ThenInclude(od => od.Template) // Removed - OrderDetails navigation property deleted
             .Include(o => o.User)
             // .Include(o => o.Payments) // Removed - Payments navigation property deleted
-            .FirstOrDefaultAsync(o => o.OrderNumber == orderNumber);
+            .FirstOrDefaultAsync(o => o.OrderId.ToString() == orderNumber);
     }
 
     public async Task<IEnumerable<Order>> GetByUserIdAsync(int userId)
@@ -41,7 +41,7 @@ public class OrderRepository : IOrderRepository
             .Include(o => o.User)
             // .Include(o => o.Payments) // Removed - Payments navigation property deleted
             .Where(o => o.UserId == userId)
-            .OrderByDescending(o => o.CreatedDate)
+            .OrderByDescending(o => o.OrderDate)
             .ToListAsync();
     }
 
@@ -52,13 +52,13 @@ public class OrderRepository : IOrderRepository
             //     .ThenInclude(od => od.Template) // Removed - OrderDetails navigation property deleted
             .Include(o => o.User)
             // .Include(o => o.Payments) // Removed - Payments navigation property deleted
-            .OrderByDescending(o => o.CreatedDate)
+            .OrderByDescending(o => o.OrderDate)
             .ToListAsync();
     }
 
     public async Task<Order> CreateAsync(Order order)
     {
-        order.CreatedDate = DateTime.Now;
+        order.OrderDate = DateTime.Now;
         order.OrderDate = DateTime.Now;
         order.Status = order.Status ?? "Pending";
 
@@ -82,14 +82,14 @@ public class OrderRepository : IOrderRepository
         var prefix = $"ORD{now:yyyyMMdd}";
         
         var lastOrder = await _context.Orders
-            .Where(o => o.OrderNumber.StartsWith(prefix))
-            .OrderByDescending(o => o.OrderNumber)
+            .Where(o => o.OrderId.ToString().StartsWith(prefix))
+            .OrderByDescending(o => o.OrderId)
             .FirstOrDefaultAsync();
 
         int sequence = 1;
         if (lastOrder != null)
         {
-            var lastSequence = lastOrder.OrderNumber.Substring(prefix.Length);
+            var lastSequence = lastOrder.OrderId.ToString().Substring(prefix.Length);
             if (int.TryParse(lastSequence, out int num))
             {
                 sequence = num + 1;

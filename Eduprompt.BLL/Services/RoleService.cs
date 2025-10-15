@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using Eduprompt.Domain.DTOs.Role;
 using Eduprompt.Domain.Entities;
 using Eduprompt.Domain.Interface.Repository;
@@ -29,24 +29,27 @@ public class RoleService : IRoleService
         return _mapper.Map<IEnumerable<RoleDto>>(roles);
     }
 
-    public async Task<RoleDto> CreateAsync(RoleCreateUpdateDto roleDto)
+    public async Task<RoleDto> CreateAsync(RoleCreateUpdateDto createDto)
     {
-        var role = _mapper.Map<Role>(roleDto);
+        var role = new Role
+        {
+            RoleName = createDto.RoleName,
+            Status = createDto.Status ?? "Active"
+        };
+
         var createdRole = await _roleRepository.CreateAsync(role);
         return _mapper.Map<RoleDto>(createdRole);
     }
 
-    public async Task<RoleDto> UpdateAsync(int id, RoleCreateUpdateDto roleDto)
+    public async Task<RoleDto> UpdateAsync(int roleId, RoleCreateUpdateDto updateDto)
     {
-        var existingRole = await _roleRepository.GetByIdAsync(id);
-        if (existingRole == null)
-        {
-            throw new KeyNotFoundException($"Role with ID {id} not found");
-        }
+        var role = await _roleRepository.GetByIdAsync(roleId);
+        if (role == null) throw new KeyNotFoundException("Role not found");
 
-        _mapper.Map(roleDto, existingRole);
-        
-        var updatedRole = await _roleRepository.UpdateAsync(existingRole);
+        role.RoleName = updateDto.RoleName;
+        role.Status = updateDto.Status ?? role.Status;
+
+        var updatedRole = await _roleRepository.UpdateAsync(role);
         return _mapper.Map<RoleDto>(updatedRole);
     }
 
@@ -54,4 +57,16 @@ public class RoleService : IRoleService
     {
         return await _roleRepository.DeleteAsync(id);
     }
+
+
+        public Task<object?> UpdateAsync(int id, object updateDto)
+    {
+        return Task.FromResult<object?>(null);
+    }
 } 
+
+
+
+
+
+

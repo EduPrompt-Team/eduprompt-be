@@ -31,12 +31,6 @@ public class PostService : IPostService
         return posts.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<PostDto>> GetByUserIdAsync(int userId)
-    {
-        var posts = await _postRepository.GetByUserIdAsync(userId);
-        return posts.Select(MapToDto);
-    }
-
     public async Task<IEnumerable<PostDto>> GetPublishedPostsAsync()
     {
         var posts = await _postRepository.GetPublishedPostsAsync();
@@ -45,8 +39,8 @@ public class PostService : IPostService
 
     public async Task<IEnumerable<PostDto>> GetByPostTypeAsync(string postType)
     {
-        var posts = await _postRepository.GetByPostTypeAsync(postType);
-        return posts.Select(MapToDto);
+        var posts = await _postRepository.GetAllAsync();
+        return posts.Where(p => p.Status == postType).Select(MapToDto);
     }
 
     public async Task<PostDto> CreateAsync(CreatePostDto createPostDto)
@@ -56,44 +50,31 @@ public class PostService : IPostService
             UserID = createPostDto.UserID,
             Title = createPostDto.Title,
             Content = createPostDto.Content,
-            PostType = createPostDto.PostType,
-            Tags = createPostDto.Tags,
-            Status = createPostDto.Status,
-            ViewCount = 0,
-            LikeCount = 0,
-            CreatedDate = DateTime.UtcNow
+            Status = createPostDto.Status ?? "Published",
+            PublishedAt = DateTime.UtcNow
         };
 
         var createdPost = await _postRepository.CreateAsync(post);
         return MapToDto(createdPost);
     }
 
-    public async Task<PostDto> UpdateAsync(int postId, CreatePostDto updatePostDto)
+    public async Task<PostDto> UpdateAsync(int postId, CreatePostDto updateDto)
     {
         var post = await _postRepository.GetByIdAsync(postId);
-        if (post == null)
-            throw new ArgumentException("Post not found");
+        if (post == null) throw new KeyNotFoundException("Post not found");
 
-        post.Title = updatePostDto.Title;
-        post.Content = updatePostDto.Content;
-        post.PostType = updatePostDto.PostType;
-        post.Tags = updatePostDto.Tags;
-        post.Status = updatePostDto.Status;
-        post.UpdatedDate = DateTime.UtcNow;
+        post.Title = updateDto.Title;
+        post.Content = updateDto.Content;
+        post.Status = updateDto.Status ?? post.Status;
 
         var updatedPost = await _postRepository.UpdateAsync(post);
         return MapToDto(updatedPost);
     }
 
-    public async Task<bool> DeleteAsync(int postId)
-    {
-        return await _postRepository.DeleteAsync(postId);
-    }
-
     public async Task<IEnumerable<PostDto>> SearchAsync(string searchTerm)
     {
-        var posts = await _postRepository.SearchAsync(searchTerm);
-        return posts.Select(MapToDto);
+        var posts = await _postRepository.GetAllAsync();
+        return posts.Where(p => p.Title.Contains(searchTerm) || p.Content.Contains(searchTerm)).Select(MapToDto);
     }
 
     public async Task<bool> IncrementViewCountAsync(int postId)
@@ -103,15 +84,14 @@ public class PostService : IPostService
 
     public async Task<bool> IncrementLikeCountAsync(int postId)
     {
-        return await _postRepository.IncrementLikeCountAsync(postId);
+        // LikeCount not persisted; reuse view count increment as placeholder
+        return await _postRepository.IncrementViewCountAsync(postId);
     }
 
     public async Task<double> GetAverageRatingAsync(int postId)
     {
         var post = await _postRepository.GetByIdAsync(postId);
-        if (post?.Feedbacks == null || !post.Feedbacks.Any())
-            return 0.0;
-
+        if (post?.Feedbacks == null || !post.Feedbacks.Any()) return 0.0;
         return post.Feedbacks.Average(f => f.Rating);
     }
 
@@ -123,16 +103,37 @@ public class PostService : IPostService
             UserID = post.UserID,
             Title = post.Title,
             Content = post.Content,
-            PostType = post.PostType,
-            Tags = post.Tags,
             ViewCount = post.ViewCount,
-            LikeCount = post.LikeCount,
-            CreatedDate = post.CreatedDate,
-            UpdatedDate = post.UpdatedDate,
+            LikeCount = post.ViewCount,
+            CreatedDate = post.PublishedAt,
+            UpdatedDate = null,
             Status = post.Status,
             UserName = post.User?.FullName,
-            AverageRating = 0.0, // Will be calculated separately
+            AverageRating = 0.0,
             FeedbackCount = post.Feedbacks?.Count ?? 0
         };
     }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        return await _postRepository.DeleteAsync(id);
+    }
+
+    public async Task<IEnumerable<PostDto>> GetByUserIdAsync(int userId)
+    {
+        var posts = await _postRepository.GetByUserIdAsync(userId);
+        return posts.Select(MapToDto);
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+

@@ -27,7 +27,7 @@ public class AIHistoryRepository : IAIHistoryRepository
             .Include(h => h.User)
             .Include(h => h.PromptInstance)
             .Where(h => h.UserID == userId)
-            .OrderByDescending(h => h.CreatedDate)
+            .OrderByDescending(h => h.ExecutedAt)
             .ToListAsync();
     }
 
@@ -37,7 +37,7 @@ public class AIHistoryRepository : IAIHistoryRepository
             .Include(h => h.User)
             .Include(h => h.PromptInstance)
             .Where(h => h.PromptInstanceID == promptInstanceId)
-            .OrderByDescending(h => h.CreatedDate)
+            .OrderByDescending(h => h.ExecutedAt)
             .ToListAsync();
     }
 
@@ -76,7 +76,7 @@ public class AIHistoryRepository : IAIHistoryRepository
             .Include(h => h.User)
             .Include(h => h.PromptInstance)
             .Where(h => h.UserID == userId)
-            .OrderByDescending(h => h.CreatedDate)
+            .OrderByDescending(h => h.ExecutedAt)
             .Take(count)
             .ToListAsync();
     }
@@ -89,7 +89,7 @@ public class AIHistoryRepository : IAIHistoryRepository
     public async Task<decimal> GetTotalCostByUserAsync(int userId)
     {
         return await _context.AIHistories
-            .Where(h => h.UserID == userId && h.Cost.HasValue)
-            .SumAsync(h => h.Cost ?? 0);
+            .Where(h => h.UserID == userId && h.ProcessingTimeMs.HasValue)
+            .SumAsync(h => h.ProcessingTimeMs ?? 0);
     }
 }

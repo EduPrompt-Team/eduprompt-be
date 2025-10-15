@@ -17,13 +17,13 @@ public class OutputDetailRepository : IOutputDetailRepository
     {
         return await _context.Set<OutputDetail>()
             .Include(d => d.ExpectedOutput)
-            .FirstOrDefaultAsync(d => d.DetailId == detailId);
+            .FirstOrDefaultAsync(d => d.DetailID == detailId);
     }
 
     public async Task<IEnumerable<OutputDetail>> GetByOutputIdAsync(int outputId)
     {
         return await _context.Set<OutputDetail>()
-            .Where(d => d.OutputId == outputId)
+            .Where(d => d.OutputID == outputId)
             .ToListAsync();
     }
 

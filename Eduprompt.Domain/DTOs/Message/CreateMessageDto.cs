@@ -8,13 +8,13 @@ public class CreateMessageDto
     public int ConversationID { get; set; }
 
     [Required]
+    [StringLength(20)]
+    public string SenderType { get; set; } = "User";
+
+    [Required]
     public string Content { get; set; } = string.Empty;
 
-    [StringLength(50)]
-    public string? MessageType { get; set; } = "Text";
-
-    [StringLength(50)]
-    public string? SenderType { get; set; } = "User";
+    public bool IsRead { get; set; } = false;
 
     [StringLength(50)]
     public string? Status { get; set; } = "Sent";

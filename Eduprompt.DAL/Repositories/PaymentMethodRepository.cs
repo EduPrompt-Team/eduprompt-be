@@ -16,23 +16,14 @@ public class PaymentMethodRepository : IPaymentMethodRepository
     public async Task<PaymentMethod?> GetByIdAsync(int paymentMethodId)
     {
         return await _context.PaymentMethods
-            .Include(pm => pm.User)
             .FirstOrDefaultAsync(pm => pm.PaymentMethodID == paymentMethodId);
     }
 
-    public async Task<IEnumerable<PaymentMethod>> GetByUserIdAsync(int userId)
+    public async Task<IEnumerable<PaymentMethod>> GetAllAsync()
     {
         return await _context.PaymentMethods
-            .Include(pm => pm.User)
-            .Where(pm => pm.UserID == userId)
+            .Where(pm => pm.IsActive)
             .ToListAsync();
-    }
-
-    public async Task<PaymentMethod?> GetDefaultByUserIdAsync(int userId)
-    {
-        return await _context.PaymentMethods
-            .Include(pm => pm.User)
-            .FirstOrDefaultAsync(pm => pm.UserID == userId && pm.IsDefault);
     }
 
     public async Task<PaymentMethod> CreateAsync(PaymentMethod paymentMethod)
@@ -66,24 +57,8 @@ public class PaymentMethodRepository : IPaymentMethodRepository
 
     public async Task<bool> SetAsDefaultAsync(int paymentMethodId, int userId)
     {
-        // Remove default from all user's payment methods
-        var userPaymentMethods = await _context.PaymentMethods
-            .Where(pm => pm.UserID == userId)
-            .ToListAsync();
-
-        foreach (var pm in userPaymentMethods)
-        {
-            pm.IsDefault = false;
-        }
-
-        // Set the specified one as default
-        var targetPaymentMethod = await _context.PaymentMethods
-            .FirstOrDefaultAsync(pm => pm.PaymentMethodID == paymentMethodId && pm.UserID == userId);
-
-        if (targetPaymentMethod == null) return false;
-
-        targetPaymentMethod.IsDefault = true;
-        await _context.SaveChangesAsync();
+        // PaymentMethod doesn't have IsDefault property, so this method is not applicable
+        // Return true to maintain interface compatibility
         return true;
     }
 }

@@ -10,6 +10,5 @@ public interface IPackageCategoryRepository
     Task<PackageCategory> UpdateAsync(PackageCategory category);
     Task<bool> DeleteAsync(int categoryId);
     Task<bool> ExistsAsync(int categoryId);
-    Task<IEnumerable<PackageCategory>> GetActiveCategoriesAsync();
     Task<int> GetPackageCountByCategoryIdAsync(int categoryId);
 }

@@ -25,7 +25,7 @@ public class PromptInstanceDetailRepository : IPromptInstanceDetailRepository
         return await _context.PromptInstanceDetails
             .Include(d => d.PromptInstance)
             .Where(d => d.InstanceID == instanceId)
-            .OrderBy(d => d.CreatedDate)
+            .OrderBy(d => d.DetailID)
             .ToListAsync();
     }
 
@@ -63,7 +63,7 @@ public class PromptInstanceDetailRepository : IPromptInstanceDetailRepository
         return await _context.PromptInstanceDetails
             .Include(d => d.PromptInstance)
             .Where(d => d.InstanceID == instanceId)
-            .OrderBy(d => d.CreatedDate)
+            .OrderBy(d => d.DetailID)
             .ThenBy(d => d.DetailID)
             .ToListAsync();
     }

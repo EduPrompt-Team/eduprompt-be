@@ -1,8 +1,9 @@
-using Microsoft.Extensions.Configuration;
+
 using System.Globalization;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Extensions.Configuration;
 
 namespace Eduprompt.BLL.Services;
 
@@ -24,17 +25,16 @@ public class VnpayHelper
     /// </summary>
     public string CreatePaymentUrl(VnpayRequestData requestData)
     {
-        // TODO: Get these from appsettings.json when VNPAY credentials are available
         var vnp_Url = _configuration["VNPay:Url"] ?? "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-        var vnp_TmnCode = _configuration["VNPay:TmnCode"] ?? "YOUR_TMN_CODE_HERE"; // ← REPLACE when ready
-        var vnp_HashSecret = _configuration["VNPay:HashSecret"] ?? "YOUR_HASH_SECRET_HERE"; // ← REPLACE when ready
+        var vnp_TmnCode = _configuration["VNPay:TmnCode"] ?? "YOUR_TMN_CODE_HERE";
+        var vnp_HashSecret = _configuration["VNPay:HashSecret"] ?? "YOUR_HASH_SECRET_HERE";
         
         var vnpay = new VnPayLibrary();
         
         vnpay.AddRequestData("vnp_Version", "2.1.0");
         vnpay.AddRequestData("vnp_Command", "pay");
         vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
-        vnpay.AddRequestData("vnp_Amount", (requestData.Amount * 100).ToString()); // VNPay uses smallest unit
+        vnpay.AddRequestData("vnp_Amount", (requestData.Amount * 100).ToString());
         vnpay.AddRequestData("vnp_CreateDate", requestData.CreateDate.ToString("yyyyMMddHHmmss"));
         vnpay.AddRequestData("vnp_CurrCode", "VND");
         vnpay.AddRequestData("vnp_IpAddr", requestData.IpAddress);
@@ -58,7 +58,7 @@ public class VnpayHelper
     /// </summary>
     public bool ValidateSignature(Dictionary<string, string> queryParams, string secureHash)
     {
-        var vnp_HashSecret = _configuration["VNPay:HashSecret"] ?? "YOUR_HASH_SECRET_HERE"; // ← REPLACE when ready
+        var vnp_HashSecret = _configuration["VNPay:HashSecret"] ?? "YOUR_HASH_SECRET_HERE";
         
         var vnpay = new VnPayLibrary();
         foreach (var param in queryParams)
@@ -87,10 +87,6 @@ public class VnpayRequestData
     public DateTime CreateDate { get; set; } = DateTime.Now;
 }
 
-/// <summary>
-/// VNPay Library for generating and validating payment URLs
-/// Based on VNPAY official documentation
-/// </summary>
 internal class VnPayLibrary
 {
     private readonly SortedList<string, string> _requestData = new SortedList<string, string>(new VnPayCompare());
@@ -189,3 +185,7 @@ internal class VnPayCompare : IComparer<string>
         return vnpCompare.Compare(x, y, CompareOptions.Ordinal);
     }
 } 
+
+
+
+
