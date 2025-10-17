@@ -43,7 +43,7 @@ SET IDENTITY_INSERT [dbo].[Users] ON;
 -- Hash: ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f
 
 INSERT INTO [dbo].[Users] ([UserId], [RoleId], [FullName], [Email], [Phone], [ProfileUrl], [CreatedDate], [Status], [Password]) VALUES
-(1, 1, 'Admin User', 'admin@eduprompt.com', '0901234567', 'https://i.pravatar.cc/150?img=1', GETUTCDATE(), 'Active', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f'),
+(1, 1, 'Admin User', 'a@example.com', '0901234567', 'https://i.pravatar.cc/150?img=1', GETUTCDATE(), 'Active', '123456'),
 (2, 2, 'Nguyễn Văn A', 'nguyenvana@example.com', '0912345678', 'https://i.pravatar.cc/150?img=2', GETUTCDATE(), 'Active', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f'),
 (3, 3, 'Trần Thị B', 'tranthib@example.com', '0923456789', 'https://i.pravatar.cc/150?img=3', GETUTCDATE(), 'Active', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f'),
 (4, 2, 'Lê Văn C', 'levanc@example.com', '0934567890', NULL, GETUTCDATE(), 'Active', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f'),
