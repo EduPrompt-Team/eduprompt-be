@@ -23,6 +23,28 @@ public class AIHistoryController : ControllerBase
     }
 
     /// <summary>
+    /// Get all AI history (Admin only)
+    /// </summary>
+    /// <returns>List of all AI interactions</returns>
+    /// <response code="200">AI history retrieved successfully</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="403">User not authorized (Admin role required)</response>
+    [HttpGet]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetAll()
+    {
+        try
+        {
+            var histories = await _aiHistoryService.GetAllAsync();
+            return Ok(histories);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Get AI history by user ID
     /// </summary>
     /// <param name="userId">User ID</param>

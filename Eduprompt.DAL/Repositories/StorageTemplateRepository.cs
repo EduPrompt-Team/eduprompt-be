@@ -18,7 +18,7 @@ public class StorageTemplateRepository : IStorageTemplateRepository
     {
         return await _context.StorageTemplates
             .Include(s => s.User)
-            // .Include(s => s.Template) // Removed - Template navigation property deleted
+            .Include(s => s.Package)
             .FirstOrDefaultAsync(s => s.StorageID == id);
     }
 
@@ -26,7 +26,7 @@ public class StorageTemplateRepository : IStorageTemplateRepository
     {
         return await _context.StorageTemplates
             .Include(s => s.User)
-            // .Include(s => s.Template) // Removed - Template navigation property deleted
+            .Include(s => s.Package)
             .Where(s => s.UserID == userId)
             .OrderByDescending(s => s.CreatedAt)
             .ToListAsync();
@@ -36,7 +36,7 @@ public class StorageTemplateRepository : IStorageTemplateRepository
     {
         return await _context.StorageTemplates
             .Include(s => s.User)
-            // .Include(s => s.Template) // Removed - Template navigation property deleted
+            .Include(s => s.Package)
             .FirstOrDefaultAsync(s => s.UserID == userId && s.PackageID == templateId);
     }
 

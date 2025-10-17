@@ -51,6 +51,8 @@ public class PostService : IPostService
             Title = createPostDto.Title,
             Content = createPostDto.Content,
             Status = createPostDto.Status ?? "Published",
+            PostType = createPostDto.PostType ?? "General",
+            Tags = createPostDto.Tags,
             PublishedAt = DateTime.UtcNow
         };
 
@@ -66,6 +68,8 @@ public class PostService : IPostService
         post.Title = updateDto.Title;
         post.Content = updateDto.Content;
         post.Status = updateDto.Status ?? post.Status;
+        post.PostType = updateDto.PostType ?? post.PostType;
+        post.Tags = updateDto.Tags ?? post.Tags;
 
         var updatedPost = await _postRepository.UpdateAsync(post);
         return MapToDto(updatedPost);
@@ -74,7 +78,11 @@ public class PostService : IPostService
     public async Task<IEnumerable<PostDto>> SearchAsync(string searchTerm)
     {
         var posts = await _postRepository.GetAllAsync();
-        return posts.Where(p => p.Title.Contains(searchTerm) || p.Content.Contains(searchTerm)).Select(MapToDto);
+        var lowerSearch = searchTerm.ToLower();
+        return posts.Where(p => 
+            (p.Title != null && p.Title.ToLower().Contains(lowerSearch)) || 
+            (p.Content != null && p.Content.ToLower().Contains(lowerSearch))
+        ).Select(MapToDto);
     }
 
     public async Task<bool> IncrementViewCountAsync(int postId)
@@ -103,6 +111,8 @@ public class PostService : IPostService
             UserID = post.UserID,
             Title = post.Title,
             Content = post.Content,
+            PostType = post.PostType,
+            Tags = post.Tags,
             ViewCount = post.ViewCount,
             LikeCount = post.ViewCount,
             CreatedDate = post.PublishedAt,

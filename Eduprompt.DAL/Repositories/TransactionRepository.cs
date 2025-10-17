@@ -13,6 +13,16 @@ public class TransactionRepository : ITransactionRepository
         _context = context;
     }
 
+    public async Task<IEnumerable<Transaction>> GetAllAsync()
+    {
+        return await _context.Transactions
+            .Include(t => t.PaymentMethod)
+            .Include(t => t.Wallet)
+                .ThenInclude(w => w.User)
+            .OrderByDescending(t => t.TransactionDate)
+            .ToListAsync();
+    }
+
     public async Task<Transaction?> GetByIdAsync(int transactionId)
     {
         return await _context.Transactions

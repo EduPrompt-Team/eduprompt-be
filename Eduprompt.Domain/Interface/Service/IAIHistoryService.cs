@@ -4,6 +4,7 @@ namespace Eduprompt.Domain.Interface.Service;
 
 public interface IAIHistoryService
 {
+    Task<IEnumerable<AIHistoryDto>> GetAllAsync();
     Task<AIHistoryDto?> GetByIdAsync(int historyId);
     Task<IEnumerable<AIHistoryDto>> GetByUserIdAsync(int userId);
     Task<IEnumerable<AIHistoryDto>> GetByPromptInstanceIdAsync(int promptInstanceId);

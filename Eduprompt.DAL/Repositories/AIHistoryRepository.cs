@@ -13,6 +13,15 @@ public class AIHistoryRepository : IAIHistoryRepository
         _context = context;
     }
 
+    public async Task<IEnumerable<AIHistory>> GetAllAsync()
+    {
+        return await _context.AIHistories
+            .Include(h => h.User)
+            .Include(h => h.PromptInstance)
+            .OrderByDescending(h => h.ExecutedAt)
+            .ToListAsync();
+    }
+
     public async Task<AIHistory?> GetByIdAsync(int historyId)
     {
         return await _context.AIHistories

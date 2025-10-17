@@ -4,6 +4,7 @@ namespace Eduprompt.Domain.Interface.Repository;
 
 public interface ITransactionRepository
 {
+    Task<IEnumerable<Transaction>> GetAllAsync();
     Task<Transaction?> GetByIdAsync(int transactionId);
     Task<IEnumerable<Transaction>> GetByUserIdAsync(int userId);
     Task<IEnumerable<Transaction>> GetByWalletIdAsync(int walletId);

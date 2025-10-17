@@ -23,6 +23,28 @@ public class PaymentMethodController : ControllerBase
     }
 
     /// <summary>
+    /// Get all payment methods (Admin only)
+    /// </summary>
+    /// <returns>List of all payment methods</returns>
+    /// <response code="200">Payment methods retrieved successfully</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="403">User not authorized (Admin role required)</response>
+    [HttpGet]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetAll()
+    {
+        try
+        {
+            var paymentMethods = await _paymentMethodService.GetAllAsync();
+            return Ok(paymentMethods);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Get payment methods by user ID
     /// </summary>
     /// <param name="userId">User ID</param>
