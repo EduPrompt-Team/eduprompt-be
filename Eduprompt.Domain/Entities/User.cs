@@ -2,35 +2,52 @@
 #nullable disable
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Eduprompt.Domain.Entities;
 
+[Table("Users")]
 public partial class User
 {
+    [Key]
+    [Column("UserId")]
     public int UserId { get; set; }
 
+    [Column("RoleId")]
     public int? RoleId { get; set; }
 
+    [Column("FullName")]
     public string FullName { get; set; }
 
+    [Column("Email")]
     public string Email { get; set; }
 
+    [Column("Phone")]
     public string Phone { get; set; }
 
+    [Column("ProfileUrl")]
     public string ProfileUrl { get; set; }
 
+    [Column("CreatedDate")]
     public DateTime? CreatedDate { get; set; }
 
+    [Column("UpdatedDate")]
     public DateTime? UpdatedDate { get; set; }
 
+    [Column("Status")]
     public string Status { get; set; }
 
+    [Column("Password")]
     public string Password { get; set; }
 
+    [Column("GoogleId")]
     public string GoogleId { get; set; }
 
+    [Column("RefreshToken")]
     public string RefreshToken { get; set; }
 
+    [Column("RefreshTokenExpiryTime")]
     public DateTime? RefreshTokenExpiryTime { get; set; }
 
     public virtual Cart Cart { get; set; }
