@@ -28,6 +28,12 @@ public partial class Post
     [StringLength(50)]
     public string? Status { get; set; } = "Published";
 
+    [StringLength(50)]
+    public string? PostType { get; set; } = "General";
+
+    [StringLength(500)]
+    public string? Tags { get; set; }
+
     // Navigation properties
     [ForeignKey("UserID")]
     public virtual User User { get; set; } = null!;

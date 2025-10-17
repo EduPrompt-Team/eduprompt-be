@@ -14,6 +14,12 @@ public class AIHistoryService : IAIHistoryService
         _aiHistoryRepository = aiHistoryRepository;
     }
 
+    public async Task<IEnumerable<AIHistoryDto>> GetAllAsync()
+    {
+        var histories = await _aiHistoryRepository.GetAllAsync();
+        return histories.Select(MapToDto);
+    }
+
     public async Task<AIHistoryDto?> GetByIdAsync(int historyId)
     {
         var history = await _aiHistoryRepository.GetByIdAsync(historyId);

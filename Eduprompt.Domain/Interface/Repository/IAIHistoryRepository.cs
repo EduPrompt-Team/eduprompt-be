@@ -4,6 +4,7 @@ namespace Eduprompt.Domain.Interface.Repository;
 
 public interface IAIHistoryRepository
 {
+    Task<IEnumerable<AIHistory>> GetAllAsync();
     Task<AIHistory?> GetByIdAsync(int historyId);
     Task<IEnumerable<AIHistory>> GetByUserIdAsync(int userId);
     Task<IEnumerable<AIHistory>> GetByPromptInstanceIdAsync(int promptInstanceId);

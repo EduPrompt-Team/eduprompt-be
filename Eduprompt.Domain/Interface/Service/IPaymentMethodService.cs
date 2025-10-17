@@ -4,6 +4,7 @@ namespace Eduprompt.Domain.Interface.Service;
 
 public interface IPaymentMethodService
 {
+    Task<IEnumerable<PaymentMethodDto>> GetAllAsync();
     Task<PaymentMethodDto?> GetByIdAsync(int paymentMethodId);
     Task<IEnumerable<PaymentMethodDto>> GetByUserIdAsync(int userId);
     Task<PaymentMethodDto> CreateAsync(CreatePaymentMethodDto createDto);

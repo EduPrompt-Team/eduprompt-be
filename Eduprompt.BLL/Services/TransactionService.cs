@@ -16,6 +16,12 @@ public class TransactionService : ITransactionService
         _walletRepository = walletRepository;
     }
 
+    public async Task<IEnumerable<TransactionDto>> GetAllAsync()
+    {
+        var transactions = await _transactionRepository.GetAllAsync();
+        return transactions.Select(MapToDto);
+    }
+
     public async Task<TransactionDto?> GetByIdAsync(int transactionId)
     {
         var transaction = await _transactionRepository.GetByIdAsync(transactionId);

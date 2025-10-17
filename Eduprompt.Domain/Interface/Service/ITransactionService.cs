@@ -4,6 +4,7 @@ namespace Eduprompt.Domain.Interface.Service;
 
 public interface ITransactionService
 {
+    Task<IEnumerable<TransactionDto>> GetAllAsync();
     Task<TransactionDto?> GetByIdAsync(int transactionId);
     Task<IEnumerable<TransactionDto>> GetByWalletIdAsync(int walletId);
     Task<IEnumerable<TransactionDto>> GetByUserIdAsync(int userId);

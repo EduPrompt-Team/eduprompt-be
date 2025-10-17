@@ -8,13 +8,16 @@ namespace Eduprompt.BLL.Services;
 public class StorageTemplateService : IStorageTemplateService
 {
     private readonly IStorageTemplateRepository _storageRepository;
+    private readonly IPackageRepository _packageRepository;
     private readonly IMapper _mapper;
 
     public StorageTemplateService(
         IStorageTemplateRepository storageRepository,
+        IPackageRepository packageRepository,
         IMapper mapper)
     {
         _storageRepository = storageRepository;
+        _packageRepository = packageRepository;
         _mapper = mapper;
     }
 
@@ -26,6 +29,13 @@ public class StorageTemplateService : IStorageTemplateService
 
     public async Task<StorageTemplateServiceDto> AddToStorageAsync(int userId, StorageTemplateCreateServiceDto storageDto)
     {
+        // Validate package exists
+        var package = await _packageRepository.GetByIdAsync(storageDto.TemplateId);
+        if (package == null)
+        {
+            throw new InvalidOperationException($"Package with ID {storageDto.TemplateId} not found");
+        }
+
         // Check if already exists
         if (await _storageRepository.ExistsAsync(userId, storageDto.TemplateId))
         {
@@ -36,7 +46,7 @@ public class StorageTemplateService : IStorageTemplateService
         {
             UserID = userId,
             PackageID = storageDto.TemplateId,
-            TemplateName = "",
+            TemplateName = package.PackageName ?? "",
             IsFavorite = false,
             CreatedAt = DateTime.UtcNow
         };

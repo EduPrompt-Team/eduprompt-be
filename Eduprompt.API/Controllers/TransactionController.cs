@@ -23,6 +23,28 @@ public class TransactionController : ControllerBase
     }
 
     /// <summary>
+    /// Get all transactions (Admin only)
+    /// </summary>
+    /// <returns>List of all transactions</returns>
+    /// <response code="200">Transactions retrieved successfully</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="403">User not authorized (Admin role required)</response>
+    [HttpGet]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetAll()
+    {
+        try
+        {
+            var transactions = await _transactionService.GetAllAsync();
+            return Ok(transactions);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Get transactions by wallet ID
     /// </summary>
     /// <param name="walletId">Wallet ID</param>
