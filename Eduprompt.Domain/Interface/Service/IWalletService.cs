@@ -9,8 +9,11 @@ public interface IWalletService
     Task<WalletDto> CreateAsync(CreateWalletDto createWalletDto);
     Task<WalletDto> UpdateAsync(int walletId, UpdateWalletDto updateWalletDto);
     Task<bool> DeleteAsync(int walletId);
-    Task<decimal> GetBalanceAsync(int userId);
-    Task<bool> UpdateBalanceAsync(int userId, decimal newBalance);
-    Task<bool> AddFundsAsync(int userId, decimal amount);
-    Task<bool> DeductFundsAsync(int userId, decimal amount);
+    Task<decimal> GetBalanceByUserIdAsync(int userId);
+    Task<decimal> GetBalanceByWalletIdAsync(int walletId);
+    Task<bool> UpdateBalanceAsync(int walletId, decimal newBalance);
+    Task<bool> AddFundsByUserIdAsync(int userId, decimal amount);
+    Task<bool> AddFundsByWalletIdAsync(int walletId, decimal amount);
+    Task<bool> DeductFundsByUserIdAsync(int userId, decimal amount);
+    Task<bool> DeductFundsByWalletIdAsync(int walletId, decimal amount);
 }

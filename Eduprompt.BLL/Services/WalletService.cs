@@ -55,8 +55,11 @@ public class WalletService : IWalletService
         return MapToDto(updatedWallet);
     }
 
-    public async Task<bool> AddFundsAsync(int walletId, decimal amount)
+    public async Task<bool> AddFundsByWalletIdAsync(int walletId, decimal amount)
     {
+        if (amount < 0)
+            throw new ArgumentException("Amount must be greater than or equal to 0", nameof(amount));
+
         var wallet = await _walletRepository.GetByIdAsync(walletId);
         if (wallet == null) return false;
 
@@ -66,8 +69,25 @@ public class WalletService : IWalletService
         return true;
     }
 
-    public async Task<bool> DeductFundsAsync(int walletId, decimal amount)
+    public async Task<bool> AddFundsByUserIdAsync(int userId, decimal amount)
     {
+        if (amount < 0)
+            throw new ArgumentException("Amount must be greater than or equal to 0", nameof(amount));
+
+        var wallet = await _walletRepository.GetByUserIdAsync(userId);
+        if (wallet == null) return false;
+
+        wallet.Balance += amount;
+        wallet.UpdatedDate = DateTime.UtcNow;
+        await _walletRepository.UpdateAsync(wallet);
+        return true;
+    }
+
+    public async Task<bool> DeductFundsByWalletIdAsync(int walletId, decimal amount)
+    {
+        if (amount < 0)
+            throw new ArgumentException("Amount must be greater than or equal to 0", nameof(amount));
+
         var wallet = await _walletRepository.GetByIdAsync(walletId);
         if (wallet == null || wallet.Balance < amount) return false;
         
@@ -77,9 +97,29 @@ public class WalletService : IWalletService
         return true;
     }
 
-    public async Task<decimal> GetBalanceAsync(int walletId)
+    public async Task<bool> DeductFundsByUserIdAsync(int userId, decimal amount)
+    {
+        if (amount < 0)
+            throw new ArgumentException("Amount must be greater than or equal to 0", nameof(amount));
+
+        var wallet = await _walletRepository.GetByUserIdAsync(userId);
+        if (wallet == null || wallet.Balance < amount) return false;
+        
+        wallet.Balance -= amount;
+        wallet.UpdatedDate = DateTime.UtcNow;
+        await _walletRepository.UpdateAsync(wallet);
+        return true;
+    }
+
+    public async Task<decimal> GetBalanceByWalletIdAsync(int walletId)
     {
         var wallet = await _walletRepository.GetByIdAsync(walletId);
+        return wallet?.Balance ?? 0;
+    }
+
+    public async Task<decimal> GetBalanceByUserIdAsync(int userId)
+    {
+        var wallet = await _walletRepository.GetByUserIdAsync(userId);
         return wallet?.Balance ?? 0;
     }
 

@@ -4,6 +4,7 @@ public interface IOrderService
 {
     Task<OrderServiceDto> CreateOrderFromCartAsync(int userId, string? notes);
     Task<OrderServiceDto?> GetByIdAsync(int orderId, int userId);
+    Task<OrderServiceDto?> GetByIdAdminAsync(int orderId); // Admin
     Task<IEnumerable<OrderServiceDto>> GetUserOrdersAsync(int userId);
     Task<IEnumerable<OrderServiceDto>> GetAllOrdersAsync(); // Admin
     Task<OrderServiceDto> CancelOrderAsync(int orderId, int userId);

@@ -8,6 +8,7 @@ public interface IPostRepository
     Task<IEnumerable<Post>> GetAllAsync();
     Task<IEnumerable<Post>> GetByUserIdAsync(int userId);
     Task<IEnumerable<Post>> GetPublishedPostsAsync();
+    Task<IEnumerable<Post>> GetByPostTypeAsync(string postType);
     Task<Post> CreateAsync(Post post);
     Task<Post> UpdateAsync(Post post);
     Task<bool> DeleteAsync(int postId);

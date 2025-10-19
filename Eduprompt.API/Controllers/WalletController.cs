@@ -137,7 +137,7 @@ public class WalletController : ControllerBase
     {
         try
         {
-            var balance = await _walletService.GetBalanceAsync(userId);
+            var balance = await _walletService.GetBalanceByUserIdAsync(userId);
             return Ok(new { balance });
         }
         catch (Exception ex)
@@ -154,11 +154,15 @@ public class WalletController : ControllerBase
     {
         try
         {
-            var result = await _walletService.AddFundsAsync(request.UserId, request.Amount);
+            var result = await _walletService.AddFundsByUserIdAsync(request.UserId, request.Amount);
             if (!result)
                 return BadRequest(new { message = "Failed to add funds" });
 
             return Ok(new { message = "Funds added successfully" });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
         catch (Exception ex)
         {
@@ -174,11 +178,15 @@ public class WalletController : ControllerBase
     {
         try
         {
-            var result = await _walletService.DeductFundsAsync(request.UserId, request.Amount);
+            var result = await _walletService.DeductFundsByUserIdAsync(request.UserId, request.Amount);
             if (!result)
                 return BadRequest(new { message = "Insufficient funds or user not found" });
 
             return Ok(new { message = "Funds deducted successfully" });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
         catch (Exception ex)
         {

@@ -28,19 +28,43 @@ public class PostService : IPostService
     public async Task<IEnumerable<PostDto>> GetAllAsync()
     {
         var posts = await _postRepository.GetAllAsync();
-        return posts.Select(MapToDto);
+        var result = new List<PostDto>();
+        foreach (var post in posts)
+        {
+            var dto = MapToDto(post);
+            dto.AverageRating = await GetAverageRatingAsync(post.PostID);
+            dto.FeedbackCount = post.Feedbacks?.Count ?? 0;
+            result.Add(dto);
+        }
+        return result;
     }
 
     public async Task<IEnumerable<PostDto>> GetPublishedPostsAsync()
     {
         var posts = await _postRepository.GetPublishedPostsAsync();
-        return posts.Select(MapToDto);
+        var result = new List<PostDto>();
+        foreach (var post in posts)
+        {
+            var dto = MapToDto(post);
+            dto.AverageRating = await GetAverageRatingAsync(post.PostID);
+            dto.FeedbackCount = post.Feedbacks?.Count ?? 0;
+            result.Add(dto);
+        }
+        return result;
     }
 
     public async Task<IEnumerable<PostDto>> GetByPostTypeAsync(string postType)
     {
-        var posts = await _postRepository.GetAllAsync();
-        return posts.Where(p => p.Status == postType).Select(MapToDto);
+        var posts = await _postRepository.GetByPostTypeAsync(postType);
+        var result = new List<PostDto>();
+        foreach (var post in posts)
+        {
+            var dto = MapToDto(post);
+            dto.AverageRating = await GetAverageRatingAsync(post.PostID);
+            dto.FeedbackCount = post.Feedbacks?.Count ?? 0;
+            result.Add(dto);
+        }
+        return result;
     }
 
     public async Task<PostDto> CreateAsync(CreatePostDto createPostDto)
@@ -116,9 +140,9 @@ public class PostService : IPostService
             ViewCount = post.ViewCount,
             LikeCount = post.ViewCount,
             CreatedDate = post.PublishedAt,
-            UpdatedDate = null,
+            UpdatedDate = null, // Post entity doesn't have UpdatedDate field
             Status = post.Status,
-            UserName = post.User?.FullName,
+            UserName = post.User?.FullName ?? "Unknown User",
             AverageRating = 0.0,
             FeedbackCount = post.Feedbacks?.Count ?? 0
         };
@@ -132,7 +156,15 @@ public class PostService : IPostService
     public async Task<IEnumerable<PostDto>> GetByUserIdAsync(int userId)
     {
         var posts = await _postRepository.GetByUserIdAsync(userId);
-        return posts.Select(MapToDto);
+        var result = new List<PostDto>();
+        foreach (var post in posts)
+        {
+            var dto = MapToDto(post);
+            dto.AverageRating = await GetAverageRatingAsync(post.PostID);
+            dto.FeedbackCount = post.Feedbacks?.Count ?? 0;
+            result.Add(dto);
+        }
+        return result;
     }
 }
 

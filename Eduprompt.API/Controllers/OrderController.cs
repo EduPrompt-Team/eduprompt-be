@@ -64,7 +64,21 @@ public class OrderController : ControllerBase
     {
         var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
         var order = await _orderService.GetByIdAsync(orderId, userId);
-        if (order == null) return NotFound();
+        if (order == null) 
+            return NotFound(new { message = "Order not found or you don't have permission to view this order" });
+        return Ok(order);
+    }
+
+    /// <summary>
+    /// Get order by ID (Admin only - can view any order)
+    /// </summary>
+    [HttpGet("admin/{orderId}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> GetByIdAdmin(int orderId)
+    {
+        var order = await _orderService.GetByIdAdminAsync(orderId);
+        if (order == null) 
+            return NotFound(new { message = "Order not found" });
         return Ok(order);
     }
 

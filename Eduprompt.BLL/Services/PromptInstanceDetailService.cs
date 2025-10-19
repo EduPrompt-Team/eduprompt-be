@@ -67,8 +67,9 @@ public class PromptInstanceDetailService : IPromptInstanceDetailService
             FieldName = detail.ParameterName,
             FieldValue = detail.ParameterValue,
             FieldType = detail.ParameterType,
-            OrderIndex = null,
-            InstanceName = detail.PromptInstance?.PromptName
+            OrderIndex = 0, // Default order index
+            InstanceName = detail.PromptInstance?.PromptName,
+            UpdatedDate = DateTime.UtcNow
         };
     }
 }

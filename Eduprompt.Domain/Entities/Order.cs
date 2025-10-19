@@ -3,26 +3,33 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Eduprompt.Domain.Entities;
 
+[Table("Orders")]
 public partial class Order
 {
     [Key]
+    [Column("OrderID")]
     public int OrderId { get; set; }
 
     [Required]
+    [Column("UserId")]
     public int UserId { get; set; }
 
+    [Column("PackageID")]
     public int? PackageID { get; set; }
 
     [Required]
-    [Column(TypeName = "decimal(18,2)")]
+    [Column("TotalAmount", TypeName = "decimal(18,2)")]
     public decimal TotalAmount { get; set; }
 
     [Required]
+    [Column("OrderDate")]
     public DateTime OrderDate { get; set; } = DateTime.UtcNow;
 
+    [Column("Notes")]
     public string? Notes { get; set; }
 
     [StringLength(50)]
+    [Column("Status")]
     public string? Status { get; set; } = "Pending";
 
     // Navigation properties

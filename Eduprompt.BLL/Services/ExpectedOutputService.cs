@@ -61,6 +61,8 @@ public class ExpectedOutputService : IExpectedOutputService
             OutputId = output.OutputID,
             InstanceID = output.PromptInstanceID,
             OutputName = output.OutputName,
+            Status = "Active",
+            UpdatedDate = DateTime.UtcNow,
             OutputDetails = output.OutputDetails?.Select(od => new OutputDetailDto
             {
                 DetailId = od.DetailID,
@@ -68,7 +70,7 @@ public class ExpectedOutputService : IExpectedOutputService
                 Description = od.DetailValue,
                 OutputSize = null,
                 CreatedDate = DateTime.UtcNow,
-                UpdatedDate = null
+                UpdatedDate = DateTime.UtcNow
             }).ToList()
         };
     }

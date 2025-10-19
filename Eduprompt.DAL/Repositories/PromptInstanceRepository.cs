@@ -16,16 +16,26 @@ public class PromptInstanceRepository : IPromptInstanceRepository
     public async Task<PromptInstance?> GetByIdAsync(int instanceId)
     {
         return await _context.PromptInstances
-            .Include(pi => pi.PromptInstanceDetails)
+            .Include(pi => pi.User)
             .Include(pi => pi.Package)
             .Include(pi => pi.PromptInstanceDetails)
             .FirstOrDefaultAsync(pi => pi.InstanceID == instanceId);
     }
 
+    public async Task<IEnumerable<PromptInstance>> GetAllAsync()
+    {
+        return await _context.PromptInstances
+            .Include(pi => pi.User)
+            .Include(pi => pi.Package)
+            .Include(pi => pi.PromptInstanceDetails)
+            .OrderByDescending(pi => pi.ExecutedAt)
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<PromptInstance>> GetByUserIdAsync(int userId)
     {
         return await _context.PromptInstances
-            .Include(pi => pi.PromptInstanceDetails)
+            .Include(pi => pi.User)
             .Include(pi => pi.Package)
             .Include(pi => pi.PromptInstanceDetails)
             .Where(pi => pi.UserID == userId)
@@ -36,7 +46,7 @@ public class PromptInstanceRepository : IPromptInstanceRepository
     public async Task<IEnumerable<PromptInstance>> GetByTemplateIdAsync(int templateId)
     {
         return await _context.PromptInstances
-            .Include(pi => pi.PromptInstanceDetails)
+            .Include(pi => pi.User)
             .Include(pi => pi.Package)
             .Include(pi => pi.PromptInstanceDetails)
             .Where(pi => pi.PackageID == templateId)
