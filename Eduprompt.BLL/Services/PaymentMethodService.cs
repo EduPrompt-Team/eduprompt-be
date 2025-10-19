@@ -24,6 +24,7 @@ public class PaymentMethodService : IPaymentMethodService
 
     public async Task<IEnumerable<PaymentMethodDto>> GetByUserIdAsync(int userId)
     {
+        // PaymentMethod is global, not user-specific in current design
         var paymentMethods = await _paymentMethodRepository.GetAllAsync();
         return paymentMethods.Select(MapToDto);
     }
@@ -70,6 +71,7 @@ public class PaymentMethodService : IPaymentMethodService
 
     public async Task<PaymentMethodDto?> GetDefaultByUserIdAsync(int userId)
     {
+        // PaymentMethod is global, not user-specific in current design
         var paymentMethods = await _paymentMethodRepository.GetAllAsync();
         var defaultMethod = paymentMethods.FirstOrDefault(pm => pm.IsActive);
         
@@ -80,6 +82,7 @@ public class PaymentMethodService : IPaymentMethodService
 
     public async Task<bool> SetAsDefaultAsync(int paymentMethodId, int userId)
     {
+        // PaymentMethod is global, not user-specific in current design
         var paymentMethods = await _paymentMethodRepository.GetAllAsync();
         var targetMethod = paymentMethods.FirstOrDefault(pm => pm.PaymentMethodID == paymentMethodId);
         

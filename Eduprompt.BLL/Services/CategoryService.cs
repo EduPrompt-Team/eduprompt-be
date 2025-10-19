@@ -72,15 +72,15 @@ public class CategoryService : ICategoryService
         return new CategoryServiceDto
         {
             CategoryId = cat.CategoryID,
-            ParentCategoryId = null,
+            ParentCategoryId = null, // No parent-child relationship in current model
             CategoryName = cat.CategoryName,
             Description = cat.Description,
             NumberOfTemplates = cat.PackageCount,
-            CreatedDate = null,
-            UpdatedDate = null,
-            Status = null,
-            ParentCategoryName = null,
-            SubCategories = null
+            CreatedDate = cat.CreatedDate,
+            UpdatedDate = cat.UpdatedDate,
+            Status = cat.Status,
+            ParentCategoryName = null, // No parent-child relationship
+            SubCategories = null // No subcategories in current model
         };
     }
 }

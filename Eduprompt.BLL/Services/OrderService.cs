@@ -43,6 +43,13 @@ public class OrderService : IOrderService
         return MapToServiceDto(order);
     }
 
+    public async Task<OrderServiceDto?> GetByIdAdminAsync(int orderId)
+    {
+        var order = await _orderRepository.GetByIdAsync(orderId);
+        if (order == null) return null;
+        return MapToServiceDto(order);
+    }
+
     public async Task<IEnumerable<OrderServiceDto>> GetUserOrdersAsync(int userId)
     {
         var orders = await _orderRepository.GetByUserIdAsync(userId);
@@ -85,7 +92,7 @@ public class OrderService : IOrderService
             UserId = order.UserId,
             OrderNumber = order.OrderId.ToString(),
             TotalAmount = order.TotalAmount,
-            CreatedDate = null,
+            CreatedDate = order.OrderDate, // Use OrderDate as CreatedDate
             OrderDate = order.OrderDate,
             Status = order.Status,
             UserName = order.User?.FullName,

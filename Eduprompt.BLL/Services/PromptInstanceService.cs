@@ -29,9 +29,10 @@ public class PromptInstanceService : IPromptInstanceService
         return Task.FromResult(Enumerable.Empty<PromptInstanceDto>());
     }
 
-    public Task<IEnumerable<PromptInstanceDto>> GetByTemplateIdAsync(int templateId)
+    public async Task<IEnumerable<PromptInstanceDto>> GetByTemplateIdAsync(int templateId)
     {
-        return Task.FromResult(Enumerable.Empty<PromptInstanceDto>());
+        var instances = await _promptInstanceRepository.GetByTemplateIdAsync(templateId);
+        return instances.Select(MapToDto);
     }
 
     public async Task<PromptInstanceDto> CreateAsync(CreatePromptInstanceDto createPromptInstanceDto)
@@ -64,14 +65,18 @@ public class PromptInstanceService : IPromptInstanceService
         return MapToDto(updatedInstance);
     }
 
-    public Task<IEnumerable<PromptInstanceDto>> GetByStatusAsync(string status)
+    public async Task<IEnumerable<PromptInstanceDto>> GetByStatusAsync(string status)
     {
-        return Task.FromResult(Enumerable.Empty<PromptInstanceDto>());
+        var instances = await _promptInstanceRepository.GetAllAsync();
+        return instances
+            .Where(i => i.Status == status)
+            .Select(MapToDto);
     }
 
-    public Task<IEnumerable<PromptInstanceDto>> GetRecentInstancesAsync(int userId, int count = 10)
+    public async Task<IEnumerable<PromptInstanceDto>> GetRecentInstancesAsync(int userId, int count = 10)
     {
-        return Task.FromResult(Enumerable.Empty<PromptInstanceDto>());
+        var instances = await _promptInstanceRepository.GetByUserIdAsync(userId);
+        return instances.Take(count).Select(MapToDto);
     }
 
     public async Task<bool> CompleteInstanceAsync(int instanceId, string outputData)
@@ -100,8 +105,8 @@ public class PromptInstanceService : IPromptInstanceService
             Status = promptInstance.Status,
             ExecutedAt = promptInstance.ExecutedAt,
             ProcessingTimeMs = promptInstance.ProcessingTimeMs,
-            UserName = promptInstance.User?.FullName,
-            PackageName = promptInstance.Package?.PackageName
+            UserName = promptInstance.User?.FullName ?? "Unknown User",
+            PackageName = promptInstance.Package?.PackageName ?? "Unknown Package"
         };
     }
 

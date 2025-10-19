@@ -3,29 +3,37 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Eduprompt.Domain.Entities;
 
+[Table("Packages")]
 public partial class Package
 {
     [Key]
+    [Column("PackageID")]
     public int PackageID { get; set; }
 
+    [Column("CategoryID")]
     public int? CategoryID { get; set; }
 
     [Required]
     [StringLength(100)]
+    [Column("PackageName")]
     public string PackageName { get; set; } = string.Empty;
 
+    [Column("Description")]
     public string? Description { get; set; }
 
     [Required]
-    [Column(TypeName = "decimal(18,2)")]
+    [Column("Price", TypeName = "decimal(18,2)")]
     public decimal Price { get; set; }
 
+    [Column("DurationDays")]
     public int? DurationDays { get; set; } // Duration in days
 
     [Required]
+    [Column("IsActive")]
     public bool IsActive { get; set; } = true;
 
     [Required]
+    [Column("CreatedDate")]
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
     // Navigation properties

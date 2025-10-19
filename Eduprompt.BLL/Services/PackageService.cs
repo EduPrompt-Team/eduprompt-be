@@ -100,7 +100,7 @@ public class PackageService : IPackageService
             DurationDays = package.DurationDays,
             IsActive = package.IsActive,
             CreatedDate = package.CreatedDate,
-            CategoryName = package.PackageCategory?.CategoryName
+            CategoryName = package.PackageCategory?.CategoryName ?? "Unknown Category"
         };
     }
 }

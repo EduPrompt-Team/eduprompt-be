@@ -55,7 +55,7 @@ public class PostRepository : IPostRepository
         return await _context.Posts
             .Include(p => p.User)
             .Include(p => p.Feedbacks)
-            .Where(p => p.PostID.ToString() == postType)
+            .Where(p => p.PostType == postType)
             .OrderByDescending(p => p.PublishedAt)
             .ToListAsync();
     }

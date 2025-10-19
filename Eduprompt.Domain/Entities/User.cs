@@ -11,7 +11,7 @@ namespace Eduprompt.Domain.Entities;
 public partial class User
 {
     [Key]
-    [Column("UserId")]
+    [Column("UserID")]
     public int UserId { get; set; }
 
     [Column("RoleId")]

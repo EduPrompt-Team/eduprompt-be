@@ -126,8 +126,8 @@ public class TransactionService : ITransactionService
             TransactionDate = transaction.TransactionDate,
             Status = transaction.Status,
             TransactionReference = transaction.TransactionReference,
-            PaymentMethodType = transaction.PaymentMethod?.Provider,
-            WalletOwnerName = transaction.Wallet?.User?.FullName
+            PaymentMethodType = transaction.PaymentMethod?.Provider ?? "Unknown",
+            WalletOwnerName = transaction.Wallet?.User?.FullName ?? "Unknown"
         };
     }
 }

@@ -39,6 +39,7 @@ public class CategoriesController : ControllerBase
             ParentCategoryId = c.ParentCategoryId,
             CategoryName = c.CategoryName,
             Description = c.Description,
+            ImageUrl = null, // Not available in current model
             NumberOfTemplates = c.NumberOfTemplates,
             CreatedDate = c.CreatedDate,
             UpdatedDate = c.UpdatedDate,
@@ -50,6 +51,7 @@ public class CategoriesController : ControllerBase
                 ParentCategoryId = sc.ParentCategoryId,
                 CategoryName = sc.CategoryName,
                 Description = sc.Description,
+                ImageUrl = null,
                 NumberOfTemplates = sc.NumberOfTemplates,
                 Status = sc.Status
             }).ToList()
@@ -68,15 +70,22 @@ public class CategoriesController : ControllerBase
         var categoryDtos = categories.Select(c => new CategoryDto
         {
             CategoryId = c.CategoryId,
+            ParentCategoryId = c.ParentCategoryId,
             CategoryName = c.CategoryName,
             Description = c.Description,
+            ImageUrl = null,
             NumberOfTemplates = c.NumberOfTemplates,
             CreatedDate = c.CreatedDate,
+            UpdatedDate = c.UpdatedDate,
             Status = c.Status,
+            ParentCategoryName = c.ParentCategoryName,
             SubCategories = c.SubCategories?.Select(sc => new CategoryDto
             {
                 CategoryId = sc.CategoryId,
+                ParentCategoryId = sc.ParentCategoryId,
                 CategoryName = sc.CategoryName,
+                Description = sc.Description,
+                ImageUrl = null,
                 NumberOfTemplates = sc.NumberOfTemplates,
                 Status = sc.Status
             }).ToList()
@@ -102,6 +111,7 @@ public class CategoriesController : ControllerBase
             ParentCategoryId = category.ParentCategoryId,
             CategoryName = category.CategoryName,
             Description = category.Description,
+            ImageUrl = null,
             NumberOfTemplates = category.NumberOfTemplates,
             CreatedDate = category.CreatedDate,
             UpdatedDate = category.UpdatedDate,
@@ -110,7 +120,10 @@ public class CategoriesController : ControllerBase
             SubCategories = category.SubCategories?.Select(sc => new CategoryDto
             {
                 CategoryId = sc.CategoryId,
+                ParentCategoryId = sc.ParentCategoryId,
                 CategoryName = sc.CategoryName,
+                Description = sc.Description,
+                ImageUrl = null,
                 NumberOfTemplates = sc.NumberOfTemplates,
                 Status = sc.Status
             }).ToList()
@@ -132,9 +145,12 @@ public class CategoriesController : ControllerBase
             ParentCategoryId = c.ParentCategoryId,
             CategoryName = c.CategoryName,
             Description = c.Description,
+            ImageUrl = null,
             NumberOfTemplates = c.NumberOfTemplates,
             CreatedDate = c.CreatedDate,
-            Status = c.Status
+            UpdatedDate = c.UpdatedDate,
+            Status = c.Status,
+            ParentCategoryName = c.ParentCategoryName
         });
 
         return Ok(categoryDtos);
@@ -164,8 +180,10 @@ public class CategoriesController : ControllerBase
                 ParentCategoryId = category.ParentCategoryId,
                 CategoryName = category.CategoryName,
                 Description = category.Description,
+                ImageUrl = null,
                 NumberOfTemplates = category.NumberOfTemplates,
                 CreatedDate = category.CreatedDate,
+                UpdatedDate = category.UpdatedDate,
                 Status = category.Status,
                 ParentCategoryName = category.ParentCategoryName
             };
@@ -202,6 +220,7 @@ public class CategoriesController : ControllerBase
                 ParentCategoryId = category.ParentCategoryId,
                 CategoryName = category.CategoryName,
                 Description = category.Description,
+                ImageUrl = null,
                 NumberOfTemplates = category.NumberOfTemplates,
                 CreatedDate = category.CreatedDate,
                 UpdatedDate = category.UpdatedDate,

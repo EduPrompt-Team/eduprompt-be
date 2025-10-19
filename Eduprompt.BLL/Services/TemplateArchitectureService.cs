@@ -38,10 +38,10 @@ public class TemplateArchitectureService : ITemplateArchitectureService
 
         var e = new Eduprompt.Domain.Entities.TemplateArchitecture
         {
-            StorageID = 0,
+            StorageID = 1, // Default storage template ID - should be created in database
             ArchitectureName = createDto.ArchitectureName,
             ArchitectureType = "Sequential",
-            ConfigurationJson = createDto.Configuration
+            ConfigurationJson = createDto.Configuration ?? "{}"
         };
 
         var created = await _architectureRepository.CreateAsync(e);
@@ -71,8 +71,8 @@ public class TemplateArchitectureService : ITemplateArchitectureService
             Description = null,
             Configuration = e.ConfigurationJson,
             CreatedDate = DateTime.UtcNow,
-            UpdatedDate = null,
-            Status = null,
+            UpdatedDate = DateTime.UtcNow,
+            Status = "Active",
             InstanceName = null
         };
     }
