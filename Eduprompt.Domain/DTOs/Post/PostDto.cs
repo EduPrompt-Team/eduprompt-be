@@ -11,7 +11,6 @@ public class PostDto
     public int ViewCount { get; set; }
     public int LikeCount { get; set; }
     public DateTime CreatedDate { get; set; }
-    public DateTime? UpdatedDate { get; set; }
     public string? Status { get; set; }
     public string? UserName { get; set; }
     public double AverageRating { get; set; }

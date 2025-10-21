@@ -54,14 +54,24 @@ public class AIHistoryRepository : IAIHistoryRepository
     {
         _context.AIHistories.Add(aiHistory);
         await _context.SaveChangesAsync();
-        return aiHistory;
+        
+        // Reload with navigation properties
+        return await _context.AIHistories
+            .Include(h => h.User)
+            .Include(h => h.PromptInstance)
+            .FirstOrDefaultAsync(h => h.AIHistoryID == aiHistory.AIHistoryID) ?? aiHistory;
     }
 
     public async Task<AIHistory> UpdateAsync(AIHistory aiHistory)
     {
         _context.AIHistories.Update(aiHistory);
         await _context.SaveChangesAsync();
-        return aiHistory;
+        
+        // Reload with navigation properties
+        return await _context.AIHistories
+            .Include(h => h.User)
+            .Include(h => h.PromptInstance)
+            .FirstOrDefaultAsync(h => h.AIHistoryID == aiHistory.AIHistoryID) ?? aiHistory;
     }
 
     public async Task<bool> DeleteAsync(int historyId)

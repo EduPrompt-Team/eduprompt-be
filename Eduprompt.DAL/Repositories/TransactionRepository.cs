@@ -65,14 +65,26 @@ public class TransactionRepository : ITransactionRepository
     {
         _context.Transactions.Add(transaction);
         await _context.SaveChangesAsync();
-        return transaction;
+        
+        // Reload with navigation properties
+        return await _context.Transactions
+            .Include(t => t.PaymentMethod)
+            .Include(t => t.Wallet)
+                .ThenInclude(w => w.User)
+            .FirstOrDefaultAsync(t => t.TransactionID == transaction.TransactionID) ?? transaction;
     }
 
     public async Task<Transaction> UpdateAsync(Transaction transaction)
     {
         _context.Transactions.Update(transaction);
         await _context.SaveChangesAsync();
-        return transaction;
+        
+        // Reload with navigation properties
+        return await _context.Transactions
+            .Include(t => t.PaymentMethod)
+            .Include(t => t.Wallet)
+                .ThenInclude(w => w.User)
+            .FirstOrDefaultAsync(t => t.TransactionID == transaction.TransactionID) ?? transaction;
     }
 
     public async Task<bool> DeleteAsync(int transactionId)

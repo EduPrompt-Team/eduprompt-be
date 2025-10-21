@@ -73,9 +73,7 @@ public class PackageCategoryService : IPackageCategoryService
             CategoryID = category.CategoryID,
             CategoryName = category.CategoryName,
             Description = category.Description,
-            CreatedDate = DateTime.UtcNow, // PackageCategory entity doesn't have CreatedDate field
-            UpdatedDate = null, // PackageCategory entity doesn't have UpdatedDate field
-            Status = "Active", // PackageCategory entity doesn't have Status field
+            DisplayOrder = category.DisplayOrder,
             PackageCount = category.Packages?.Count ?? 0
         };
     }

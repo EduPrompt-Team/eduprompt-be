@@ -67,7 +67,6 @@ public class PackageDetailService : IPackageDetailService
             FeatureName = detail.FeatureName,
             FeatureDescription = detail.FeatureValue,
             IsIncluded = detail.FeatureValue?.Equals("Included", StringComparison.OrdinalIgnoreCase) == true,
-            Limit = null, // PackageDetail entity doesn't have Limit field
             Unit = detail.FeatureType,
             PackageName = detail.Package?.PackageName ?? "Unknown Package"
         };

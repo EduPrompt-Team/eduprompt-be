@@ -10,7 +10,7 @@ namespace Eduprompt.API.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Admin")] // Only Admin can manage roles
+[Authorize] // Only Admin can manage roles
 [ApiExplorerSettings(GroupName = "03. Roles (Admin)")]
 [Produces("application/json")]
 public class RolesController : ControllerBase

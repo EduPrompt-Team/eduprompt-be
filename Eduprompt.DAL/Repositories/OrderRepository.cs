@@ -58,8 +58,7 @@ public class OrderRepository : IOrderRepository
 
     public async Task<Order> CreateAsync(Order order)
     {
-        order.OrderDate = DateTime.Now;
-        order.OrderDate = DateTime.Now;
+        order.OrderDate = DateTime.UtcNow;
         order.Status = order.Status ?? "Pending";
 
         await _context.Orders.AddAsync(order);

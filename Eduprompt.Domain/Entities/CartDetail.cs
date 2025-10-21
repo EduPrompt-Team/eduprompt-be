@@ -7,7 +7,7 @@ namespace Eduprompt.Domain.Entities;
 public partial class CartDetail
 {
     [Key]
-    [Column("DetailID")]
+    [Column("CartDetailID")]
     public int CartDetailId { get; set; }
 
     [Required]

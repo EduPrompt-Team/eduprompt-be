@@ -27,7 +27,7 @@ public class APIKeyController : ControllerBase
     /// <response code="401">User not authenticated</response>
     /// <response code="403">User not authorized (Admin role required)</response>
     [HttpGet("package/{packageId}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public async Task<IActionResult> GetByPackage(int packageId)
     {
         return Ok(await _service.GetByPackageIdAsync(packageId));
@@ -56,7 +56,7 @@ public class APIKeyController : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public async Task<IActionResult> Create([FromBody] CreateAPIKeyDto dto)
     {
         var created = await _service.CreateAsync(dto);
@@ -64,7 +64,7 @@ public class APIKeyController : ControllerBase
     }
 
     [HttpPut("{apiKeyId}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public async Task<IActionResult> Update(int apiKeyId, [FromBody] CreateAPIKeyDto dto)
     {
         var updated = await _service.UpdateAsync(apiKeyId, dto);
@@ -72,7 +72,7 @@ public class APIKeyController : ControllerBase
     }
 
     [HttpDelete("{apiKeyId}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public async Task<IActionResult> Delete(int apiKeyId)
     {
         var ok = await _service.DeleteAsync(apiKeyId);

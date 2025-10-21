@@ -31,7 +31,7 @@ public static class DependencyInjection
         
         // New Repositories
         services.AddScoped<IWalletRepository, WalletRepository>();
-        services.AddScoped<IPaymentMethodRepository, PaymentMethodRepository>();
+        services.AddScoped<IPaymentMethodRepository, PaymentMethodRepository>(); // Repository disabled but interface maintained
         services.AddScoped<ITransactionRepository, TransactionRepository>();
         services.AddScoped<IConversationRepository, ConversationRepository>();
         services.AddScoped<IMessageRepository, MessageRepository>();
@@ -66,7 +66,7 @@ public static class DependencyInjection
         services.AddScoped<IPostService, PostService>();
         services.AddScoped<IConversationService, ConversationService>();
         services.AddScoped<IMessageService, MessageService>();
-        services.AddScoped<IPaymentMethodService, PaymentMethodService>();
+        services.AddScoped<IPaymentMethodService, PaymentMethodService>(); // Service disabled but interface maintained
         services.AddScoped<ITransactionService, TransactionService>();
         services.AddScoped<IAIHistoryService, AIHistoryService>();
         services.AddScoped<IFeedbackService, FeedbackService>();

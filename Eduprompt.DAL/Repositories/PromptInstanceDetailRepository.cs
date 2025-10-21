@@ -33,7 +33,11 @@ public class PromptInstanceDetailRepository : IPromptInstanceDetailRepository
     {
         _context.PromptInstanceDetails.Add(detail);
         await _context.SaveChangesAsync();
-        return detail;
+        
+        // Reload with navigation properties
+        return await _context.PromptInstanceDetails
+            .Include(d => d.PromptInstance)
+            .FirstOrDefaultAsync(d => d.DetailID == detail.DetailID) ?? detail;
     }
 
     public async Task<PromptInstanceDetail> UpdateAsync(PromptInstanceDetail detail)

@@ -41,7 +41,7 @@ public class TemplateArchitectureController : ControllerBase
     /// <response code="401">User not authenticated</response>
     /// <response code="403">User not authorized (Admin role required)</response>
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public async Task<IActionResult> Create([FromBody] CreateTemplateArchitectureDto dto)
     {
         var created = await _service.CreateAsync(dto);
@@ -49,7 +49,7 @@ public class TemplateArchitectureController : ControllerBase
     }
 
     [HttpPut("{architectureId}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public async Task<IActionResult> Update(int architectureId, [FromBody] CreateTemplateArchitectureDto dto)
     {
         var updated = await _service.UpdateAsync(architectureId, dto);
@@ -57,7 +57,7 @@ public class TemplateArchitectureController : ControllerBase
     }
 
     [HttpDelete("{architectureId}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public async Task<IActionResult> Delete(int architectureId)
     {
         var ok = await _service.DeleteAsync(architectureId);

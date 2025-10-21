@@ -71,7 +71,7 @@ public class ExpectedOutputService : IExpectedOutputService
                 OutputSize = null,
                 CreatedDate = DateTime.UtcNow,
                 UpdatedDate = DateTime.UtcNow
-            }).ToList()
+            }).ToList() ?? new List<OutputDetailDto>()
         };
     }
 }

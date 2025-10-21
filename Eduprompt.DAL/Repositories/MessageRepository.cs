@@ -33,14 +33,22 @@ public class MessageRepository : IMessageRepository
     {
         _context.Messages.Add(message);
         await _context.SaveChangesAsync();
-        return message;
+        
+        // Reload with navigation properties
+        return await _context.Messages
+            .Include(m => m.Conversation)
+            .FirstOrDefaultAsync(m => m.MessageID == message.MessageID) ?? message;
     }
 
     public async Task<Message> UpdateAsync(Message message)
     {
         _context.Messages.Update(message);
         await _context.SaveChangesAsync();
-        return message;
+        
+        // Reload with navigation properties
+        return await _context.Messages
+            .Include(m => m.Conversation)
+            .FirstOrDefaultAsync(m => m.MessageID == message.MessageID) ?? message;
     }
 
     public async Task<bool> DeleteAsync(int messageId)
