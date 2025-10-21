@@ -68,12 +68,10 @@ public class TemplateArchitectureService : ITemplateArchitectureService
             ArchitectureID = e.ArchitectureID,
             PromptInstanceID = 0,
             ArchitectureName = e.ArchitectureName,
-            Description = null,
             Configuration = e.ConfigurationJson,
             CreatedDate = DateTime.UtcNow,
             UpdatedDate = DateTime.UtcNow,
-            Status = "Active",
-            InstanceName = null
+            Status = "Active"
         };
     }
 

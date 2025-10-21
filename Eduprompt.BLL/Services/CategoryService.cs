@@ -76,9 +76,9 @@ public class CategoryService : ICategoryService
             CategoryName = cat.CategoryName,
             Description = cat.Description,
             NumberOfTemplates = cat.PackageCount,
-            CreatedDate = cat.CreatedDate,
-            UpdatedDate = cat.UpdatedDate,
-            Status = cat.Status,
+            CreatedDate = DateTime.UtcNow, // Default value since not in database
+            UpdatedDate = null, // Not available in current model
+            Status = "Active", // Default value since not in database
             ParentCategoryName = null, // No parent-child relationship
             SubCategories = null // No subcategories in current model
         };

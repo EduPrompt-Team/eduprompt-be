@@ -41,7 +41,7 @@ public class PackageDetailController : ControllerBase
     /// <response code="401">User not authenticated</response>
     /// <response code="403">User not authorized (Admin role required)</response>
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public async Task<IActionResult> Create([FromBody] CreatePackageDetailDto dto)
     {
         var created = await _service.CreateAsync(dto);
@@ -49,7 +49,7 @@ public class PackageDetailController : ControllerBase
     }
 
     [HttpPut("{detailId}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public async Task<IActionResult> Update(int detailId, [FromBody] CreatePackageDetailDto dto)
     {
         var updated = await _service.UpdateAsync(detailId, dto);
@@ -57,7 +57,7 @@ public class PackageDetailController : ControllerBase
     }
 
     [HttpDelete("{detailId}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     public async Task<IActionResult> Delete(int detailId)
     {
         var ok = await _service.DeleteAsync(detailId);

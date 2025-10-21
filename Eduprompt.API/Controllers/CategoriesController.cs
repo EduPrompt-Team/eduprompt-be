@@ -51,7 +51,7 @@ public class CategoriesController : ControllerBase
                 ParentCategoryId = sc.ParentCategoryId,
                 CategoryName = sc.CategoryName,
                 Description = sc.Description,
-                ImageUrl = null,
+                ImageUrl = null, // Not available in current model
                 NumberOfTemplates = sc.NumberOfTemplates,
                 Status = sc.Status
             }).ToList()

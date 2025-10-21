@@ -64,7 +64,12 @@ public class PostRepository : IPostRepository
     {
         _context.Posts.Add(post);
         await _context.SaveChangesAsync();
-        return post;
+        
+        // Reload with navigation properties
+        return await _context.Posts
+            .Include(p => p.User)
+            .Include(p => p.Feedbacks)
+            .FirstOrDefaultAsync(p => p.PostID == post.PostID) ?? post;
     }
 
     public async Task<Post> UpdateAsync(Post post)

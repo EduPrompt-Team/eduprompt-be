@@ -55,7 +55,12 @@ public class PackageRepository : IPackageRepository
     {
         _context.Packages.Add(package);
         await _context.SaveChangesAsync();
-        return package;
+        
+        // Reload with navigation properties
+        return await _context.Packages
+            .Include(p => p.PackageCategory)
+            .Include(p => p.PackageDetails)
+            .FirstOrDefaultAsync(p => p.PackageID == package.PackageID) ?? package;
     }
 
     public async Task<Package> UpdateAsync(Package package)

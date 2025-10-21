@@ -33,7 +33,11 @@ public class PackageDetailRepository : IPackageDetailRepository
     {
         _context.PackageDetails.Add(detail);
         await _context.SaveChangesAsync();
-        return detail;
+        
+        // Reload with navigation properties
+        return await _context.PackageDetails
+            .Include(d => d.Package)
+            .FirstOrDefaultAsync(d => d.DetailID == detail.DetailID) ?? detail;
     }
 
     public async Task<PackageDetail> UpdateAsync(PackageDetail detail)

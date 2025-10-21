@@ -29,7 +29,7 @@ public partial class EdupromptContext : DbContext
     
     // Payment entities
     public virtual DbSet<Wallet> Wallets { get; set; }
-    public virtual DbSet<PaymentMethod> PaymentMethods { get; set; }
+    // public virtual DbSet<PaymentMethod> PaymentMethods { get; set; } // Temporarily disabled due to UserId column issue
     public virtual DbSet<Transaction> Transactions { get; set; }
     
     // AI/Prompt entities
@@ -77,6 +77,28 @@ public partial class EdupromptContext : DbContext
         {
             entity.HasKey(e => e.RoleId);
             entity.Property(e => e.RoleName).IsRequired().HasMaxLength(50);
+        });
+
+        // PaymentMethod configuration
+        modelBuilder.Entity<PaymentMethod>(entity =>
+        {
+            entity.HasKey(e => e.PaymentMethodID);
+            entity.Property(e => e.MethodName).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Provider).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.ProcessingFee).HasColumnType("decimal(18,2)");
+            
+            // Explicitly ignore any shadow properties that EF might try to create
+            entity.Ignore("UserId");
+        });
+
+        // Transaction configuration
+        modelBuilder.Entity<Transaction>(entity =>
+        {
+            entity.HasKey(e => e.TransactionID);
+            entity.Property(e => e.Amount).HasColumnType("decimal(18,2)");
+            entity.Property(e => e.TransactionType).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.TransactionReference).HasMaxLength(100);
         });
 
         // Add other basic configurations as needed

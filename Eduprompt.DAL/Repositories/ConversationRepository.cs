@@ -35,14 +35,24 @@ public class ConversationRepository : IConversationRepository
     {
         _context.Conversations.Add(conversation);
         await _context.SaveChangesAsync();
-        return conversation;
+        
+        // Reload with navigation properties
+        return await _context.Conversations
+            .Include(c => c.User)
+            .Include(c => c.Messages)
+            .FirstOrDefaultAsync(c => c.ConversationID == conversation.ConversationID) ?? conversation;
     }
 
     public async Task<Conversation> UpdateAsync(Conversation conversation)
     {
         _context.Conversations.Update(conversation);
         await _context.SaveChangesAsync();
-        return conversation;
+        
+        // Reload with navigation properties
+        return await _context.Conversations
+            .Include(c => c.User)
+            .Include(c => c.Messages)
+            .FirstOrDefaultAsync(c => c.ConversationID == conversation.ConversationID) ?? conversation;
     }
 
     public async Task<bool> DeleteAsync(int conversationId)
