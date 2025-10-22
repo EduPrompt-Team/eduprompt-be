@@ -142,10 +142,18 @@ public class AuthController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetCurrentUser()
     {
-        // Temporarily use default UserId for testing since authorize is disabled
-        var UserId = 1; // Default user ID for testing
-        // var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        var user = await _userService.GetByIdAsync(UserId);
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrWhiteSpace(userIdClaim))
+        {
+            return Unauthorized(new { message = "Missing user claim" });
+        }
+
+        if (!int.TryParse(userIdClaim, out var userId))
+        {
+            return Unauthorized(new { message = "Invalid user claim" });
+        }
+
+        var user = await _userService.GetByIdAsync(userId);
         
         if (user == null)
             return NotFound(new { message = "User not found" });
