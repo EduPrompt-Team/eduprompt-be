@@ -5,7 +5,7 @@ namespace Eduprompt.Domain.DTOs.PackageDetail;
 public class CreatePackageDetailDto
 {
     [Required]
-    public int PackageID { get; set; }
+    public int PackageId { get; set; }
 
     [Required]
     [StringLength(100)]

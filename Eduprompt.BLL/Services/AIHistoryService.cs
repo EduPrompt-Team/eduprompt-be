@@ -1,26 +1,26 @@
-using Eduprompt.Domain.DTOs.AIHistory;
+using Eduprompt.Domain.DTOs.Aihistory;
 using Eduprompt.Domain.Entities;
 using Eduprompt.Domain.Interface.Repository;
 using Eduprompt.Domain.Interface.Service;
 
 namespace Eduprompt.BLL.Services;
 
-public class AIHistoryService : IAIHistoryService
+public class AihistoryService : IAihistoryService
 {
-    private readonly IAIHistoryRepository _aiHistoryRepository;
+    private readonly IAihistoryRepository _aiHistoryRepository;
 
-    public AIHistoryService(IAIHistoryRepository aiHistoryRepository)
+    public AihistoryService(IAihistoryRepository aiHistoryRepository)
     {
         _aiHistoryRepository = aiHistoryRepository;
     }
 
-    public async Task<IEnumerable<AIHistoryDto>> GetAllAsync()
+    public async Task<IEnumerable<AihistoryDto>> GetAllAsync()
     {
         var histories = await _aiHistoryRepository.GetAllAsync();
         return histories.Select(MapToDto);
     }
 
-    public async Task<AIHistoryDto?> GetByIdAsync(int historyId)
+    public async Task<AihistoryDto?> GetByIdAsync(int historyId)
     {
         var history = await _aiHistoryRepository.GetByIdAsync(historyId);
         if (history == null) return null;
@@ -28,27 +28,27 @@ public class AIHistoryService : IAIHistoryService
         return MapToDto(history);
     }
 
-    public async Task<IEnumerable<AIHistoryDto>> GetByUserIdAsync(int userId)
+    public async Task<IEnumerable<AihistoryDto>> GetByUserIdAsync(int UserId)
     {
-        var histories = await _aiHistoryRepository.GetByUserIdAsync(userId);
+        var histories = await _aiHistoryRepository.GetByUserIdAsync(UserId);
         return histories.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<AIHistoryDto>> GetByPromptInstanceIdAsync(int promptInstanceId)
+    public async Task<IEnumerable<AihistoryDto>> GetByPromptInstanceIdAsync(int PromptInstanceId)
     {
-        var histories = await _aiHistoryRepository.GetByPromptInstanceIdAsync(promptInstanceId);
+        var histories = await _aiHistoryRepository.GetByPromptInstanceIdAsync(PromptInstanceId);
         return histories.Select(MapToDto);
     }
 
-    public async Task<AIHistoryDto> CreateAsync(CreateAIHistoryDto createDto)
+    public async Task<AihistoryDto> CreateAsync(CreateAihistoryDto createDto)
     {
-        var history = new AIHistory
+        var history = new Aihistory
         {
-            UserID = createDto.UserID,
-            ConversationID = createDto.ConversationID,
-            PromptInstanceID = createDto.PromptInstanceID,
+            UserId = createDto.UserId,
+            ConversationId = createDto.ConversationId,
+            PromptInstanceId = createDto.PromptInstanceId,
             UserMessage = createDto.UserMessage,
-            AIResponse = createDto.AIResponse,
+            Airesponse = createDto.Airesponse,
             ExecutedAt = DateTime.UtcNow,
             ProcessingTimeMs = createDto.ProcessingTimeMs,
             Status = createDto.Status ?? "Completed"
@@ -58,16 +58,16 @@ public class AIHistoryService : IAIHistoryService
         return MapToDto(createdHistory);
     }
 
-    public async Task<AIHistoryDto> UpdateAsync(int historyId, CreateAIHistoryDto updateDto)
+    public async Task<AihistoryDto> UpdateAsync(int historyId, CreateAihistoryDto updateDto)
     {
         var history = await _aiHistoryRepository.GetByIdAsync(historyId);
         if (history == null) throw new KeyNotFoundException("AI history not found");
 
-        history.UserID = updateDto.UserID;
-        history.ConversationID = updateDto.ConversationID;
-        history.PromptInstanceID = updateDto.PromptInstanceID;
+        history.UserId = updateDto.UserId;
+        history.ConversationId = updateDto.ConversationId;
+        history.PromptInstanceId = updateDto.PromptInstanceId;
         history.UserMessage = updateDto.UserMessage;
-        history.AIResponse = updateDto.AIResponse;
+        history.Airesponse = updateDto.Airesponse;
         history.ProcessingTimeMs = updateDto.ProcessingTimeMs;
         history.Status = updateDto.Status ?? history.Status;
 
@@ -80,38 +80,38 @@ public class AIHistoryService : IAIHistoryService
         return await _aiHistoryRepository.DeleteAsync(historyId);
     }
 
-    public async Task<IEnumerable<AIHistoryDto>> GetRecentHistoriesAsync(int userId, int count = 10)
+    public async Task<IEnumerable<AihistoryDto>> GetRecentHistoriesAsync(int UserId, int count = 10)
     {
-        var histories = await _aiHistoryRepository.GetRecentHistoriesAsync(userId, count);
+        var histories = await _aiHistoryRepository.GetRecentHistoriesAsync(UserId, count);
         return histories.Select(MapToDto);
     }
 
-    public async Task<int> GetHistoryCountByUserAsync(int userId)
+    public async Task<int> GetHistoryCountByUserAsync(int UserId)
     {
-        return await _aiHistoryRepository.GetHistoryCountByUserAsync(userId);
+        return await _aiHistoryRepository.GetHistoryCountByUserAsync(UserId);
     }
 
-    public async Task<decimal> GetTotalCostByUserAsync(int userId)
+    public async Task<decimal> GetTotalCostByUserAsync(int UserId)
     {
-        var histories = await _aiHistoryRepository.GetByUserIdAsync(userId);
+        var histories = await _aiHistoryRepository.GetByUserIdAsync(UserId);
         return histories.Sum(h => h.ProcessingTimeMs ?? 0);
     }
 
-    private static AIHistoryDto MapToDto(AIHistory history)
+    private static AihistoryDto MapToDto(Aihistory history)
     {
-        return new AIHistoryDto
+        return new AihistoryDto
         {
-            HistoryID = history.AIHistoryID,
-            UserID = history.UserID,
-            ConversationID = history.ConversationID,
-            PromptInstanceID = history.PromptInstanceID,
+            HistoryID = history.AihistoryId,
+            UserId = history.UserId,
+            ConversationId = history.ConversationId,
+            PromptInstanceId = history.PromptInstanceId,
             UserMessage = history.UserMessage,
-            AIResponse = history.AIResponse,
+            Airesponse = history.Airesponse,
             ExecutedAt = history.ExecutedAt,
             ProcessingTimeMs = history.ProcessingTimeMs,
             Status = history.Status,
             UserName = history.User?.FullName,
-            InstanceName = history.PromptInstance?.PromptName
+            PromptInstanceName = history.PromptInstance?.PromptName
         };
     }
 }

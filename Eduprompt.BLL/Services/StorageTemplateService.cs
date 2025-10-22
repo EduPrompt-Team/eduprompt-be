@@ -21,13 +21,13 @@ public class StorageTemplateService : IStorageTemplateService
         _mapper = mapper;
     }
 
-    public async Task<IEnumerable<StorageTemplateServiceDto>> GetUserStorageAsync(int userId)
+    public async Task<IEnumerable<StorageTemplateServiceDto>> GetUserStorageAsync(int UserId)
     {
-        var storage = await _storageRepository.GetByUserIdAsync(userId);
+        var storage = await _storageRepository.GetByUserIdAsync(UserId);
         return storage.Select(MapToDto);
     }
 
-    public async Task<StorageTemplateServiceDto> AddToStorageAsync(int userId, StorageTemplateCreateServiceDto storageDto)
+    public async Task<StorageTemplateServiceDto> AddToStorageAsync(int UserId, StorageTemplateCreateServiceDto storageDto)
     {
         // Validate package exists
         var package = await _packageRepository.GetByIdAsync(storageDto.TemplateId);
@@ -37,15 +37,15 @@ public class StorageTemplateService : IStorageTemplateService
         }
 
         // Check if already exists
-        if (await _storageRepository.ExistsAsync(userId, storageDto.TemplateId))
+        if (await _storageRepository.ExistsAsync(UserId, storageDto.TemplateId))
         {
             throw new InvalidOperationException("Template already in storage");
         }
 
         var storage = new StorageTemplate
         {
-            UserID = userId,
-            PackageID = storageDto.TemplateId,
+            UserId = UserId,
+            PackageId = storageDto.TemplateId,
             TemplateName = package.PackageName ?? "",
             IsFavorite = false,
             CreatedAt = DateTime.UtcNow
@@ -55,27 +55,27 @@ public class StorageTemplateService : IStorageTemplateService
         return MapToDto(created);
     }
 
-    public async Task<bool> RemoveFromStorageAsync(int id, int userId)
+    public async Task<bool> RemoveFromStorageAsync(int id, int UserId)
     {
         var storage = await _storageRepository.GetByIdAsync(id);
-        if (storage == null || storage.UserID != userId)
+        if (storage == null || storage.UserId != UserId)
             return false;
 
         return await _storageRepository.DeleteAsync(id);
     }
 
-    public async Task<bool> IsInStorageAsync(int userId, int templateId)
+    public async Task<bool> IsInStorageAsync(int UserId, int templateId)
     {
-        return await _storageRepository.ExistsAsync(userId, templateId);
+        return await _storageRepository.ExistsAsync(UserId, templateId);
     }
 
     private static StorageTemplateServiceDto MapToDto(StorageTemplate s)
     {
         return new StorageTemplateServiceDto
         {
-            StorageId = s.StorageID,
-            UserId = s.UserID,
-            TemplateId = s.PackageID,
+            StorageId = s.StorageId,
+            UserId = s.UserId,
+            TemplateId = s.PackageId,
             UploadDate = s.CreatedAt,
             UpdatedDate = null,
             Status = null,

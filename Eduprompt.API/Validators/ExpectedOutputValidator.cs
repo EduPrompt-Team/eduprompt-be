@@ -7,7 +7,7 @@ public class CreateExpectedOutputValidator : AbstractValidator<CreateExpectedOut
 {
     public CreateExpectedOutputValidator()
     {
-        RuleFor(x => x.InstanceID).GreaterThan(0);
+        RuleFor(x => x.PromptInstanceId).GreaterThan(0);
         RuleFor(x => x.OutputName).NotEmpty().MaximumLength(100);
         When(x => x.Status != null, () => RuleFor(x => x.Status!).MaximumLength(50));
         When(x => x.OutputDetails != null, () =>

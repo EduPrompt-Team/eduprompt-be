@@ -7,40 +7,37 @@ namespace Eduprompt.BLL.Services;
 public class TemplateArchitectureService : ITemplateArchitectureService
 {
     private readonly ITemplateArchitectureRepository _architectureRepository;
-    // Using instance repository as originally wired; do not depend on StorageTemplate DTOs here
-    private readonly IPromptInstanceRepository _instanceRepository;
 
-    public TemplateArchitectureService(
-        ITemplateArchitectureRepository architectureRepository,
-        IPromptInstanceRepository instanceRepository)
+    public TemplateArchitectureService(ITemplateArchitectureRepository architectureRepository)
     {
         _architectureRepository = architectureRepository;
-        _instanceRepository = instanceRepository;
     }
 
-    public async Task<TemplateArchitectureDto?> GetByIdAsync(int architectureId)
+    public async Task<TemplateArchitectureDto?> GetByIdAsync(int ArchitectureId)
     {
-        var e = await _architectureRepository.GetByIdAsync(architectureId);
+        var e = await _architectureRepository.GetByIdAsync(ArchitectureId);
         return e == null ? null : Map(e);
     }
 
-    public async Task<IEnumerable<TemplateArchitectureDto>> GetByPromptInstanceIdAsync(int promptInstanceId)
+    public async Task<IEnumerable<TemplateArchitectureDto>> GetByInstanceIdAsync(int InstanceId)
     {
-        var list = await _architectureRepository.GetByInstanceIdAsync(promptInstanceId);
+        var list = await _architectureRepository.GetByInstanceIdAsync(InstanceId);
+        return list.Select(Map);
+    }
+
+    public async Task<IEnumerable<TemplateArchitectureDto>> GetByPromptInstanceIdAsync(int PromptInstanceId)
+    {
+        var list = await _architectureRepository.GetByInstanceIdAsync(PromptInstanceId);
         return list.Select(Map);
     }
 
     public async Task<TemplateArchitectureDto> CreateAsync(CreateTemplateArchitectureDto createDto)
     {
-        // Ensure instance exists
-        var instance = await _instanceRepository.GetByIdAsync(createDto.PromptInstanceID);
-        if (instance == null) throw new ArgumentException("Prompt instance not found");
-
         var e = new Eduprompt.Domain.Entities.TemplateArchitecture
         {
-            StorageID = 1, // Default storage template ID - should be created in database
+            StorageId = createDto.StorageId,
             ArchitectureName = createDto.ArchitectureName,
-            ArchitectureType = "Sequential",
+            ArchitectureType = createDto.ArchitectureType ?? "Sequential",
             ConfigurationJson = createDto.Configuration ?? "{}"
         };
 
@@ -48,14 +45,14 @@ public class TemplateArchitectureService : ITemplateArchitectureService
         return Map(created);
     }
 
-    public async Task<TemplateArchitectureDto> UpdateAsync(int architectureId, CreateTemplateArchitectureDto updateDto)
+    public async Task<TemplateArchitectureDto> UpdateAsync(int ArchitectureId, CreateTemplateArchitectureDto updateDto)
     {
-        var architecture = await _architectureRepository.GetByIdAsync(architectureId);
+        var architecture = await _architectureRepository.GetByIdAsync(ArchitectureId);
         if (architecture == null) throw new KeyNotFoundException("Template architecture not found");
 
         architecture.ArchitectureName = updateDto.ArchitectureName;
-        architecture.ArchitectureType = "Sequential";
-        architecture.ConfigurationJson = updateDto.Configuration;
+        architecture.ArchitectureType = updateDto.ArchitectureType ?? architecture.ArchitectureType;
+        architecture.ConfigurationJson = updateDto.Configuration ?? architecture.ConfigurationJson;
 
         var updatedArchitecture = await _architectureRepository.UpdateAsync(architecture);
         return Map(updatedArchitecture);
@@ -65,9 +62,10 @@ public class TemplateArchitectureService : ITemplateArchitectureService
     {
         return new TemplateArchitectureDto
         {
-            ArchitectureID = e.ArchitectureID,
-            PromptInstanceID = 0,
+            ArchitectureId = e.ArchitectureId,
+            StorageId = e.StorageId,
             ArchitectureName = e.ArchitectureName,
+            ArchitectureType = e.ArchitectureType,
             Configuration = e.ConfigurationJson,
             CreatedDate = DateTime.UtcNow,
             UpdatedDate = DateTime.UtcNow,

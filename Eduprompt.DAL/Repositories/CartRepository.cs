@@ -1,4 +1,5 @@
 using Eduprompt.Domain.Entities;
+using Eduprompt.DAL.DbContexts;
 using Eduprompt.Domain.Interface.Repository;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,19 +7,19 @@ namespace Eduprompt.DAL.Repositories;
 
 public class CartRepository : ICartRepository
 {
-    private readonly EdupromptContext _context;
+    private readonly EdupromptV2Context _context;
 
-    public CartRepository(EdupromptContext context)
+    public CartRepository(EdupromptV2Context context)
     {
         _context = context;
     }
 
-    public async Task<Cart?> GetByUserIdAsync(int userId)
+    public async Task<Cart?> GetByUserIdAsync(int UserId)
     {
         return await _context.Carts
             .Include(c => c.CartDetails)
                 .ThenInclude(cd => cd.Package)
-            .FirstOrDefaultAsync(c => c.UserId == userId);
+            .FirstOrDefaultAsync(c => c.UserId == UserId);
     }
 
     public async Task<Cart?> GetByIdAsync(int cartId)
@@ -50,9 +51,9 @@ public class CartRepository : ICartRepository
         return await GetByIdAsync(cart.CartId) ?? cart;
     }
 
-    public async Task<bool> ClearCartAsync(int userId)
+    public async Task<bool> ClearCartAsync(int UserId)
     {
-        var cart = await GetByUserIdAsync(userId);
+        var cart = await GetByUserIdAsync(UserId);
         if (cart == null) return false;
 
         _context.CartDetails.RemoveRange(cart.CartDetails);
@@ -72,11 +73,11 @@ public class CartRepository : ICartRepository
             .FirstOrDefaultAsync(cd => cd.CartDetailId == cartDetailId);
     }
 
-    public async Task<CartDetail?> GetCartItemByPackageAsync(int cartId, int packageId)
+    public async Task<CartDetail?> GetCartItemByPackageAsync(int cartId, int PackageId)
     {
         return await _context.CartDetails
             .Include(cd => cd.Package)
-            .FirstOrDefaultAsync(cd => cd.CartId == cartId && cd.PackageID == packageId);
+            .FirstOrDefaultAsync(cd => cd.CartId == cartId && cd.PackageId == PackageId);
     }
 
     public async Task<CartDetail> AddItemAsync(CartDetail cartDetail)

@@ -26,16 +26,20 @@ public class WishlistsController : ControllerBase
     [HttpGet("my-wishlist")]
     public async Task<IActionResult> GetMyWishlist()
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        var wishlists = await _wishlistService.GetByUserIdAsync(userId);
+        // Temporarily use default UserId for testing since authorize is disabled
+        var UserId = 1; // Default user ID for testing
+        // var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var wishlists = await _wishlistService.GetByUserIdAsync(UserId);
         return Ok(wishlists);
     }
 
     [HttpPost]
     public async Task<IActionResult> AddToWishlist([FromBody] WishlistCreateDto wishlistDto)
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        var created = await _wishlistService.CreateAsync(userId, wishlistDto);
+        // Temporarily use default UserId for testing since authorize is disabled
+        var UserId = 1; // Default user ID for testing
+        // var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var created = await _wishlistService.CreateAsync(UserId, wishlistDto);
         return CreatedAtAction(nameof(GetMyWishlist), created);
     }
 
@@ -48,11 +52,13 @@ public class WishlistsController : ControllerBase
         return NoContent();
     }
 
-    [HttpGet("check/{packageId}")]
-    public async Task<IActionResult> CheckWishlist(int packageId)
+    [HttpGet("check/{PackageId}")]
+    public async Task<IActionResult> CheckWishlist(int PackageId)
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        var isInWishlist = await _wishlistService.IsInWishlistAsync(userId, packageId);
-        return Ok(new { packageId, isInWishlist });
+        // Temporarily use default UserId for testing since authorize is disabled
+        var UserId = 1; // Default user ID for testing
+        // var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var isInWishlist = await _wishlistService.IsInWishlistAsync(UserId, PackageId);
+        return Ok(new { PackageId, isInWishlist });
     }
 } 

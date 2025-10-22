@@ -14,15 +14,15 @@ public class PaymentMethodService : IPaymentMethodService
         _paymentMethodRepository = paymentMethodRepository;
     }
 
-    public async Task<PaymentMethodDto?> GetByIdAsync(int paymentMethodId)
+    public async Task<PaymentMethodDto?> GetByIdAsync(int PaymentMethodId)
     {
-        var paymentMethod = await _paymentMethodRepository.GetByIdAsync(paymentMethodId);
+        var paymentMethod = await _paymentMethodRepository.GetByIdAsync(PaymentMethodId);
         if (paymentMethod == null) return null;
 
         return MapToDto(paymentMethod);
     }
 
-    public async Task<IEnumerable<PaymentMethodDto>> GetByUserIdAsync(int userId)
+    public async Task<IEnumerable<PaymentMethodDto>> GetByUserIdAsync(int UserId)
     {
         // PaymentMethod is global, not user-specific in current design
         var paymentMethods = await _paymentMethodRepository.GetAllAsync();
@@ -49,9 +49,9 @@ public class PaymentMethodService : IPaymentMethodService
         return MapToDto(createdPaymentMethod);
     }
 
-    public async Task<PaymentMethodDto> UpdateAsync(int paymentMethodId, CreatePaymentMethodDto updateDto)
+    public async Task<PaymentMethodDto> UpdateAsync(int PaymentMethodId, CreatePaymentMethodDto updateDto)
     {
-        var paymentMethod = await _paymentMethodRepository.GetByIdAsync(paymentMethodId);
+        var paymentMethod = await _paymentMethodRepository.GetByIdAsync(PaymentMethodId);
         if (paymentMethod == null)
             throw new KeyNotFoundException("Payment method not found");
 
@@ -64,12 +64,12 @@ public class PaymentMethodService : IPaymentMethodService
         return MapToDto(updatedPaymentMethod);
     }
 
-    public async Task<bool> DeleteAsync(int paymentMethodId)
+    public async Task<bool> DeleteAsync(int PaymentMethodId)
     {
-        return await _paymentMethodRepository.DeleteAsync(paymentMethodId);
+        return await _paymentMethodRepository.DeleteAsync(PaymentMethodId);
     }
 
-    public async Task<PaymentMethodDto?> GetDefaultByUserIdAsync(int userId)
+    public async Task<PaymentMethodDto?> GetDefaultByUserIdAsync(int UserId)
     {
         // PaymentMethod is global, not user-specific in current design
         var paymentMethods = await _paymentMethodRepository.GetAllAsync();
@@ -80,18 +80,18 @@ public class PaymentMethodService : IPaymentMethodService
         return MapToDto(defaultMethod);
     }
 
-    public async Task<bool> SetAsDefaultAsync(int paymentMethodId, int userId)
+    public async Task<bool> SetAsDefaultAsync(int PaymentMethodId, int UserId)
     {
         // PaymentMethod is global, not user-specific in current design
         var paymentMethods = await _paymentMethodRepository.GetAllAsync();
-        var targetMethod = paymentMethods.FirstOrDefault(pm => pm.PaymentMethodID == paymentMethodId);
+        var targetMethod = paymentMethods.FirstOrDefault(pm => pm.PaymentMethodId == PaymentMethodId);
         
         if (targetMethod == null) return false;
 
         // Remove default from all other methods
         foreach (var method in paymentMethods)
         {
-            if (method.PaymentMethodID != paymentMethodId)
+            if (method.PaymentMethodId != PaymentMethodId)
             {
                 method.IsActive = false;
                 await _paymentMethodRepository.UpdateAsync(method);
@@ -109,7 +109,7 @@ public class PaymentMethodService : IPaymentMethodService
     {
         return new PaymentMethodDto
         {
-            PaymentMethodID = paymentMethod.PaymentMethodID,
+            PaymentMethodId = paymentMethod.PaymentMethodId,
             MethodName = paymentMethod.MethodName,
             Provider = paymentMethod.Provider,
             IsActive = paymentMethod.IsActive,

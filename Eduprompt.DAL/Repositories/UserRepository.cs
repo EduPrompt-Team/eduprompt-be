@@ -1,4 +1,5 @@
 using Eduprompt.Domain.Entities;
+using Eduprompt.DAL.DbContexts;
 using Eduprompt.Domain.Interface.Repository;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,9 +7,9 @@ namespace Eduprompt.DAL.Repositories;
 
 public class UserRepository : IUserRepository
 {
-    private readonly EdupromptContext _context;
+    private readonly EdupromptV2Context _context;
 
-    public UserRepository(EdupromptContext context)
+    public UserRepository(EdupromptV2Context context)
     {
         _context = context;
     }

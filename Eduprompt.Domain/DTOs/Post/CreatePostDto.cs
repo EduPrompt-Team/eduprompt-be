@@ -5,7 +5,7 @@ namespace Eduprompt.Domain.DTOs.Post;
 public class CreatePostDto
 {
     [Required]
-    public int UserID { get; set; }
+    public int UserId { get; set; }
 
     [Required]
     [StringLength(200)]

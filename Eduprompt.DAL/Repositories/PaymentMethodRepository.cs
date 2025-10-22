@@ -1,4 +1,5 @@
 using Eduprompt.Domain.Entities;
+using Eduprompt.DAL.DbContexts;
 using Eduprompt.Domain.Interface.Repository;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,14 +7,14 @@ namespace Eduprompt.DAL.Repositories;
 
 public class PaymentMethodRepository : IPaymentMethodRepository
 {
-    private readonly EdupromptContext _context;
+    private readonly EdupromptV2Context _context;
 
-    public PaymentMethodRepository(EdupromptContext context)
+    public PaymentMethodRepository(EdupromptV2Context context)
     {
         _context = context;
     }
 
-    public async Task<PaymentMethod?> GetByIdAsync(int paymentMethodId)
+    public async Task<PaymentMethod?> GetByIdAsync(int PaymentMethodId)
     {
         // PaymentMethods DbSet temporarily disabled due to UserId column issue
         return null;
@@ -37,19 +38,19 @@ public class PaymentMethodRepository : IPaymentMethodRepository
         return paymentMethod;
     }
 
-    public async Task<bool> DeleteAsync(int paymentMethodId)
+    public async Task<bool> DeleteAsync(int PaymentMethodId)
     {
         // PaymentMethods DbSet temporarily disabled due to UserId column issue
         return false;
     }
 
-    public async Task<bool> ExistsAsync(int paymentMethodId)
+    public async Task<bool> ExistsAsync(int PaymentMethodId)
     {
         // PaymentMethods DbSet temporarily disabled due to UserId column issue
         return false;
     }
 
-    public async Task<bool> SetAsDefaultAsync(int paymentMethodId, int userId)
+    public async Task<bool> SetAsDefaultAsync(int PaymentMethodId, int UserId)
     {
         // PaymentMethods DbSet temporarily disabled due to UserId column issue
         return false;

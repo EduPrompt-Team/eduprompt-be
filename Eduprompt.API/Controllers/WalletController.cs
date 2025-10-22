@@ -22,18 +22,18 @@ public class WalletController : ControllerBase
     /// <summary>
     /// Get wallet by user ID
     /// </summary>
-    /// <param name="userId">User ID</param>
+    /// <param name="UserId">User ID</param>
     /// <returns>User's wallet details</returns>
     /// <response code="200">Wallet found</response>
     /// <response code="400">Error retrieving wallet</response>
     /// <response code="401">User not authenticated</response>
     /// <response code="404">Wallet not found</response>
-    [HttpGet("user/{userId}")]
-    public async Task<IActionResult> GetByUserId(int userId)
+    [HttpGet("user/{UserId}")]
+    public async Task<IActionResult> GetByUserId(int UserId)
     {
         try
         {
-            var wallet = await _walletService.GetByUserIdAsync(userId);
+            var wallet = await _walletService.GetByUserIdAsync(UserId);
             if (wallet == null)
                 return NotFound(new { message = "Wallet not found" });
 
@@ -48,18 +48,18 @@ public class WalletController : ControllerBase
     /// <summary>
     /// Get wallet by wallet ID
     /// </summary>
-    /// <param name="walletId">Wallet ID</param>
+    /// <param name="WalletId">Wallet ID</param>
     /// <returns>Wallet details</returns>
     /// <response code="200">Wallet found</response>
     /// <response code="400">Error retrieving wallet</response>
     /// <response code="401">User not authenticated</response>
     /// <response code="404">Wallet not found</response>
-    [HttpGet("{walletId}")]
-    public async Task<IActionResult> GetById(int walletId)
+    [HttpGet("{WalletId}")]
+    public async Task<IActionResult> GetById(int WalletId)
     {
         try
         {
-            var wallet = await _walletService.GetByIdAsync(walletId);
+            var wallet = await _walletService.GetByIdAsync(WalletId);
             if (wallet == null)
                 return NotFound(new { message = "Wallet not found" });
 
@@ -80,7 +80,7 @@ public class WalletController : ControllerBase
         try
         {
             var wallet = await _walletService.CreateAsync(createWalletDto);
-            return CreatedAtAction(nameof(GetById), new { walletId = wallet.WalletID }, wallet);
+            return CreatedAtAction(nameof(GetById), new { WalletId = wallet.WalletId }, wallet);
         }
         catch (Exception ex)
         {
@@ -91,12 +91,12 @@ public class WalletController : ControllerBase
     /// <summary>
     /// Cập nhật ví
     /// </summary>
-    [HttpPut("{walletId}")]
-    public async Task<IActionResult> Update(int walletId, [FromBody] UpdateWalletDto updateWalletDto)
+    [HttpPut("{WalletId}")]
+    public async Task<IActionResult> Update(int WalletId, [FromBody] UpdateWalletDto updateWalletDto)
     {
         try
         {
-            var wallet = await _walletService.UpdateAsync(walletId, updateWalletDto);
+            var wallet = await _walletService.UpdateAsync(WalletId, updateWalletDto);
             return Ok(wallet);
         }
         catch (ArgumentException ex)
@@ -112,12 +112,12 @@ public class WalletController : ControllerBase
     /// <summary>
     /// Xóa ví
     /// </summary>
-    [HttpDelete("{walletId}")]
-    public async Task<IActionResult> Delete(int walletId)
+    [HttpDelete("{WalletId}")]
+    public async Task<IActionResult> Delete(int WalletId)
     {
         try
         {
-            var result = await _walletService.DeleteAsync(walletId);
+            var result = await _walletService.DeleteAsync(WalletId);
             if (!result)
                 return NotFound(new { message = "Wallet not found" });
 
@@ -132,12 +132,12 @@ public class WalletController : ControllerBase
     /// <summary>
     /// Lấy số dư ví
     /// </summary>
-    [HttpGet("balance/{userId}")]
-    public async Task<IActionResult> GetBalance(int userId)
+    [HttpGet("balance/{UserId}")]
+    public async Task<IActionResult> GetBalance(int UserId)
     {
         try
         {
-            var balance = await _walletService.GetBalanceByUserIdAsync(userId);
+            var balance = await _walletService.GetBalanceByUserIdAsync(UserId);
             return Ok(new { balance });
         }
         catch (Exception ex)

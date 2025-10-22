@@ -2,9 +2,9 @@ namespace Eduprompt.Domain.DTOs.StorageTemplate;
 
 public class StorageTemplateDto
 {
-    public int StorageID { get; set; }
-    public int UserID { get; set; }
-    public int PackageID { get; set; }
+    public int StorageId { get; set; }
+    public int UserId { get; set; }
+    public int PackageId { get; set; }
     public string TemplateName { get; set; } = string.Empty;
     public bool IsFavorite { get; set; }
     public DateTime CreatedAt { get; set; }

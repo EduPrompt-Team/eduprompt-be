@@ -4,7 +4,7 @@ public class CartItemDto
 {
     public int CartDetailId { get; set; }
     public int CartId { get; set; }
-    public int PackageID { get; set; }
+    public int PackageId { get; set; }
     public int Quantity { get; set; }
     public decimal UnitPrice { get; set; }
     public DateTime AddedDate { get; set; }

@@ -1,4 +1,4 @@
-﻿using Eduprompt.Domain.DTOs.Wallet;
+using Eduprompt.Domain.DTOs.Wallet;
 using Eduprompt.Domain.Entities;
 using Eduprompt.Domain.Interface.Repository;
 using Eduprompt.Domain.Interface.Service;
@@ -14,15 +14,15 @@ public class WalletService : IWalletService
         _walletRepository = walletRepository;
     }
 
-    public async Task<WalletDto?> GetByIdAsync(int walletId)
+    public async Task<WalletDto?> GetByIdAsync(int WalletId)
     {
-        var wallet = await _walletRepository.GetByIdAsync(walletId);
+        var wallet = await _walletRepository.GetByIdAsync(WalletId);
         return wallet != null ? MapToDto(wallet) : null;
     }
 
-    public async Task<WalletDto?> GetByUserIdAsync(int userId)
+    public async Task<WalletDto?> GetByUserIdAsync(int UserId)
     {
-        var wallet = await _walletRepository.GetByUserIdAsync(userId);
+        var wallet = await _walletRepository.GetByUserIdAsync(UserId);
         return wallet != null ? MapToDto(wallet) : null;
     }
 
@@ -30,7 +30,7 @@ public class WalletService : IWalletService
     {
         var wallet = new Wallet
         {
-            UserID = createWalletDto.UserID,
+            UserId = createWalletDto.UserId,
             Currency = createWalletDto.Currency,
             Status = createWalletDto.Status,
             Balance = 0.00m,
@@ -41,9 +41,9 @@ public class WalletService : IWalletService
         return MapToDto(createdWallet);
     }
 
-    public async Task<WalletDto> UpdateAsync(int walletId, UpdateWalletDto updateDto)
+    public async Task<WalletDto> UpdateAsync(int WalletId, UpdateWalletDto updateDto)
     {
-        var wallet = await _walletRepository.GetByIdAsync(walletId);
+        var wallet = await _walletRepository.GetByIdAsync(WalletId);
         if (wallet == null) throw new KeyNotFoundException("Wallet not found");
 
         wallet.Balance = updateDto.Balance;
@@ -55,12 +55,12 @@ public class WalletService : IWalletService
         return MapToDto(updatedWallet);
     }
 
-    public async Task<bool> AddFundsByWalletIdAsync(int walletId, decimal amount)
+    public async Task<bool> AddFundsByWalletIdAsync(int WalletId, decimal amount)
     {
         if (amount < 0)
             throw new ArgumentException("Amount must be greater than or equal to 0", nameof(amount));
 
-        var wallet = await _walletRepository.GetByIdAsync(walletId);
+        var wallet = await _walletRepository.GetByIdAsync(WalletId);
         if (wallet == null) return false;
 
         wallet.Balance += amount;
@@ -69,12 +69,12 @@ public class WalletService : IWalletService
         return true;
     }
 
-    public async Task<bool> AddFundsByUserIdAsync(int userId, decimal amount)
+    public async Task<bool> AddFundsByUserIdAsync(int UserId, decimal amount)
     {
         if (amount < 0)
             throw new ArgumentException("Amount must be greater than or equal to 0", nameof(amount));
 
-        var wallet = await _walletRepository.GetByUserIdAsync(userId);
+        var wallet = await _walletRepository.GetByUserIdAsync(UserId);
         if (wallet == null) return false;
 
         wallet.Balance += amount;
@@ -83,12 +83,12 @@ public class WalletService : IWalletService
         return true;
     }
 
-    public async Task<bool> DeductFundsByWalletIdAsync(int walletId, decimal amount)
+    public async Task<bool> DeductFundsByWalletIdAsync(int WalletId, decimal amount)
     {
         if (amount < 0)
             throw new ArgumentException("Amount must be greater than or equal to 0", nameof(amount));
 
-        var wallet = await _walletRepository.GetByIdAsync(walletId);
+        var wallet = await _walletRepository.GetByIdAsync(WalletId);
         if (wallet == null || wallet.Balance < amount) return false;
         
         wallet.Balance -= amount;
@@ -97,12 +97,12 @@ public class WalletService : IWalletService
         return true;
     }
 
-    public async Task<bool> DeductFundsByUserIdAsync(int userId, decimal amount)
+    public async Task<bool> DeductFundsByUserIdAsync(int UserId, decimal amount)
     {
         if (amount < 0)
             throw new ArgumentException("Amount must be greater than or equal to 0", nameof(amount));
 
-        var wallet = await _walletRepository.GetByUserIdAsync(userId);
+        var wallet = await _walletRepository.GetByUserIdAsync(UserId);
         if (wallet == null || wallet.Balance < amount) return false;
         
         wallet.Balance -= amount;
@@ -111,34 +111,34 @@ public class WalletService : IWalletService
         return true;
     }
 
-    public async Task<decimal> GetBalanceByWalletIdAsync(int walletId)
+    public async Task<decimal> GetBalanceByWalletIdAsync(int WalletId)
     {
-        var wallet = await _walletRepository.GetByIdAsync(walletId);
+        var wallet = await _walletRepository.GetByIdAsync(WalletId);
         return wallet?.Balance ?? 0;
     }
 
-    public async Task<decimal> GetBalanceByUserIdAsync(int userId)
+    public async Task<decimal> GetBalanceByUserIdAsync(int UserId)
     {
-        var wallet = await _walletRepository.GetByUserIdAsync(userId);
+        var wallet = await _walletRepository.GetByUserIdAsync(UserId);
         return wallet?.Balance ?? 0;
     }
 
-    public async Task<bool> UpdateBalanceAsync(int walletId, decimal amount)
+    public async Task<bool> UpdateBalanceAsync(int WalletId, decimal amount)
     {
-        return await _walletRepository.UpdateBalanceAsync(walletId, amount);
+        return await _walletRepository.UpdateBalanceAsync(WalletId, amount);
     }
 
-    public async Task<bool> DeleteAsync(int walletId)
+    public async Task<bool> DeleteAsync(int WalletId)
     {
-        return await _walletRepository.DeleteAsync(walletId);
+        return await _walletRepository.DeleteAsync(WalletId);
     }
 
     private static WalletDto MapToDto(Wallet wallet)
     {
         return new WalletDto
         {
-            WalletID = wallet.WalletID,
-            UserID = wallet.UserID,
+            WalletId = wallet.WalletId,
+            UserId = wallet.UserId,
             Balance = wallet.Balance,
             Currency = wallet.Currency,
             CreatedDate = wallet.CreatedDate,

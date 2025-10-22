@@ -1,4 +1,5 @@
 using Eduprompt.Domain.Entities;
+using Eduprompt.DAL.DbContexts;
 using Eduprompt.Domain.Interface.Repository;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,37 +7,37 @@ namespace Eduprompt.DAL.Repositories;
 
 public class FeedbackRepository : IFeedbackRepository
 {
-    private readonly EdupromptContext _context;
+    private readonly EdupromptV2Context _context;
 
-    public FeedbackRepository(EdupromptContext context)
+    public FeedbackRepository(EdupromptV2Context context)
     {
         _context = context;
     }
 
-    public async Task<Feedback?> GetByIdAsync(int feedbackId)
+    public async Task<Feedback?> GetByIdAsync(int FeedbackId)
     {
         return await _context.Feedbacks
             .Include(f => f.User)
             .Include(f => f.Post)
-            .FirstOrDefaultAsync(f => f.FeedbackID == feedbackId);
+            .FirstOrDefaultAsync(f => f.FeedbackId == FeedbackId);
     }
 
-    public async Task<IEnumerable<Feedback>> GetByPostIdAsync(int postId)
+    public async Task<IEnumerable<Feedback>> GetByPostIdAsync(int PostId)
     {
         return await _context.Feedbacks
             .Include(f => f.User)
             .Include(f => f.Post)
-            .Where(f => f.PostID == postId)
+            .Where(f => f.PostId == PostId)
             .OrderByDescending(f => f.CreatedDate)
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Feedback>> GetByUserIdAsync(int userId)
+    public async Task<IEnumerable<Feedback>> GetByUserIdAsync(int UserId)
     {
         return await _context.Feedbacks
             .Include(f => f.User)
             .Include(f => f.Post)
-            .Where(f => f.UserID == userId)
+            .Where(f => f.UserId == UserId)
             .OrderByDescending(f => f.CreatedDate)
             .ToListAsync();
     }
@@ -55,9 +56,9 @@ public class FeedbackRepository : IFeedbackRepository
         return feedback;
     }
 
-    public async Task<bool> DeleteAsync(int feedbackId)
+    public async Task<bool> DeleteAsync(int FeedbackId)
     {
-        var feedback = await _context.Feedbacks.FindAsync(feedbackId);
+        var feedback = await _context.Feedbacks.FindAsync(FeedbackId);
         if (feedback == null) return false;
 
         _context.Feedbacks.Remove(feedback);
@@ -65,32 +66,32 @@ public class FeedbackRepository : IFeedbackRepository
         return true;
     }
 
-    public async Task<bool> ExistsAsync(int feedbackId)
+    public async Task<bool> ExistsAsync(int FeedbackId)
     {
-        return await _context.Feedbacks.AnyAsync(f => f.FeedbackID == feedbackId);
+        return await _context.Feedbacks.AnyAsync(f => f.FeedbackId == FeedbackId);
     }
 
-    public async Task<double> GetAverageRatingByPostIdAsync(int postId)
+    public async Task<double> GetAverageRatingByPostIdAsync(int PostId)
     {
         var feedbacks = await _context.Feedbacks
-            .Where(f => f.PostID == postId)
+            .Where(f => f.PostId == PostId)
             .Select(f => f.Rating)
             .ToListAsync();
 
         return feedbacks.Any() ? feedbacks.Average() : 0.0;
     }
 
-    public async Task<int> GetFeedbackCountByPostIdAsync(int postId)
+    public async Task<int> GetFeedbackCountByPostIdAsync(int PostId)
     {
-        return await _context.Feedbacks.CountAsync(f => f.PostID == postId);
+        return await _context.Feedbacks.CountAsync(f => f.PostId == PostId);
     }
 
-    public async Task<IEnumerable<Feedback>> GetRecentFeedbacksAsync(int postId, int count = 10)
+    public async Task<IEnumerable<Feedback>> GetRecentFeedbacksAsync(int PostId, int count = 10)
     {
         return await _context.Feedbacks
             .Include(f => f.User)
             .Include(f => f.Post)
-            .Where(f => f.PostID == postId)
+            .Where(f => f.PostId == PostId)
             .OrderByDescending(f => f.CreatedDate)
             .Take(count)
             .ToListAsync();

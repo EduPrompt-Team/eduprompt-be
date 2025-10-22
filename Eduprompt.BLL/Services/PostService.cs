@@ -14,13 +14,13 @@ public class PostService : IPostService
         _postRepository = postRepository;
     }
 
-    public async Task<PostDto?> GetByIdAsync(int postId)
+    public async Task<PostDto?> GetByIdAsync(int PostId)
     {
-        var post = await _postRepository.GetByIdAsync(postId);
+        var post = await _postRepository.GetByIdAsync(PostId);
         if (post == null) return null;
 
         var dto = MapToDto(post);
-        dto.AverageRating = await GetAverageRatingAsync(postId);
+        dto.AverageRating = await GetAverageRatingAsync(PostId);
         dto.FeedbackCount = post.Feedbacks?.Count ?? 0;
         return dto;
     }
@@ -32,7 +32,7 @@ public class PostService : IPostService
         foreach (var post in posts)
         {
             var dto = MapToDto(post);
-            dto.AverageRating = await GetAverageRatingAsync(post.PostID);
+            dto.AverageRating = await GetAverageRatingAsync(post.PostId);
             dto.FeedbackCount = post.Feedbacks?.Count ?? 0;
             result.Add(dto);
         }
@@ -46,7 +46,7 @@ public class PostService : IPostService
         foreach (var post in posts)
         {
             var dto = MapToDto(post);
-            dto.AverageRating = await GetAverageRatingAsync(post.PostID);
+            dto.AverageRating = await GetAverageRatingAsync(post.PostId);
             dto.FeedbackCount = post.Feedbacks?.Count ?? 0;
             result.Add(dto);
         }
@@ -60,7 +60,7 @@ public class PostService : IPostService
         foreach (var post in posts)
         {
             var dto = MapToDto(post);
-            dto.AverageRating = await GetAverageRatingAsync(post.PostID);
+            dto.AverageRating = await GetAverageRatingAsync(post.PostId);
             dto.FeedbackCount = post.Feedbacks?.Count ?? 0;
             result.Add(dto);
         }
@@ -71,7 +71,7 @@ public class PostService : IPostService
     {
         var post = new Post
         {
-            UserID = createPostDto.UserID,
+            UserId = createPostDto.UserId,
             Title = createPostDto.Title,
             Content = createPostDto.Content,
             Status = createPostDto.Status ?? "Published",
@@ -84,9 +84,9 @@ public class PostService : IPostService
         return MapToDto(createdPost);
     }
 
-    public async Task<PostDto> UpdateAsync(int postId, CreatePostDto updateDto)
+    public async Task<PostDto> UpdateAsync(int PostId, CreatePostDto updateDto)
     {
-        var post = await _postRepository.GetByIdAsync(postId);
+        var post = await _postRepository.GetByIdAsync(PostId);
         if (post == null) throw new KeyNotFoundException("Post not found");
 
         post.Title = updateDto.Title;
@@ -109,23 +109,23 @@ public class PostService : IPostService
         ).Select(MapToDto);
     }
 
-    public async Task<bool> IncrementViewCountAsync(int postId)
+    public async Task<bool> IncrementViewCountAsync(int PostId)
     {
-        return await _postRepository.IncrementViewCountAsync(postId);
+        return await _postRepository.IncrementViewCountAsync(PostId);
     }
 
-    public async Task<bool> IncrementLikeCountAsync(int postId)
+    public async Task<bool> IncrementLikeCountAsync(int PostId)
     {
         // Since LikeCount is not persisted in database, we'll use a different approach
         // For now, we'll just return true to indicate the like was processed
         // In a real implementation, you might want to create a separate Likes table
-        var post = await _postRepository.GetByIdAsync(postId);
+        var post = await _postRepository.GetByIdAsync(PostId);
         return post != null;
     }
 
-    public async Task<double> GetAverageRatingAsync(int postId)
+    public async Task<double> GetAverageRatingAsync(int PostId)
     {
-        var post = await _postRepository.GetByIdAsync(postId);
+        var post = await _postRepository.GetByIdAsync(PostId);
         if (post?.Feedbacks == null || !post.Feedbacks.Any()) return 0.0;
         return post.Feedbacks.Average(f => f.Rating);
     }
@@ -134,8 +134,8 @@ public class PostService : IPostService
     {
         return new PostDto
         {
-            PostID = post.PostID,
-            UserID = post.UserID,
+            PostId = post.PostId,
+            UserId = post.UserId,
             Title = post.Title,
             Content = post.Content,
             PostType = post.PostType,
@@ -155,14 +155,14 @@ public class PostService : IPostService
         return await _postRepository.DeleteAsync(id);
     }
 
-    public async Task<IEnumerable<PostDto>> GetByUserIdAsync(int userId)
+    public async Task<IEnumerable<PostDto>> GetByUserIdAsync(int UserId)
     {
-        var posts = await _postRepository.GetByUserIdAsync(userId);
+        var posts = await _postRepository.GetByUserIdAsync(UserId);
         var result = new List<PostDto>();
         foreach (var post in posts)
         {
             var dto = MapToDto(post);
-            dto.AverageRating = await GetAverageRatingAsync(post.PostID);
+            dto.AverageRating = await GetAverageRatingAsync(post.PostId);
             dto.FeedbackCount = post.Feedbacks?.Count ?? 0;
             result.Add(dto);
         }

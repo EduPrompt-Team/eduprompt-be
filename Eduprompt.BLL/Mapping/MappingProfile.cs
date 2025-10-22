@@ -9,7 +9,7 @@ using Eduprompt.Domain.DTOs.Wishlist;
 using Eduprompt.Domain.DTOs.Package;
 using Eduprompt.Domain.DTOs.PackageCategory;
 using Eduprompt.Domain.DTOs.PackageDetail;
-using Eduprompt.Domain.DTOs.APIKey;
+using Eduprompt.Domain.DTOs.Apikey;
 using Eduprompt.Domain.DTOs.PromptInstance;
 using Eduprompt.Domain.DTOs.PromptInstanceDetail;
 using Eduprompt.Domain.DTOs.TemplateArchitecture;
@@ -20,7 +20,7 @@ using Eduprompt.Domain.DTOs.Transaction;
 using Eduprompt.Domain.DTOs.Wallet;
 using Eduprompt.Domain.DTOs.Post;
 using Eduprompt.Domain.DTOs.Feedback;
-using Eduprompt.Domain.DTOs.AIHistory;
+using Eduprompt.Domain.DTOs.Aihistory;
 using Eduprompt.Domain.DTOs.ExpectedOutput;
 using Eduprompt.Domain.Entities;
 
@@ -77,8 +77,8 @@ public class MappingProfile : Profile
         CreateMap<PackageDetail, CreatePackageDetailDto>().ReverseMap();
 
         // API Key mappings
-        CreateMap<APIKey, APIKeyDto>().ReverseMap();
-        CreateMap<APIKey, CreateAPIKeyDto>().ReverseMap();
+        CreateMap<Apikey, ApikeyDto>().ReverseMap();
+        CreateMap<Apikey, CreateApikeyDto>().ReverseMap();
 
         // Prompt Instance mappings
         CreateMap<PromptInstance, PromptInstanceDto>().ReverseMap();
@@ -115,8 +115,8 @@ public class MappingProfile : Profile
         CreateMap<Feedback, CreateFeedbackDto>().ReverseMap();
 
         // AI History mappings
-        CreateMap<AIHistory, AIHistoryDto>().ReverseMap();
-        CreateMap<AIHistory, CreateAIHistoryDto>().ReverseMap();
+        CreateMap<Aihistory, AihistoryDto>().ReverseMap();
+        CreateMap<Aihistory, CreateAihistoryDto>().ReverseMap();
 
         // Expected Output mappings
         CreateMap<ExpectedOutput, ExpectedOutputDto>().ReverseMap();

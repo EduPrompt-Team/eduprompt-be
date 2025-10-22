@@ -1,4 +1,4 @@
-﻿using Eduprompt.Domain.DTOs.Order;
+using Eduprompt.Domain.DTOs.Order;
 using Eduprompt.Domain.Entities;
 using Eduprompt.Domain.Interface.Repository;
 using Eduprompt.Domain.Interface.Service;
@@ -16,15 +16,15 @@ public class OrderService : IOrderService
         _cartRepository = cartRepository;
     }
 
-    public async Task<OrderServiceDto> CreateOrderFromCartAsync(int userId, string? notes)
+    public async Task<OrderServiceDto> CreateOrderFromCartAsync(int UserId, string? notes)
     {
-        var cart = await _cartRepository.GetByUserIdAsync(userId);
+        var cart = await _cartRepository.GetByUserIdAsync(UserId);
         var totalAmount = cart?.CartDetails?.Sum(cd => cd.Quantity * cd.UnitPrice) ?? 0m;
 
         var order = new Order
         {
-            UserId = userId,
-            PackageID = null,
+            UserId = UserId,
+            PackageId = null,
             TotalAmount = totalAmount,
             OrderDate = DateTime.UtcNow,
             Notes = notes,
@@ -32,27 +32,27 @@ public class OrderService : IOrderService
         };
 
         var created = await _orderRepository.CreateAsync(order);
-        await _cartRepository.ClearCartAsync(userId);
+        await _cartRepository.ClearCartAsync(UserId);
         return MapToServiceDto(created);
     }
 
-    public async Task<OrderServiceDto?> GetByIdAsync(int orderId, int userId)
+    public async Task<OrderServiceDto?> GetByIdAsync(int OrderId, int UserId)
     {
-        var order = await _orderRepository.GetByIdAsync(orderId);
-        if (order == null || order.UserId != userId) return null;
+        var order = await _orderRepository.GetByIdAsync(OrderId);
+        if (order == null || order.UserId != UserId) return null;
         return MapToServiceDto(order);
     }
 
-    public async Task<OrderServiceDto?> GetByIdAdminAsync(int orderId)
+    public async Task<OrderServiceDto?> GetByIdAdminAsync(int OrderId)
     {
-        var order = await _orderRepository.GetByIdAsync(orderId);
+        var order = await _orderRepository.GetByIdAsync(OrderId);
         if (order == null) return null;
         return MapToServiceDto(order);
     }
 
-    public async Task<IEnumerable<OrderServiceDto>> GetUserOrdersAsync(int userId)
+    public async Task<IEnumerable<OrderServiceDto>> GetUserOrdersAsync(int UserId)
     {
-        var orders = await _orderRepository.GetByUserIdAsync(userId);
+        var orders = await _orderRepository.GetByUserIdAsync(UserId);
         return orders.Select(MapToServiceDto);
     }
 
@@ -62,10 +62,10 @@ public class OrderService : IOrderService
         return orders.Select(MapToServiceDto);
     }
 
-    public async Task<OrderServiceDto> CancelOrderAsync(int orderId, int userId)
+    public async Task<OrderServiceDto> CancelOrderAsync(int OrderId, int UserId)
     {
-        var order = await _orderRepository.GetByIdAsync(orderId);
-        if (order == null || order.UserId != userId)
+        var order = await _orderRepository.GetByIdAsync(OrderId);
+        if (order == null || order.UserId != UserId)
             throw new KeyNotFoundException("Order not found");
 
         order.Status = "Cancelled";
@@ -73,9 +73,9 @@ public class OrderService : IOrderService
         return MapToServiceDto(updated);
     }
 
-    public async Task<OrderServiceDto> UpdateOrderStatusAsync(int orderId, string status)
+    public async Task<OrderServiceDto> UpdateOrderStatusAsync(int OrderId, string status)
     {
-        var order = await _orderRepository.GetByIdAsync(orderId);
+        var order = await _orderRepository.GetByIdAsync(OrderId);
         if (order == null)
             throw new KeyNotFoundException("Order not found");
 

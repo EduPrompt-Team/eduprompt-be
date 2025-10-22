@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Eduprompt.Domain.DTOs.Role;
 using Eduprompt.Domain.Entities;
 using Eduprompt.Domain.Interface.Repository;

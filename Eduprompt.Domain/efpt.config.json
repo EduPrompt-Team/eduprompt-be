@@ -1,6 +1,6 @@
 ﻿{
    "CodeGenerationMode": 4,
-   "ContextClassName": "EdupromptContext",
+   "ContextClassName": "EdupromptV2Context",
    "ContextNamespace": null,
    "FilterSchemas": false,
    "IncludeConnectionString": true,
@@ -16,6 +16,14 @@
    "T4TemplatePath": null,
    "Tables": [
       {
+         "Name": "[dbo].[AIHistories]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[APIKeys]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[CartDetails]",
          "ObjectType": 0
       },
@@ -24,11 +32,19 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[Conversations]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[ExpectedOutputs]",
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[OrderDetails]",
+         "Name": "[dbo].[Feedbacks]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Messages]",
          "ObjectType": 0
       },
       {
@@ -40,23 +56,31 @@
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[Payments]",
+         "Name": "[dbo].[PackageCategories]",
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[PromptDetails]",
+         "Name": "[dbo].[PackageDetails]",
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[Prompts]",
+         "Name": "[dbo].[Packages]",
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[PromptTemplates]",
+         "Name": "[dbo].[PaymentMethods]",
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[Reviews]",
+         "Name": "[dbo].[Posts]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PromptInstanceDetails]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[PromptInstances]",
          "ObjectType": 0
       },
       {
@@ -68,11 +92,19 @@
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[TemplateCategories]",
+         "Name": "[dbo].[TemplateArchitectures]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Transactions]",
          "ObjectType": 0
       },
       {
          "Name": "[dbo].[Users]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Wallets]",
          "ObjectType": 0
       },
       {

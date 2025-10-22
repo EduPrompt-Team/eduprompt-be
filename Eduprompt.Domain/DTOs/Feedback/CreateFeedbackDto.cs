@@ -5,12 +5,12 @@ namespace Eduprompt.Domain.DTOs.Feedback;
 public class CreateFeedbackDto
 {
     [Required]
-    public int PostID { get; set; }
+    public int PostId { get; set; }
 
     [Required]
-    public int UserID { get; set; }
+    public int UserId { get; set; }
 
-    public int? PackageID { get; set; }
+    public int? PackageId { get; set; }
 
     [Required]
     [Range(1, 5, ErrorMessage = "Rating must be between 1 and 5")]

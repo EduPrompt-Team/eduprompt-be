@@ -2,8 +2,8 @@ namespace Eduprompt.Domain.DTOs.Message;
 
 public class MessageDto
 {
-    public int MessageID { get; set; }
-    public int ConversationID { get; set; }
+    public int MessageId { get; set; }
+    public int ConversationId { get; set; }
     public string SenderType { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
     public DateTime SentAt { get; set; }

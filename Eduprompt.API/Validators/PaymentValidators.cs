@@ -18,8 +18,8 @@ public class CreateTransactionValidator : AbstractValidator<CreateTransactionDto
 {
     public CreateTransactionValidator()
     {
-        RuleFor(x => x.WalletID).GreaterThan(0);
-        RuleFor(x => x.PaymentMethodID).GreaterThan(0);
+        RuleFor(x => x.WalletId).GreaterThan(0);
+        RuleFor(x => x.PaymentMethodId).GreaterThan(0);
         RuleFor(x => x.Amount).GreaterThan(0);
         RuleFor(x => x.TransactionType).NotEmpty();
     }

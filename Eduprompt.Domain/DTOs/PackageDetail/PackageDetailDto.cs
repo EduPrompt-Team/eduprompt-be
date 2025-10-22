@@ -2,8 +2,8 @@ namespace Eduprompt.Domain.DTOs.PackageDetail;
 
 public class PackageDetailDto
 {
-    public int DetailID { get; set; }
-    public int PackageID { get; set; }
+    public int DetailId { get; set; }
+    public int PackageId { get; set; }
     public string FeatureName { get; set; } = string.Empty;
     public string? FeatureDescription { get; set; }
     public bool IsIncluded { get; set; }

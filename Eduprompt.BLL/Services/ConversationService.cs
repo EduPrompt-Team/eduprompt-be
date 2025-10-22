@@ -14,17 +14,17 @@ public class ConversationService : IConversationService
         _conversationRepository = conversationRepository;
     }
 
-    public async Task<ConversationDto?> GetByIdAsync(int conversationId)
+    public async Task<ConversationDto?> GetByIdAsync(int ConversationId)
     {
-        var conversation = await _conversationRepository.GetByIdAsync(conversationId);
+        var conversation = await _conversationRepository.GetByIdAsync(ConversationId);
         if (conversation == null) return null;
 
         return MapToDto(conversation);
     }
 
-    public async Task<IEnumerable<ConversationDto>> GetByUserIdAsync(int userId)
+    public async Task<IEnumerable<ConversationDto>> GetByUserIdAsync(int UserId)
     {
-        var conversations = await _conversationRepository.GetByUserIdAsync(userId);
+        var conversations = await _conversationRepository.GetByUserIdAsync(UserId);
         return conversations.Select(MapToDto);
     }
 
@@ -32,7 +32,7 @@ public class ConversationService : IConversationService
     {
         var conversation = new Conversation
         {
-            UserID = createDto.UserID,
+            UserId = createDto.UserId,
             Title = createDto.Title,
             Status = createDto.Status ?? "Active",
             StartedAt = DateTime.UtcNow
@@ -42,9 +42,9 @@ public class ConversationService : IConversationService
         return MapToDto(createdConversation);
     }
 
-    public async Task<ConversationDto> UpdateAsync(int conversationId, CreateConversationDto updateDto)
+    public async Task<ConversationDto> UpdateAsync(int ConversationId, CreateConversationDto updateDto)
     {
-        var conversation = await _conversationRepository.GetByIdAsync(conversationId);
+        var conversation = await _conversationRepository.GetByIdAsync(ConversationId);
         if (conversation == null)
             throw new KeyNotFoundException("Conversation not found");
 
@@ -56,28 +56,28 @@ public class ConversationService : IConversationService
         return MapToDto(updatedConversation);
     }
 
-    public async Task<bool> DeleteAsync(int conversationId)
+    public async Task<bool> DeleteAsync(int ConversationId)
     {
-        return await _conversationRepository.DeleteAsync(conversationId);
+        return await _conversationRepository.DeleteAsync(ConversationId);
     }
 
-    public async Task<IEnumerable<ConversationDto>> GetRecentConversationsAsync(int userId, int count = 10)
+    public async Task<IEnumerable<ConversationDto>> GetRecentConversationsAsync(int UserId, int count = 10)
     {
-        var conversations = await _conversationRepository.GetRecentConversationsAsync(userId, count);
+        var conversations = await _conversationRepository.GetRecentConversationsAsync(UserId, count);
         return conversations.Select(MapToDto);
     }
 
-    public async Task<int> GetMessageCountAsync(int conversationId)
+    public async Task<int> GetMessageCountAsync(int ConversationId)
     {
-        return await _conversationRepository.GetMessageCountAsync(conversationId);
+        return await _conversationRepository.GetMessageCountAsync(ConversationId);
     }
 
     private static ConversationDto MapToDto(Conversation conversation)
     {
         return new ConversationDto
         {
-            ConversationID = conversation.ConversationID,
-            UserID = conversation.UserID,
+            ConversationId = conversation.ConversationId,
+            UserId = conversation.UserId,
             Title = conversation.Title,
             StartedAt = conversation.StartedAt,
             LastActivity = conversation.LastActivity,

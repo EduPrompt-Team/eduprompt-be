@@ -25,17 +25,17 @@ public class ConversationController : ControllerBase
     /// <summary>
     /// Get conversations by user ID
     /// </summary>
-    /// <param name="userId">User ID</param>
+    /// <param name="UserId">User ID</param>
     /// <returns>List of user's conversations</returns>
     /// <response code="200">Conversations retrieved successfully</response>
     /// <response code="400">Error retrieving conversations</response>
     /// <response code="401">User not authenticated</response>
-    [HttpGet("user/{userId}")]
-    public async Task<IActionResult> GetByUserId(int userId)
+    [HttpGet("user/{UserId}")]
+    public async Task<IActionResult> GetByUserId(int UserId)
     {
         try
         {
-            var conversations = await _conversationService.GetByUserIdAsync(userId);
+            var conversations = await _conversationService.GetByUserIdAsync(UserId);
             return Ok(conversations);
         }
         catch (Exception ex)
@@ -79,7 +79,7 @@ public class ConversationController : ControllerBase
         try
         {
             var conversation = await _conversationService.CreateAsync(createDto);
-            return CreatedAtAction(nameof(GetById), new { id = conversation.ConversationID }, conversation);
+            return CreatedAtAction(nameof(GetById), new { id = conversation.ConversationId }, conversation);
         }
         catch (Exception ex)
         {
@@ -127,12 +127,12 @@ public class ConversationController : ControllerBase
     /// <summary>
     /// Lấy cuộc trò chuyện gần đây
     /// </summary>
-    [HttpGet("user/{userId}/recent")]
-    public async Task<IActionResult> GetRecent(int userId, [FromQuery] int count = 10)
+    [HttpGet("user/{UserId}/recent")]
+    public async Task<IActionResult> GetRecent(int UserId, [FromQuery] int count = 10)
     {
         try
         {
-            var conversations = await _conversationService.GetRecentConversationsAsync(userId, count);
+            var conversations = await _conversationService.GetRecentConversationsAsync(UserId, count);
             return Ok(conversations);
         }
         catch (Exception ex)

@@ -22,33 +22,33 @@ public class TransactionService : ITransactionService
         return transactions.Select(MapToDto);
     }
 
-    public async Task<TransactionDto?> GetByIdAsync(int transactionId)
+    public async Task<TransactionDto?> GetByIdAsync(int TransactionId)
     {
-        var transaction = await _transactionRepository.GetByIdAsync(transactionId);
+        var transaction = await _transactionRepository.GetByIdAsync(TransactionId);
         return transaction != null ? MapToDto(transaction) : null;
     }
 
-    public async Task<IEnumerable<TransactionDto>> GetByUserIdAsync(int userId)
+    public async Task<IEnumerable<TransactionDto>> GetByUserIdAsync(int UserId)
     {
-        var transactions = await _transactionRepository.GetByUserIdAsync(userId);
+        var transactions = await _transactionRepository.GetByUserIdAsync(UserId);
         return transactions.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<TransactionDto>> GetByWalletIdAsync(int walletId)
+    public async Task<IEnumerable<TransactionDto>> GetByWalletIdAsync(int WalletId)
     {
-        var transactions = await _transactionRepository.GetByWalletIdAsync(walletId);
+        var transactions = await _transactionRepository.GetByWalletIdAsync(WalletId);
         return transactions.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<TransactionDto>> GetByPaymentMethodIdAsync(int paymentMethodId)
+    public async Task<IEnumerable<TransactionDto>> GetByPaymentMethodIdAsync(int PaymentMethodId)
     {
-        var transactions = await _transactionRepository.GetByPaymentMethodIdAsync(paymentMethodId);
+        var transactions = await _transactionRepository.GetByPaymentMethodIdAsync(PaymentMethodId);
         return transactions.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<TransactionDto>> GetRecentTransactionsAsync(int walletId, int count)
+    public async Task<IEnumerable<TransactionDto>> GetRecentTransactionsAsync(int WalletId, int count)
     {
-        var transactions = await _transactionRepository.GetByWalletIdAsync(walletId);
+        var transactions = await _transactionRepository.GetByWalletIdAsync(WalletId);
         return transactions
             .OrderByDescending(t => t.TransactionDate)
             .Take(count)
@@ -59,9 +59,9 @@ public class TransactionService : ITransactionService
     {
         var transaction = new Transaction
         {
-            PaymentMethodID = createDto.PaymentMethodID,
-            WalletID = createDto.WalletID,
-            OrderID = createDto.OrderID,
+            PaymentMethodId = createDto.PaymentMethodId,
+            WalletId = createDto.WalletId,
+            OrderId = createDto.OrderId,
             Amount = createDto.Amount,
             TransactionType = createDto.TransactionType,
             TransactionDate = DateTime.UtcNow,
@@ -73,15 +73,15 @@ public class TransactionService : ITransactionService
         return MapToDto(createdTransaction);
     }
 
-    public async Task<TransactionDto> UpdateAsync(int transactionId, CreateTransactionDto updateDto)
+    public async Task<TransactionDto> UpdateAsync(int TransactionId, CreateTransactionDto updateDto)
     {
-        var transaction = await _transactionRepository.GetByIdAsync(transactionId);
+        var transaction = await _transactionRepository.GetByIdAsync(TransactionId);
         if (transaction == null)
             throw new KeyNotFoundException("Transaction not found");
 
-        transaction.PaymentMethodID = updateDto.PaymentMethodID;
-        transaction.WalletID = updateDto.WalletID;
-        transaction.OrderID = updateDto.OrderID;
+        transaction.PaymentMethodId = updateDto.PaymentMethodId;
+        transaction.WalletId = updateDto.WalletId;
+        transaction.OrderId = updateDto.OrderId;
         transaction.Amount = updateDto.Amount;
         transaction.TransactionType = updateDto.TransactionType;
         transaction.Status = updateDto.Status ?? transaction.Status;
@@ -91,9 +91,9 @@ public class TransactionService : ITransactionService
         return MapToDto(updatedTransaction);
     }
 
-    public async Task<bool> DeleteAsync(int transactionId)
+    public async Task<bool> DeleteAsync(int TransactionId)
     {
-        return await _transactionRepository.DeleteAsync(transactionId);
+        return await _transactionRepository.DeleteAsync(TransactionId);
     }
 
     public async Task<IEnumerable<TransactionDto>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
@@ -102,14 +102,14 @@ public class TransactionService : ITransactionService
         return transactions.Select(MapToDto);
     }
 
-    public async Task<decimal> GetTotalAmountByTypeAsync(string transactionType, int? userId = null)
+    public async Task<decimal> GetTotalAmountByTypeAsync(string transactionType, int? UserId = null)
     {
-        return await _transactionRepository.GetTotalAmountByTypeAsync(transactionType, userId);
+        return await _transactionRepository.GetTotalAmountByTypeAsync(transactionType, UserId);
     }
 
-    public async Task<decimal> GetWalletBalanceAsync(int walletId)
+    public async Task<decimal> GetWalletBalanceAsync(int WalletId)
     {
-        var wallet = await _walletRepository.GetByIdAsync(walletId);
+        var wallet = await _walletRepository.GetByIdAsync(WalletId);
         return wallet?.Balance ?? 0;
     }
 
@@ -117,10 +117,10 @@ public class TransactionService : ITransactionService
     {
         return new TransactionDto
         {
-            TransactionID = transaction.TransactionID,
-            PaymentMethodID = transaction.PaymentMethodID,
-            WalletID = transaction.WalletID,
-            OrderID = transaction.OrderID,
+            TransactionId = transaction.TransactionId,
+            PaymentMethodId = transaction.PaymentMethodId,
+            WalletId = transaction.WalletId,
+            OrderId = transaction.OrderId,
             Amount = transaction.Amount,
             TransactionType = transaction.TransactionType,
             TransactionDate = transaction.TransactionDate,

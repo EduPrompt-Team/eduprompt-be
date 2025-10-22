@@ -1,4 +1,5 @@
 using Eduprompt.Domain.Entities;
+using Eduprompt.DAL.DbContexts;
 using Eduprompt.Domain.Interface.Repository;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,25 +7,25 @@ namespace Eduprompt.DAL.Repositories;
 
 public class MessageRepository : IMessageRepository
 {
-    private readonly EdupromptContext _context;
+    private readonly EdupromptV2Context _context;
 
-    public MessageRepository(EdupromptContext context)
+    public MessageRepository(EdupromptV2Context context)
     {
         _context = context;
     }
 
-    public async Task<Message?> GetByIdAsync(int messageId)
+    public async Task<Message?> GetByIdAsync(int MessageId)
     {
         return await _context.Messages
             .Include(m => m.Conversation)
-            .FirstOrDefaultAsync(m => m.MessageID == messageId);
+            .FirstOrDefaultAsync(m => m.MessageId == MessageId);
     }
 
-    public async Task<IEnumerable<Message>> GetByConversationIdAsync(int conversationId)
+    public async Task<IEnumerable<Message>> GetByConversationIdAsync(int ConversationId)
     {
         return await _context.Messages
             .Include(m => m.Conversation)
-            .Where(m => m.ConversationID == conversationId)
+            .Where(m => m.ConversationId == ConversationId)
             .OrderBy(m => m.SentAt)
             .ToListAsync();
     }
@@ -37,7 +38,7 @@ public class MessageRepository : IMessageRepository
         // Reload with navigation properties
         return await _context.Messages
             .Include(m => m.Conversation)
-            .FirstOrDefaultAsync(m => m.MessageID == message.MessageID) ?? message;
+            .FirstOrDefaultAsync(m => m.MessageId == message.MessageId) ?? message;
     }
 
     public async Task<Message> UpdateAsync(Message message)
@@ -48,12 +49,12 @@ public class MessageRepository : IMessageRepository
         // Reload with navigation properties
         return await _context.Messages
             .Include(m => m.Conversation)
-            .FirstOrDefaultAsync(m => m.MessageID == message.MessageID) ?? message;
+            .FirstOrDefaultAsync(m => m.MessageId == message.MessageId) ?? message;
     }
 
-    public async Task<bool> DeleteAsync(int messageId)
+    public async Task<bool> DeleteAsync(int MessageId)
     {
-        var message = await _context.Messages.FindAsync(messageId);
+        var message = await _context.Messages.FindAsync(MessageId);
         if (message == null) return false;
 
         _context.Messages.Remove(message);
@@ -61,26 +62,26 @@ public class MessageRepository : IMessageRepository
         return true;
     }
 
-    public async Task<bool> ExistsAsync(int messageId)
+    public async Task<bool> ExistsAsync(int MessageId)
     {
-        return await _context.Messages.AnyAsync(m => m.MessageID == messageId);
+        return await _context.Messages.AnyAsync(m => m.MessageId == MessageId);
     }
 
-    public async Task<IEnumerable<Message>> GetRecentMessagesAsync(int conversationId, int count = 50)
+    public async Task<IEnumerable<Message>> GetRecentMessagesAsync(int ConversationId, int count = 50)
     {
         return await _context.Messages
             .Include(m => m.Conversation)
-            .Where(m => m.ConversationID == conversationId)
+            .Where(m => m.ConversationId == ConversationId)
             .OrderByDescending(m => m.SentAt)
             .Take(count)
             .ToListAsync();
     }
 
-    public async Task<Message?> GetLastMessageAsync(int conversationId)
+    public async Task<Message?> GetLastMessageAsync(int ConversationId)
     {
         return await _context.Messages
             .Include(m => m.Conversation)
-            .Where(m => m.ConversationID == conversationId)
+            .Where(m => m.ConversationId == ConversationId)
             .OrderByDescending(m => m.SentAt)
             .FirstOrDefaultAsync();
     }

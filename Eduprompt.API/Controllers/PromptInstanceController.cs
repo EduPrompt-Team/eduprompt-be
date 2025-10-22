@@ -22,18 +22,18 @@ public class PromptInstanceController : ControllerBase
     /// <summary>
     /// Get prompt instance by ID
     /// </summary>
-    /// <param name="instanceId">Prompt instance ID</param>
+    /// <param name="InstanceId">Prompt instance ID</param>
     /// <returns>Prompt instance details</returns>
     /// <response code="200">Instance found</response>
     /// <response code="400">Error retrieving instance</response>
     /// <response code="401">User not authenticated</response>
     /// <response code="404">Instance not found</response>
-    [HttpGet("{instanceId}")]
-    public async Task<IActionResult> GetById(int instanceId)
+    [HttpGet("{InstanceId}")]
+    public async Task<IActionResult> GetById(int InstanceId)
     {
         try
         {
-            var instance = await _promptInstanceService.GetByIdAsync(instanceId);
+            var instance = await _promptInstanceService.GetByIdAsync(InstanceId);
             if (instance == null)
                 return NotFound(new { message = "Prompt instance not found" });
 
@@ -48,17 +48,17 @@ public class PromptInstanceController : ControllerBase
     /// <summary>
     /// Get prompt instances by user ID
     /// </summary>
-    /// <param name="userId">User ID</param>
+    /// <param name="UserId">User ID</param>
     /// <returns>List of user's prompt instances</returns>
     /// <response code="200">Instances retrieved successfully</response>
     /// <response code="400">Error retrieving instances</response>
     /// <response code="401">User not authenticated</response>
-    [HttpGet("user/{userId}")]
-    public async Task<IActionResult> GetByUserId(int userId)
+    [HttpGet("user/{UserId}")]
+    public async Task<IActionResult> GetByUserId(int UserId)
     {
         try
         {
-            var instances = await _promptInstanceService.GetByUserIdAsync(userId);
+            var instances = await _promptInstanceService.GetByUserIdAsync(UserId);
             return Ok(instances);
         }
         catch (Exception ex)
@@ -104,12 +104,12 @@ public class PromptInstanceController : ControllerBase
     /// <summary>
     /// Lấy instances gần đây của user
     /// </summary>
-    [HttpGet("recent/{userId}")]
-    public async Task<IActionResult> GetRecentInstances(int userId, [FromQuery] int count = 10)
+    [HttpGet("recent/{UserId}")]
+    public async Task<IActionResult> GetRecentInstances(int UserId, [FromQuery] int count = 10)
     {
         try
         {
-            var instances = await _promptInstanceService.GetRecentInstancesAsync(userId, count);
+            var instances = await _promptInstanceService.GetRecentInstancesAsync(UserId, count);
             return Ok(instances);
         }
         catch (Exception ex)
@@ -127,7 +127,7 @@ public class PromptInstanceController : ControllerBase
         try
         {
             var instance = await _promptInstanceService.CreateAsync(createPromptInstanceDto);
-            return CreatedAtAction(nameof(GetById), new { instanceId = instance.InstanceID }, instance);
+            return CreatedAtAction(nameof(GetById), new { InstanceId = instance.InstanceId }, instance);
         }
         catch (Exception ex)
         {
@@ -138,12 +138,12 @@ public class PromptInstanceController : ControllerBase
     /// <summary>
     /// Cập nhật instance
     /// </summary>
-    [HttpPut("{instanceId}")]
-    public async Task<IActionResult> Update(int instanceId, [FromBody] UpdatePromptInstanceDto updatePromptInstanceDto)
+    [HttpPut("{InstanceId}")]
+    public async Task<IActionResult> Update(int InstanceId, [FromBody] UpdatePromptInstanceDto updatePromptInstanceDto)
     {
         try
         {
-            var instance = await _promptInstanceService.UpdateAsync(instanceId, updatePromptInstanceDto);
+            var instance = await _promptInstanceService.UpdateAsync(InstanceId, updatePromptInstanceDto);
             return Ok(instance);
         }
         catch (ArgumentException ex)
@@ -159,12 +159,12 @@ public class PromptInstanceController : ControllerBase
     /// <summary>
     /// Xóa instance
     /// </summary>
-    [HttpDelete("{instanceId}")]
-    public async Task<IActionResult> Delete(int instanceId)
+    [HttpDelete("{InstanceId}")]
+    public async Task<IActionResult> Delete(int InstanceId)
     {
         try
         {
-            var result = await _promptInstanceService.DeleteAsync(instanceId);
+            var result = await _promptInstanceService.DeleteAsync(InstanceId);
             if (!result)
                 return NotFound(new { message = "Prompt instance not found" });
 
@@ -179,12 +179,12 @@ public class PromptInstanceController : ControllerBase
     /// <summary>
     /// Hoàn thành instance với output data
     /// </summary>
-    [HttpPost("{instanceId}/complete")]
-    public async Task<IActionResult> CompleteInstance(int instanceId, [FromBody] CompleteInstanceRequest request)
+    [HttpPost("{InstanceId}/complete")]
+    public async Task<IActionResult> CompleteInstance(int InstanceId, [FromBody] CompleteInstanceRequest request)
     {
         try
         {
-            var result = await _promptInstanceService.CompleteInstanceAsync(instanceId, request.OutputData);
+            var result = await _promptInstanceService.CompleteInstanceAsync(InstanceId, request.OutputData);
             if (!result)
                 return NotFound(new { message = "Prompt instance not found" });
 

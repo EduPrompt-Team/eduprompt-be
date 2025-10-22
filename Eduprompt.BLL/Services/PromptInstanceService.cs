@@ -18,13 +18,13 @@ public class PromptInstanceService : IPromptInstanceService
         _promptInstanceRepository = promptInstanceRepository;
     }
 
-    public async Task<PromptInstanceDto?> GetByIdAsync(int instanceId)
+    public async Task<PromptInstanceDto?> GetByIdAsync(int InstanceId)
     {
-        var instance = await _promptInstanceRepository.GetByIdAsync(instanceId);
+        var instance = await _promptInstanceRepository.GetByIdAsync(InstanceId);
         return instance != null ? MapToDto(instance) : null;
     }
 
-    public Task<IEnumerable<PromptInstanceDto>> GetByUserIdAsync(int userId)
+    public Task<IEnumerable<PromptInstanceDto>> GetByUserIdAsync(int UserId)
     {
         return Task.FromResult(Enumerable.Empty<PromptInstanceDto>());
     }
@@ -39,8 +39,8 @@ public class PromptInstanceService : IPromptInstanceService
     {
         var instance = new PromptInstance
         {
-            UserID = createPromptInstanceDto.UserID,
-            PackageID = createPromptInstanceDto.PackageID,
+            UserId = createPromptInstanceDto.UserId,
+            PackageId = createPromptInstanceDto.PackageId,
             PromptName = createPromptInstanceDto.PromptName,
             InputJson = createPromptInstanceDto.InputJson,
             Status = createPromptInstanceDto.Status ?? "Pending",
@@ -51,9 +51,9 @@ public class PromptInstanceService : IPromptInstanceService
         return MapToDto(createdInstance);
     }
 
-    public async Task<PromptInstanceDto> UpdateAsync(int instanceId, UpdatePromptInstanceDto updateDto)
+    public async Task<PromptInstanceDto> UpdateAsync(int InstanceId, UpdatePromptInstanceDto updateDto)
     {
-        var instance = await _promptInstanceRepository.GetByIdAsync(instanceId);
+        var instance = await _promptInstanceRepository.GetByIdAsync(InstanceId);
         if (instance == null) throw new KeyNotFoundException("Prompt instance not found");
 
         instance.PromptName = updateDto.PromptName ?? instance.PromptName;
@@ -73,15 +73,15 @@ public class PromptInstanceService : IPromptInstanceService
             .Select(MapToDto);
     }
 
-    public async Task<IEnumerable<PromptInstanceDto>> GetRecentInstancesAsync(int userId, int count = 10)
+    public async Task<IEnumerable<PromptInstanceDto>> GetRecentInstancesAsync(int UserId, int count = 10)
     {
-        var instances = await _promptInstanceRepository.GetByUserIdAsync(userId);
+        var instances = await _promptInstanceRepository.GetByUserIdAsync(UserId);
         return instances.Take(count).Select(MapToDto);
     }
 
-    public async Task<bool> CompleteInstanceAsync(int instanceId, string outputData)
+    public async Task<bool> CompleteInstanceAsync(int InstanceId, string outputData)
     {
-        var instance = await _promptInstanceRepository.GetByIdAsync(instanceId);
+        var instance = await _promptInstanceRepository.GetByIdAsync(InstanceId);
         if (instance == null) return false;
 
         instance.OutputJson = outputData;
@@ -96,9 +96,9 @@ public class PromptInstanceService : IPromptInstanceService
     {
         return new PromptInstanceDto
         {
-            InstanceID = promptInstance.InstanceID,
-            UserID = promptInstance.UserID,
-            PackageID = promptInstance.PackageID,
+            InstanceId = promptInstance.InstanceId,
+            UserId = promptInstance.UserId,
+            PackageId = promptInstance.PackageId,
             PromptName = promptInstance.PromptName,
             InputJson = promptInstance.InputJson,
             OutputJson = promptInstance.OutputJson,

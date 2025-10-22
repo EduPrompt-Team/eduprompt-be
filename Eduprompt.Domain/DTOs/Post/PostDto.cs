@@ -2,8 +2,8 @@ namespace Eduprompt.Domain.DTOs.Post;
 
 public class PostDto
 {
-    public int PostID { get; set; }
-    public int UserID { get; set; }
+    public int PostId { get; set; }
+    public int UserId { get; set; }
     public string Title { get; set; } = string.Empty;
     public string Content { get; set; } = string.Empty;
     public string? PostType { get; set; }

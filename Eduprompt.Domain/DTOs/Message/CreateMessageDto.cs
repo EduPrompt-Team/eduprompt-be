@@ -5,7 +5,7 @@ namespace Eduprompt.Domain.DTOs.Message;
 public class CreateMessageDto
 {
     [Required]
-    public int ConversationID { get; set; }
+    public int ConversationId { get; set; }
 
     [Required]
     [StringLength(20)]

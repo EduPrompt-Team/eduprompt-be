@@ -26,32 +26,40 @@ public class CartController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetCart()
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        var cart = await _cartService.GetUserCartAsync(userId);
+        // Temporarily use default UserId for testing since authorize is disabled
+        var UserId = 1; // Default user ID for testing
+        // var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var cart = await _cartService.GetUserCartAsync(UserId);
         return Ok(cart);
     }
 
     [HttpPost("items")]
     public async Task<IActionResult> AddItem([FromBody] AddCartItemDto itemDto)
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        var cart = await _cartService.AddItemAsync(userId, itemDto);
+        // Temporarily use default UserId for testing since authorize is disabled
+        var UserId = 1; // Default user ID for testing
+        // var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var cart = await _cartService.AddItemAsync(UserId, itemDto);
         return Ok(cart);
     }
 
     [HttpPut("items/{cartDetailId}")]
     public async Task<IActionResult> UpdateItem(int cartDetailId, [FromBody] UpdateCartItemDto itemDto)
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        var cart = await _cartService.UpdateItemQuantityAsync(userId, cartDetailId, itemDto.Quantity);
+        // Temporarily use default UserId for testing since authorize is disabled
+        var UserId = 1; // Default user ID for testing
+        // var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var cart = await _cartService.UpdateItemQuantityAsync(UserId, cartDetailId, itemDto.Quantity);
         return Ok(cart);
     }
 
     [HttpDelete("items/{cartDetailId}")]
     public async Task<IActionResult> RemoveItem(int cartDetailId)
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        var result = await _cartService.RemoveItemAsync(userId, cartDetailId);
+        // Temporarily use default UserId for testing since authorize is disabled
+        var UserId = 1; // Default user ID for testing
+        // var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var result = await _cartService.RemoveItemAsync(UserId, cartDetailId);
         if (!result) return NotFound(new { message = $"Cart item with ID {cartDetailId} not found" });
         return NoContent();
     }
@@ -59,8 +67,10 @@ public class CartController : ControllerBase
     [HttpDelete]
     public async Task<IActionResult> ClearCart()
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        var result = await _cartService.ClearCartAsync(userId);
+        // Temporarily use default UserId for testing since authorize is disabled
+        var UserId = 1; // Default user ID for testing
+        // var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var result = await _cartService.ClearCartAsync(UserId);
         if (!result) return NotFound(new { message = "Cart not found" });
         return NoContent();
     }

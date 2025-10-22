@@ -3,7 +3,7 @@ namespace Eduprompt.Domain.DTOs.ExpectedOutput;
 public class ExpectedOutputDto
 {
     public int OutputId { get; set; }
-    public int InstanceID { get; set; }
+    public int PromptInstanceId { get; set; }
     public string OutputName { get; set; } = string.Empty;
     public string? Status { get; set; }
     public DateTime CreatedDate { get; set; }

@@ -21,14 +21,14 @@ public class TemplateArchitectureController : ControllerBase
     /// <summary>
     /// Get template architecture by instance ID (Public)
     /// </summary>
-    /// <param name="instanceId">Prompt instance ID</param>
+    /// <param name="InstanceId">Prompt instance ID</param>
     /// <returns>Template architecture for the instance</returns>
     /// <response code="200">Template architecture retrieved successfully</response>
-    [HttpGet("instance/{instanceId}")]
+    [HttpGet("instance/{InstanceId}")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetByInstance(int instanceId)
+    public async Task<IActionResult> GetByInstance(int InstanceId)
     {
-        return Ok(await _service.GetByPromptInstanceIdAsync(instanceId));
+        return Ok(await _service.GetByPromptInstanceIdAsync(InstanceId));
     }
 
     /// <summary>

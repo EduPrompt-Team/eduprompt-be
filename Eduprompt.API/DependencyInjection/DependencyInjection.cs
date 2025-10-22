@@ -1,5 +1,6 @@
-﻿using Eduprompt.BLL.Mapping;
+using Eduprompt.BLL.Mapping;
 using Eduprompt.BLL.Services;
+using Eduprompt.DAL.DbContexts;
 using Eduprompt.DAL.Repositories;
 using Eduprompt.Domain.Interface.Repository;
 using Eduprompt.Domain.Interface.Service;
@@ -15,7 +16,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
         // Add DbContext
-        services.AddDbContext<EdupromptContext>(options =>
+        services.AddDbContext<EdupromptV2Context>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
         // Add AutoMapper
@@ -38,11 +39,11 @@ public static class DependencyInjection
         services.AddScoped<IPackageRepository, PackageRepository>();
         services.AddScoped<IPromptInstanceRepository, PromptInstanceRepository>();
         services.AddScoped<IPostRepository, PostRepository>();
-        services.AddScoped<IAIHistoryRepository, AIHistoryRepository>();
+        services.AddScoped<IAihistoryRepository, AIHistoryRepository>();
         services.AddScoped<IFeedbackRepository, FeedbackRepository>();
         services.AddScoped<IPackageCategoryRepository, PackageCategoryRepository>();
         services.AddScoped<IPackageDetailRepository, PackageDetailRepository>();
-        services.AddScoped<IAPIKeyRepository, APIKeyRepository>();
+        services.AddScoped<IApikeyRepository, APIKeyRepository>();
         services.AddScoped<IPromptInstanceDetailRepository, PromptInstanceDetailRepository>();
         services.AddScoped<ITemplateArchitectureRepository, TemplateArchitectureRepository>();
         services.AddScoped<IExpectedOutputRepository, ExpectedOutputRepository>();
@@ -68,11 +69,10 @@ public static class DependencyInjection
         services.AddScoped<IMessageService, MessageService>();
         services.AddScoped<IPaymentMethodService, PaymentMethodService>(); // Service disabled but interface maintained
         services.AddScoped<ITransactionService, TransactionService>();
-        services.AddScoped<IAIHistoryService, AIHistoryService>();
+        services.AddScoped<IAihistoryService, AihistoryService>();
         services.AddScoped<IFeedbackService, FeedbackService>();
         services.AddScoped<IPackageCategoryService, PackageCategoryService>();
-        services.AddScoped<ICategoryService, CategoryService>();
-        services.AddScoped<IAPIKeyService, APIKeyService>();
+        services.AddScoped<IApikeyService, ApikeyService>();
         services.AddScoped<IPackageDetailService, PackageDetailService>();
         services.AddScoped<ITemplateArchitectureService, TemplateArchitectureService>();
         services.AddScoped<IPromptInstanceDetailService, PromptInstanceDetailService>();

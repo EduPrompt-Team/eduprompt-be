@@ -14,23 +14,23 @@ public class FeedbackService : IFeedbackService
         _feedbackRepository = feedbackRepository;
     }
 
-    public async Task<FeedbackDto?> GetByIdAsync(int feedbackId)
+    public async Task<FeedbackDto?> GetByIdAsync(int FeedbackId)
     {
-        var feedback = await _feedbackRepository.GetByIdAsync(feedbackId);
+        var feedback = await _feedbackRepository.GetByIdAsync(FeedbackId);
         if (feedback == null) return null;
 
         return MapToDto(feedback);
     }
 
-    public async Task<IEnumerable<FeedbackDto>> GetByUserIdAsync(int userId)
+    public async Task<IEnumerable<FeedbackDto>> GetByUserIdAsync(int UserId)
     {
-        var feedbacks = await _feedbackRepository.GetByUserIdAsync(userId);
+        var feedbacks = await _feedbackRepository.GetByUserIdAsync(UserId);
         return feedbacks.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<FeedbackDto>> GetByPostIdAsync(int postId)
+    public async Task<IEnumerable<FeedbackDto>> GetByPostIdAsync(int PostId)
     {
-        var feedbacks = await _feedbackRepository.GetByPostIdAsync(postId);
+        var feedbacks = await _feedbackRepository.GetByPostIdAsync(PostId);
         return feedbacks.Select(MapToDto);
     }
 
@@ -38,9 +38,9 @@ public class FeedbackService : IFeedbackService
     {
         var feedback = new Feedback
         {
-            PostID = createDto.PostID,
-            UserID = createDto.UserID,
-            PackageID = createDto.PackageID,
+            PostId = createDto.PostId,
+            UserId = createDto.UserId,
+            PackageId = createDto.PackageId,
             Rating = createDto.Rating,
             Comment = createDto.Comment,
             IsVerified = createDto.IsVerified,
@@ -52,9 +52,9 @@ public class FeedbackService : IFeedbackService
         return MapToDto(createdFeedback);
     }
 
-    public async Task<FeedbackDto> UpdateAsync(int feedbackId, CreateFeedbackDto updateDto)
+    public async Task<FeedbackDto> UpdateAsync(int FeedbackId, CreateFeedbackDto updateDto)
     {
-        var feedback = await _feedbackRepository.GetByIdAsync(feedbackId);
+        var feedback = await _feedbackRepository.GetByIdAsync(FeedbackId);
         if (feedback == null)
             throw new KeyNotFoundException("Feedback not found");
 
@@ -67,35 +67,35 @@ public class FeedbackService : IFeedbackService
         return MapToDto(updatedFeedback);
     }
 
-    public async Task<bool> DeleteAsync(int feedbackId)
+    public async Task<bool> DeleteAsync(int FeedbackId)
     {
-        return await _feedbackRepository.DeleteAsync(feedbackId);
+        return await _feedbackRepository.DeleteAsync(FeedbackId);
     }
 
-    public async Task<IEnumerable<FeedbackDto>> GetRecentFeedbacksAsync(int postId, int count = 10)
+    public async Task<IEnumerable<FeedbackDto>> GetRecentFeedbacksAsync(int PostId, int count = 10)
     {
-        var feedbacks = await _feedbackRepository.GetRecentFeedbacksAsync(postId, count);
+        var feedbacks = await _feedbackRepository.GetRecentFeedbacksAsync(PostId, count);
         return feedbacks.Select(MapToDto);
     }
 
-    public async Task<double> GetAverageRatingByPostIdAsync(int postId)
+    public async Task<double> GetAverageRatingByPostIdAsync(int PostId)
     {
-        return await _feedbackRepository.GetAverageRatingByPostIdAsync(postId);
+        return await _feedbackRepository.GetAverageRatingByPostIdAsync(PostId);
     }
 
-    public async Task<int> GetFeedbackCountByPostIdAsync(int postId)
+    public async Task<int> GetFeedbackCountByPostIdAsync(int PostId)
     {
-        return await _feedbackRepository.GetFeedbackCountByPostIdAsync(postId);
+        return await _feedbackRepository.GetFeedbackCountByPostIdAsync(PostId);
     }
 
     private static FeedbackDto MapToDto(Feedback feedback)
     {
         return new FeedbackDto
         {
-            FeedbackID = feedback.FeedbackID,
-            PostID = feedback.PostID,
-            UserID = feedback.UserID,
-            PackageID = feedback.PackageID,
+            FeedbackId = feedback.FeedbackId,
+            PostId = feedback.PostId,
+            UserId = feedback.UserId,
+            PackageId = feedback.PackageId,
             Rating = feedback.Rating,
             Comment = feedback.Comment,
             CreatedDate = feedback.CreatedDate,

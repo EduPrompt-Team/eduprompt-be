@@ -1,4 +1,4 @@
-﻿using Eduprompt.Domain.DTOs.Message;
+using Eduprompt.Domain.DTOs.Message;
 using Eduprompt.Domain.Entities;
 using Eduprompt.Domain.Interface.Repository;
 using Eduprompt.Domain.Interface.Service;
@@ -14,17 +14,17 @@ public class MessageService : IMessageService
         _messageRepository = messageRepository;
     }
 
-    public async Task<MessageDto?> GetByIdAsync(int messageId)
+    public async Task<MessageDto?> GetByIdAsync(int MessageId)
     {
-        var message = await _messageRepository.GetByIdAsync(messageId);
+        var message = await _messageRepository.GetByIdAsync(MessageId);
         if (message == null) return null;
 
         return MapToDto(message);
     }
 
-    public async Task<IEnumerable<MessageDto>> GetByConversationIdAsync(int conversationId)
+    public async Task<IEnumerable<MessageDto>> GetByConversationIdAsync(int ConversationId)
     {
-        var messages = await _messageRepository.GetByConversationIdAsync(conversationId);
+        var messages = await _messageRepository.GetByConversationIdAsync(ConversationId);
         return messages.Select(MapToDto);
     }
 
@@ -32,7 +32,7 @@ public class MessageService : IMessageService
     {
         var message = new Message
         {
-            ConversationID = createDto.ConversationID,
+            ConversationId = createDto.ConversationId,
             SenderType = createDto.SenderType,
             Content = createDto.Content,
             IsRead = createDto.IsRead,
@@ -44,9 +44,9 @@ public class MessageService : IMessageService
         return MapToDto(createdMessage);
     }
 
-    public async Task<MessageDto> UpdateAsync(int messageId, CreateMessageDto updateDto)
+    public async Task<MessageDto> UpdateAsync(int MessageId, CreateMessageDto updateDto)
     {
-        var message = await _messageRepository.GetByIdAsync(messageId);
+        var message = await _messageRepository.GetByIdAsync(MessageId);
         if (message == null)
             throw new KeyNotFoundException("Message not found");
 
@@ -58,20 +58,20 @@ public class MessageService : IMessageService
         return MapToDto(updatedMessage);
     }
 
-    public async Task<bool> DeleteAsync(int messageId)
+    public async Task<bool> DeleteAsync(int MessageId)
     {
-        return await _messageRepository.DeleteAsync(messageId);
+        return await _messageRepository.DeleteAsync(MessageId);
     }
 
-    public async Task<IEnumerable<MessageDto>> GetRecentMessagesAsync(int conversationId, int count = 20)
+    public async Task<IEnumerable<MessageDto>> GetRecentMessagesAsync(int ConversationId, int count = 20)
     {
-        var messages = await _messageRepository.GetRecentMessagesAsync(conversationId, count);
+        var messages = await _messageRepository.GetRecentMessagesAsync(ConversationId, count);
         return messages.Select(MapToDto);
     }
 
-    public async Task<MessageDto?> GetLastMessageAsync(int conversationId)
+    public async Task<MessageDto?> GetLastMessageAsync(int ConversationId)
     {
-        var messages = await _messageRepository.GetRecentMessagesAsync(conversationId, 1);
+        var messages = await _messageRepository.GetRecentMessagesAsync(ConversationId, 1);
         var lastMessage = messages.FirstOrDefault();
         return lastMessage != null ? MapToDto(lastMessage) : null;
     }
@@ -80,8 +80,8 @@ public class MessageService : IMessageService
     {
         return new MessageDto
         {
-            MessageID = message.MessageID,
-            ConversationID = message.ConversationID,
+            MessageId = message.MessageId,
+            ConversationId = message.ConversationId,
             SenderType = message.SenderType,
             Content = message.Content,
             SentAt = message.SentAt,

@@ -1,4 +1,4 @@
-﻿using Eduprompt.Domain.DTOs.PackageDetail;
+using Eduprompt.Domain.DTOs.PackageDetail;
 using Eduprompt.Domain.Entities;
 using Eduprompt.Domain.Interface.Repository;
 using Eduprompt.Domain.Interface.Service;
@@ -14,15 +14,15 @@ public class PackageDetailService : IPackageDetailService
         _packageDetailRepository = packageDetailRepository;
     }
 
-    public async Task<PackageDetailDto?> GetByIdAsync(int detailId)
+    public async Task<PackageDetailDto?> GetByIdAsync(int DetailId)
     {
-        var detail = await _packageDetailRepository.GetByIdAsync(detailId);
+        var detail = await _packageDetailRepository.GetByIdAsync(DetailId);
         return detail != null ? MapToDto(detail) : null;
     }
 
-    public async Task<IEnumerable<PackageDetailDto>> GetByPackageIdAsync(int packageId)
+    public async Task<IEnumerable<PackageDetailDto>> GetByPackageIdAsync(int PackageId)
     {
-        var details = await _packageDetailRepository.GetByPackageIdAsync(packageId);
+        var details = await _packageDetailRepository.GetByPackageIdAsync(PackageId);
         return details.Select(MapToDto);
     }
 
@@ -30,7 +30,7 @@ public class PackageDetailService : IPackageDetailService
     {
         var detail = new PackageDetail
         {
-            PackageID = createDto.PackageID,
+            PackageId = createDto.PackageId,
             FeatureName = createDto.FeatureName,
             FeatureValue = createDto.FeatureDescription ?? (createDto.IsIncluded ? "Included" : "Excluded"),
             FeatureType = createDto.Unit ?? "Text"
@@ -40,9 +40,9 @@ public class PackageDetailService : IPackageDetailService
         return MapToDto(createdDetail);
     }
 
-    public async Task<PackageDetailDto> UpdateAsync(int detailId, CreatePackageDetailDto updateDto)
+    public async Task<PackageDetailDto> UpdateAsync(int DetailId, CreatePackageDetailDto updateDto)
     {
-        var detail = await _packageDetailRepository.GetByIdAsync(detailId);
+        var detail = await _packageDetailRepository.GetByIdAsync(DetailId);
         if (detail == null) throw new KeyNotFoundException("Package detail not found");
 
         detail.FeatureName = updateDto.FeatureName;
@@ -53,17 +53,17 @@ public class PackageDetailService : IPackageDetailService
         return MapToDto(updatedDetail);
     }
 
-    public async Task<bool> DeleteAsync(int detailId)
+    public async Task<bool> DeleteAsync(int DetailId)
     {
-        return await _packageDetailRepository.DeleteAsync(detailId);
+        return await _packageDetailRepository.DeleteAsync(DetailId);
     }
 
     private static PackageDetailDto MapToDto(PackageDetail detail)
     {
         return new PackageDetailDto
         {
-            DetailID = detail.DetailID,
-            PackageID = detail.PackageID,
+            DetailId = detail.DetailId,
+            PackageId = detail.PackageId,
             FeatureName = detail.FeatureName,
             FeatureDescription = detail.FeatureValue,
             IsIncluded = detail.FeatureValue?.Equals("Included", StringComparison.OrdinalIgnoreCase) == true,

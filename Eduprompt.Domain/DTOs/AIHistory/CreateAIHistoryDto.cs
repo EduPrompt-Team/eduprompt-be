@@ -1,19 +1,19 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Eduprompt.Domain.DTOs.AIHistory;
+namespace Eduprompt.Domain.DTOs.Aihistory;
 
-public class CreateAIHistoryDto
+public class CreateAihistoryDto
 {
     [Required]
-    public int UserID { get; set; }
+    public int UserId { get; set; }
 
-    public int? ConversationID { get; set; }
+    public int? ConversationId { get; set; }
 
-    public int? PromptInstanceID { get; set; }
+    public int? PromptInstanceId { get; set; }
 
     public string? UserMessage { get; set; }
 
-    public string? AIResponse { get; set; }
+    public string? Airesponse { get; set; }
 
     public int? ProcessingTimeMs { get; set; }
 

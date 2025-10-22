@@ -5,12 +5,12 @@ namespace Eduprompt.Domain.DTOs.Transaction;
 public class CreateTransactionDto
 {
     [Required]
-    public int PaymentMethodID { get; set; }
+    public int PaymentMethodId { get; set; }
 
     [Required]
-    public int WalletID { get; set; }
+    public int WalletId { get; set; }
 
-    public int? OrderID { get; set; }
+    public int? OrderId { get; set; }
 
     [Required]
     [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0")]

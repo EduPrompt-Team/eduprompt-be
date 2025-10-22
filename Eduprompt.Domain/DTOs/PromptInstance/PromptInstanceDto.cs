@@ -2,9 +2,9 @@ namespace Eduprompt.Domain.DTOs.PromptInstance;
 
 public class PromptInstanceDto
 {
-    public int InstanceID { get; set; }
-    public int UserID { get; set; }
-    public int PackageID { get; set; }
+    public int InstanceId { get; set; }
+    public int UserId { get; set; }
+    public int PackageId { get; set; }
     public string PromptName { get; set; } = string.Empty;
     public string? InputJson { get; set; }
     public string? OutputJson { get; set; }

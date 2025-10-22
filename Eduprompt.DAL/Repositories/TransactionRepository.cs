@@ -1,4 +1,5 @@
 using Eduprompt.Domain.Entities;
+using Eduprompt.DAL.DbContexts;
 using Eduprompt.Domain.Interface.Repository;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,9 +7,9 @@ namespace Eduprompt.DAL.Repositories;
 
 public class TransactionRepository : ITransactionRepository
 {
-    private readonly EdupromptContext _context;
+    private readonly EdupromptV2Context _context;
 
-    public TransactionRepository(EdupromptContext context)
+    public TransactionRepository(EdupromptV2Context context)
     {
         _context = context;
     }
@@ -23,40 +24,40 @@ public class TransactionRepository : ITransactionRepository
             .ToListAsync();
     }
 
-    public async Task<Transaction?> GetByIdAsync(int transactionId)
+    public async Task<Transaction?> GetByIdAsync(int TransactionId)
     {
         return await _context.Transactions
             .Include(t => t.PaymentMethod)
             .Include(t => t.Wallet)
-            .FirstOrDefaultAsync(t => t.TransactionID == transactionId);
+            .FirstOrDefaultAsync(t => t.TransactionId == TransactionId);
     }
 
-    public async Task<IEnumerable<Transaction>> GetByUserIdAsync(int userId)
+    public async Task<IEnumerable<Transaction>> GetByUserIdAsync(int UserId)
     {
         return await _context.Transactions
             .Include(t => t.PaymentMethod)
             .Include(t => t.Wallet)
-            .Where(t => t.Wallet.UserID == userId)
+            .Where(t => t.Wallet.UserId == UserId)
             .OrderByDescending(t => t.TransactionDate)
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Transaction>> GetByWalletIdAsync(int walletId)
+    public async Task<IEnumerable<Transaction>> GetByWalletIdAsync(int WalletId)
     {
         return await _context.Transactions
             .Include(t => t.PaymentMethod)
             .Include(t => t.Wallet)
-            .Where(t => t.WalletID == walletId)
+            .Where(t => t.WalletId == WalletId)
             .OrderByDescending(t => t.TransactionDate)
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Transaction>> GetByPaymentMethodIdAsync(int paymentMethodId)
+    public async Task<IEnumerable<Transaction>> GetByPaymentMethodIdAsync(int PaymentMethodId)
     {
         return await _context.Transactions
             .Include(t => t.PaymentMethod)
             .Include(t => t.Wallet)
-            .Where(t => t.PaymentMethodID == paymentMethodId)
+            .Where(t => t.PaymentMethodId == PaymentMethodId)
             .OrderByDescending(t => t.TransactionDate)
             .ToListAsync();
     }
@@ -71,7 +72,7 @@ public class TransactionRepository : ITransactionRepository
             .Include(t => t.PaymentMethod)
             .Include(t => t.Wallet)
                 .ThenInclude(w => w.User)
-            .FirstOrDefaultAsync(t => t.TransactionID == transaction.TransactionID) ?? transaction;
+            .FirstOrDefaultAsync(t => t.TransactionId == transaction.TransactionId) ?? transaction;
     }
 
     public async Task<Transaction> UpdateAsync(Transaction transaction)
@@ -84,12 +85,12 @@ public class TransactionRepository : ITransactionRepository
             .Include(t => t.PaymentMethod)
             .Include(t => t.Wallet)
                 .ThenInclude(w => w.User)
-            .FirstOrDefaultAsync(t => t.TransactionID == transaction.TransactionID) ?? transaction;
+            .FirstOrDefaultAsync(t => t.TransactionId == transaction.TransactionId) ?? transaction;
     }
 
-    public async Task<bool> DeleteAsync(int transactionId)
+    public async Task<bool> DeleteAsync(int TransactionId)
     {
-        var transaction = await _context.Transactions.FindAsync(transactionId);
+        var transaction = await _context.Transactions.FindAsync(TransactionId);
         if (transaction == null) return false;
 
         _context.Transactions.Remove(transaction);
@@ -97,9 +98,9 @@ public class TransactionRepository : ITransactionRepository
         return true;
     }
 
-    public async Task<bool> ExistsAsync(int transactionId)
+    public async Task<bool> ExistsAsync(int TransactionId)
     {
-        return await _context.Transactions.AnyAsync(t => t.TransactionID == transactionId);
+        return await _context.Transactions.AnyAsync(t => t.TransactionId == TransactionId);
     }
 
     public async Task<IEnumerable<Transaction>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
@@ -112,13 +113,13 @@ public class TransactionRepository : ITransactionRepository
             .ToListAsync();
     }
 
-    public async Task<decimal> GetTotalAmountByTypeAsync(string transactionType, int? userId = null)
+    public async Task<decimal> GetTotalAmountByTypeAsync(string transactionType, int? UserId = null)
     {
         var query = _context.Transactions.Where(t => t.TransactionType == transactionType);
 
-        if (userId.HasValue)
+        if (UserId.HasValue)
         {
-            query = query.Where(t => t.Wallet.UserID == userId.Value);
+            query = query.Where(t => t.Wallet.UserId == UserId.Value);
         }
 
         return await query.SumAsync(t => t.Amount);

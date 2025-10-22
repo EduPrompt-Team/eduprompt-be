@@ -1,4 +1,5 @@
 using Eduprompt.Domain.Entities;
+using Eduprompt.DAL.DbContexts;
 using Eduprompt.Domain.Interface.Repository;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,26 +7,26 @@ namespace Eduprompt.DAL.Repositories;
 
 public class PromptInstanceDetailRepository : IPromptInstanceDetailRepository
 {
-    private readonly EdupromptContext _context;
+    private readonly EdupromptV2Context _context;
 
-    public PromptInstanceDetailRepository(EdupromptContext context)
+    public PromptInstanceDetailRepository(EdupromptV2Context context)
     {
         _context = context;
     }
 
-    public async Task<PromptInstanceDetail?> GetByIdAsync(int detailId)
+    public async Task<PromptInstanceDetail?> GetByIdAsync(int DetailId)
     {
         return await _context.PromptInstanceDetails
-            .Include(d => d.PromptInstance)
-            .FirstOrDefaultAsync(d => d.DetailID == detailId);
+            .Include(d => d.Instance)
+            .FirstOrDefaultAsync(d => d.DetailId == DetailId);
     }
 
-    public async Task<IEnumerable<PromptInstanceDetail>> GetByInstanceIdAsync(int instanceId)
+    public async Task<IEnumerable<PromptInstanceDetail>> GetByPromptInstanceIdAsync(int PromptInstanceId)
     {
         return await _context.PromptInstanceDetails
-            .Include(d => d.PromptInstance)
-            .Where(d => d.InstanceID == instanceId)
-            .OrderBy(d => d.DetailID)
+            .Include(d => d.Instance)
+            .Where(d => d.InstanceId == PromptInstanceId)
+            .OrderBy(d => d.DetailId)
             .ToListAsync();
     }
 
@@ -36,8 +37,8 @@ public class PromptInstanceDetailRepository : IPromptInstanceDetailRepository
         
         // Reload with navigation properties
         return await _context.PromptInstanceDetails
-            .Include(d => d.PromptInstance)
-            .FirstOrDefaultAsync(d => d.DetailID == detail.DetailID) ?? detail;
+            .Include(d => d.Instance)
+            .FirstOrDefaultAsync(d => d.DetailId == detail.DetailId) ?? detail;
     }
 
     public async Task<PromptInstanceDetail> UpdateAsync(PromptInstanceDetail detail)
@@ -47,9 +48,9 @@ public class PromptInstanceDetailRepository : IPromptInstanceDetailRepository
         return detail;
     }
 
-    public async Task<bool> DeleteAsync(int detailId)
+    public async Task<bool> DeleteAsync(int DetailId)
     {
-        var detail = await _context.PromptInstanceDetails.FindAsync(detailId);
+        var detail = await _context.PromptInstanceDetails.FindAsync(DetailId);
         if (detail == null) return false;
 
         _context.PromptInstanceDetails.Remove(detail);
@@ -57,25 +58,44 @@ public class PromptInstanceDetailRepository : IPromptInstanceDetailRepository
         return true;
     }
 
-    public async Task<bool> ExistsAsync(int detailId)
+    public async Task<bool> ExistsAsync(int DetailId)
     {
-        return await _context.PromptInstanceDetails.AnyAsync(d => d.DetailID == detailId);
+        return await _context.PromptInstanceDetails.AnyAsync(d => d.DetailId == DetailId);
     }
 
-    public async Task<IEnumerable<PromptInstanceDetail>> GetOrderedByInstanceIdAsync(int instanceId)
+    public async Task<IEnumerable<PromptInstanceDetail>> GetOrderedByPromptInstanceIdAsync(int PromptInstanceId)
     {
         return await _context.PromptInstanceDetails
-            .Include(d => d.PromptInstance)
-            .Where(d => d.InstanceID == instanceId)
-            .OrderBy(d => d.DetailID)
-            .ThenBy(d => d.DetailID)
+            .Include(d => d.Instance)
+            .Where(d => d.InstanceId == PromptInstanceId)
+            .OrderBy(d => d.DetailId)
+            .ThenBy(d => d.DetailId)
             .ToListAsync();
     }
 
-    public async Task<bool> DeleteByInstanceIdAsync(int instanceId)
+    public async Task<IEnumerable<PromptInstanceDetail>> GetByInstanceIdAsync(int InstanceId)
+    {
+        return await _context.PromptInstanceDetails
+            .Include(d => d.Instance)
+            .Where(d => d.InstanceId == InstanceId)
+            .OrderBy(d => d.DetailId)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<PromptInstanceDetail>> GetOrderedByInstanceIdAsync(int InstanceId)
+    {
+        return await _context.PromptInstanceDetails
+            .Include(d => d.Instance)
+            .Where(d => d.InstanceId == InstanceId)
+            .OrderBy(d => d.DetailId)
+            .ThenBy(d => d.DetailId)
+            .ToListAsync();
+    }
+
+    public async Task<bool> DeleteByInstanceIdAsync(int InstanceId)
     {
         var details = await _context.PromptInstanceDetails
-            .Where(d => d.InstanceID == instanceId)
+            .Where(d => d.InstanceId == InstanceId)
             .ToListAsync();
 
         if (!details.Any()) return false;

@@ -7,7 +7,7 @@ public class CreatePackageDetailValidator : AbstractValidator<CreatePackageDetai
 {
     public CreatePackageDetailValidator()
     {
-        RuleFor(x => x.PackageID).GreaterThan(0);
+        RuleFor(x => x.PackageId).GreaterThan(0);
         RuleFor(x => x.FeatureName).NotEmpty().MaximumLength(100);
         When(x => x.Unit != null, () => RuleFor(x => x.Unit!).MaximumLength(20));
         When(x => x.Limit.HasValue, () => RuleFor(x => x.Limit!.Value).GreaterThanOrEqualTo(0));

@@ -2,10 +2,10 @@ namespace Eduprompt.Domain.DTOs.Transaction;
 
 public class TransactionDto
 {
-    public int TransactionID { get; set; }
-    public int PaymentMethodID { get; set; }
-    public int WalletID { get; set; }
-    public int? OrderID { get; set; }
+    public int TransactionId { get; set; }
+    public int PaymentMethodId { get; set; }
+    public int WalletId { get; set; }
+    public int? OrderId { get; set; }
     public decimal Amount { get; set; }
     public string TransactionType { get; set; } = string.Empty;
     public DateTime TransactionDate { get; set; }

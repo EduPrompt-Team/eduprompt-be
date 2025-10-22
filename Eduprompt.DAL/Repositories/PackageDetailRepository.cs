@@ -1,4 +1,5 @@
 using Eduprompt.Domain.Entities;
+using Eduprompt.DAL.DbContexts;
 using Eduprompt.Domain.Interface.Repository;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,26 +7,26 @@ namespace Eduprompt.DAL.Repositories;
 
 public class PackageDetailRepository : IPackageDetailRepository
 {
-    private readonly EdupromptContext _context;
+    private readonly EdupromptV2Context _context;
 
-    public PackageDetailRepository(EdupromptContext context)
+    public PackageDetailRepository(EdupromptV2Context context)
     {
         _context = context;
     }
 
-    public async Task<PackageDetail?> GetByIdAsync(int detailId)
+    public async Task<PackageDetail?> GetByIdAsync(int DetailId)
     {
         return await _context.PackageDetails
             .Include(d => d.Package)
-            .FirstOrDefaultAsync(d => d.DetailID == detailId);
+            .FirstOrDefaultAsync(d => d.DetailId == DetailId);
     }
 
-    public async Task<IEnumerable<PackageDetail>> GetByPackageIdAsync(int packageId)
+    public async Task<IEnumerable<PackageDetail>> GetByPackageIdAsync(int PackageId)
     {
         return await _context.PackageDetails
             .Include(d => d.Package)
-            .Where(d => d.PackageID == packageId)
-            .OrderBy(d => d.DetailID)
+            .Where(d => d.PackageId == PackageId)
+            .OrderBy(d => d.DetailId)
             .ToListAsync();
     }
 
@@ -37,7 +38,7 @@ public class PackageDetailRepository : IPackageDetailRepository
         // Reload with navigation properties
         return await _context.PackageDetails
             .Include(d => d.Package)
-            .FirstOrDefaultAsync(d => d.DetailID == detail.DetailID) ?? detail;
+            .FirstOrDefaultAsync(d => d.DetailId == detail.DetailId) ?? detail;
     }
 
     public async Task<PackageDetail> UpdateAsync(PackageDetail detail)
@@ -47,9 +48,9 @@ public class PackageDetailRepository : IPackageDetailRepository
         return detail;
     }
 
-    public async Task<bool> DeleteAsync(int detailId)
+    public async Task<bool> DeleteAsync(int DetailId)
     {
-        var detail = await _context.PackageDetails.FindAsync(detailId);
+        var detail = await _context.PackageDetails.FindAsync(DetailId);
         if (detail == null) return false;
 
         _context.PackageDetails.Remove(detail);
@@ -57,24 +58,24 @@ public class PackageDetailRepository : IPackageDetailRepository
         return true;
     }
 
-    public async Task<bool> ExistsAsync(int detailId)
+    public async Task<bool> ExistsAsync(int DetailId)
     {
-        return await _context.PackageDetails.AnyAsync(d => d.DetailID == detailId);
+        return await _context.PackageDetails.AnyAsync(d => d.DetailId == DetailId);
     }
 
-    public async Task<IEnumerable<PackageDetail>> GetIncludedFeaturesByPackageIdAsync(int packageId)
+    public async Task<IEnumerable<PackageDetail>> GetIncludedFeaturesByPackageIdAsync(int PackageId)
     {
         return await _context.PackageDetails
             .Include(d => d.Package)
-            .Where(d => d.PackageID == packageId)
-            .OrderBy(d => d.DetailID)
+            .Where(d => d.PackageId == PackageId)
+            .OrderBy(d => d.DetailId)
             .ToListAsync();
     }
 
-    public async Task<bool> DeleteByPackageIdAsync(int packageId)
+    public async Task<bool> DeleteByPackageIdAsync(int PackageId)
     {
         var details = await _context.PackageDetails
-            .Where(d => d.PackageID == packageId)
+            .Where(d => d.PackageId == PackageId)
             .ToListAsync();
 
         if (!details.Any()) return false;

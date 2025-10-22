@@ -5,7 +5,7 @@ namespace Eduprompt.Domain.DTOs.StorageTemplate;
 public class StorageTemplateCreateDto
 {
     [Required(ErrorMessage = "Package ID is required")]
-    public int PackageID { get; set; }
+    public int PackageId { get; set; }
     
     [Required]
     [StringLength(200)]

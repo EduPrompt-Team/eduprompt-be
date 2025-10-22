@@ -5,10 +5,10 @@ namespace Eduprompt.Domain.DTOs.PromptInstance;
 public class CreatePromptInstanceDto
 {
     [Required]
-    public int UserID { get; set; }
+    public int UserId { get; set; }
 
     [Required]
-    public int PackageID { get; set; }
+    public int PackageId { get; set; }
 
     [Required]
     [StringLength(200)]

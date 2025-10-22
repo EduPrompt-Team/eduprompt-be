@@ -14,15 +14,15 @@ public class ExpectedOutputService : IExpectedOutputService
         _expectedOutputRepository = expectedOutputRepository;
     }
 
-    public async Task<ExpectedOutputDto?> GetByIdAsync(int outputId)
+    public async Task<ExpectedOutputDto?> GetByIdAsync(int OutputId)
     {
-        var output = await _expectedOutputRepository.GetByIdAsync(outputId);
+        var output = await _expectedOutputRepository.GetByIdAsync(OutputId);
         return output != null ? MapToDto(output) : null;
     }
 
-    public async Task<IEnumerable<ExpectedOutputDto>> GetByInstanceIdAsync(int instanceId)
+    public async Task<IEnumerable<ExpectedOutputDto>> GetByInstanceIdAsync(int InstanceId)
     {
-        var outputs = await _expectedOutputRepository.GetByInstanceIdAsync(instanceId);
+        var outputs = await _expectedOutputRepository.GetByInstanceIdAsync(InstanceId);
         return outputs.Select(MapToDto);
     }
 
@@ -30,7 +30,7 @@ public class ExpectedOutputService : IExpectedOutputService
     {
         var output = new ExpectedOutput
         {
-            PromptInstanceID = createDto.InstanceID,
+            PromptInstanceId = createDto.PromptInstanceId,
             OutputName = createDto.OutputName
         };
 
@@ -38,9 +38,9 @@ public class ExpectedOutputService : IExpectedOutputService
         return MapToDto(createdOutput);
     }
 
-    public async Task<ExpectedOutputDto> UpdateAsync(int outputId, CreateExpectedOutputDto updateDto)
+    public async Task<ExpectedOutputDto> UpdateAsync(int OutputId, CreateExpectedOutputDto updateDto)
     {
-        var output = await _expectedOutputRepository.GetByIdAsync(outputId);
+        var output = await _expectedOutputRepository.GetByIdAsync(OutputId);
         if (output == null) throw new KeyNotFoundException("Expected output not found");
 
         output.OutputName = updateDto.OutputName;
@@ -49,24 +49,24 @@ public class ExpectedOutputService : IExpectedOutputService
         return MapToDto(updatedOutput);
     }
 
-    public async Task<bool> DeleteAsync(int outputId)
+    public async Task<bool> DeleteAsync(int OutputId)
     {
-        return await _expectedOutputRepository.DeleteAsync(outputId);
+        return await _expectedOutputRepository.DeleteAsync(OutputId);
     }
 
     private static ExpectedOutputDto MapToDto(ExpectedOutput output)
     {
         return new ExpectedOutputDto
         {
-            OutputId = output.OutputID,
-            InstanceID = output.PromptInstanceID,
+            OutputId = output.OutputId,
+            PromptInstanceId = output.PromptInstanceId,
             OutputName = output.OutputName,
             Status = "Active",
             UpdatedDate = DateTime.UtcNow,
             OutputDetails = output.OutputDetails?.Select(od => new OutputDetailDto
             {
-                DetailId = od.DetailID,
-                OutputId = od.OutputID,
+                DetailId = od.DetailId,
+                OutputId = od.OutputId,
                 Description = od.DetailValue,
                 OutputSize = null,
                 CreatedDate = DateTime.UtcNow,

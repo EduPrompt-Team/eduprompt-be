@@ -15,11 +15,11 @@ namespace Eduprompt.API.Controllers;
 [Authorize]
 public class PackageCategoryController : ControllerBase
 {
-    private readonly IPackageCategoryService _packageCategoryService;
+    private readonly IPackageCategoryService _packagePackageCategoryService;
 
-    public PackageCategoryController(IPackageCategoryService packageCategoryService)
+    public PackageCategoryController(IPackageCategoryService packagePackageCategoryService)
     {
-        _packageCategoryService = packageCategoryService;
+        _packagePackageCategoryService = packagePackageCategoryService;
     }
 
     /// <summary>
@@ -34,7 +34,7 @@ public class PackageCategoryController : ControllerBase
     {
         try
         {
-            var categories = await _packageCategoryService.GetAllAsync();
+            var categories = await _packagePackageCategoryService.GetAllAsync();
             return Ok(categories);
         }
         catch (Exception ex)
@@ -55,7 +55,7 @@ public class PackageCategoryController : ControllerBase
     {
         try
         {
-            var categories = await _packageCategoryService.GetActiveCategoriesAsync();
+            var categories = await _packagePackageCategoryService.GetActiveCategoriesAsync();
             return Ok(categories);
         }
         catch (Exception ex)
@@ -72,7 +72,7 @@ public class PackageCategoryController : ControllerBase
     {
         try
         {
-            var category = await _packageCategoryService.GetByIdAsync(id);
+            var category = await _packagePackageCategoryService.GetByIdAsync(id);
             if (category == null)
                 return NotFound();
 
@@ -92,8 +92,8 @@ public class PackageCategoryController : ControllerBase
     {
         try
         {
-            var category = await _packageCategoryService.CreateAsync(createDto);
-            return CreatedAtAction(nameof(GetById), new { id = category.CategoryID }, category);
+            var category = await _packagePackageCategoryService.CreateAsync(createDto);
+            return CreatedAtAction(nameof(GetById), new { id = category.CategoryId }, category);
         }
         catch (Exception ex)
         {
@@ -109,7 +109,7 @@ public class PackageCategoryController : ControllerBase
     {
         try
         {
-            var category = await _packageCategoryService.UpdateAsync(id, updateDto);
+            var category = await _packagePackageCategoryService.UpdateAsync(id, updateDto);
             return Ok(category);
         }
         catch (Exception ex)
@@ -126,7 +126,7 @@ public class PackageCategoryController : ControllerBase
     {
         try
         {
-            var result = await _packageCategoryService.DeleteAsync(id);
+            var result = await _packagePackageCategoryService.DeleteAsync(id);
             if (!result)
                 return NotFound();
 
@@ -146,7 +146,7 @@ public class PackageCategoryController : ControllerBase
     {
         try
         {
-            var count = await _packageCategoryService.GetPackageCountByCategoryIdAsync(id);
+            var count = await _packagePackageCategoryService.GetPackageCountByCategoryIdAsync(id);
             return Ok(new { count });
         }
         catch (Exception ex)

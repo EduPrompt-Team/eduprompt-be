@@ -42,23 +42,23 @@ public class PostController : ControllerBase
     /// <summary>
     /// Get post by ID
     /// </summary>
-    /// <param name="postId">Post ID</param>
+    /// <param name="PostId">Post ID</param>
     /// <returns>Post details</returns>
     /// <response code="200">Post found</response>
     /// <response code="400">Error retrieving post</response>
     /// <response code="404">Post not found</response>
-    [HttpGet("{postId}")]
+    [HttpGet("{PostId}")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetById(int postId)
+    public async Task<IActionResult> GetById(int PostId)
     {
         try
         {
-            var post = await _postService.GetByIdAsync(postId);
+            var post = await _postService.GetByIdAsync(PostId);
             if (post == null)
                 return NotFound(new { message = "Post not found" });
 
             // Increment view count
-            await _postService.IncrementViewCountAsync(postId);
+            await _postService.IncrementViewCountAsync(PostId);
 
             return Ok(post);
         }
@@ -71,13 +71,13 @@ public class PostController : ControllerBase
     /// <summary>
     /// Lấy bài đăng theo User ID
     /// </summary>
-    [HttpGet("user/{userId}")]
+    [HttpGet("user/{UserId}")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetByUserId(int userId)
+    public async Task<IActionResult> GetByUserId(int UserId)
     {
         try
         {
-            var posts = await _postService.GetByUserIdAsync(userId);
+            var posts = await _postService.GetByUserIdAsync(UserId);
             return Ok(posts);
         }
         catch (Exception ex)
@@ -153,7 +153,7 @@ public class PostController : ControllerBase
         try
         {
             var post = await _postService.CreateAsync(createPostDto);
-            return CreatedAtAction(nameof(GetById), new { postId = post.PostID }, post);
+            return CreatedAtAction(nameof(GetById), new { PostId = post.PostId }, post);
         }
         catch (Exception ex)
         {
@@ -164,13 +164,13 @@ public class PostController : ControllerBase
     /// <summary>
     /// Cập nhật bài đăng
     /// </summary>
-    [HttpPut("{postId}")]
+    [HttpPut("{PostId}")]
     [Authorize]
-    public async Task<IActionResult> Update(int postId, [FromBody] CreatePostDto updatePostDto)
+    public async Task<IActionResult> Update(int PostId, [FromBody] CreatePostDto updatePostDto)
     {
         try
         {
-            var post = await _postService.UpdateAsync(postId, updatePostDto);
+            var post = await _postService.UpdateAsync(PostId, updatePostDto);
             return Ok(post);
         }
         catch (ArgumentException ex)
@@ -186,13 +186,13 @@ public class PostController : ControllerBase
     /// <summary>
     /// Xóa bài đăng
     /// </summary>
-    [HttpDelete("{postId}")]
+    [HttpDelete("{PostId}")]
     [Authorize]
-    public async Task<IActionResult> Delete(int postId)
+    public async Task<IActionResult> Delete(int PostId)
     {
         try
         {
-            var result = await _postService.DeleteAsync(postId);
+            var result = await _postService.DeleteAsync(PostId);
             if (!result)
                 return NotFound(new { message = "Post not found" });
 
@@ -207,13 +207,13 @@ public class PostController : ControllerBase
     /// <summary>
     /// Like bài đăng
     /// </summary>
-    [HttpPost("{postId}/like")]
+    [HttpPost("{PostId}/like")]
     [Authorize]
-    public async Task<IActionResult> LikePost(int postId)
+    public async Task<IActionResult> LikePost(int PostId)
     {
         try
         {
-            var result = await _postService.IncrementLikeCountAsync(postId);
+            var result = await _postService.IncrementLikeCountAsync(PostId);
             if (!result)
                 return NotFound(new { message = "Post not found" });
 
@@ -228,13 +228,13 @@ public class PostController : ControllerBase
     /// <summary>
     /// Lấy đánh giá trung bình của bài đăng
     /// </summary>
-    [HttpGet("{postId}/rating")]
+    [HttpGet("{PostId}/rating")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetAverageRating(int postId)
+    public async Task<IActionResult> GetAverageRating(int PostId)
     {
         try
         {
-            var rating = await _postService.GetAverageRatingAsync(postId);
+            var rating = await _postService.GetAverageRatingAsync(PostId);
             return Ok(new { averageRating = rating });
         }
         catch (Exception ex)

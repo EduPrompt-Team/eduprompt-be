@@ -4,7 +4,7 @@ namespace Eduprompt.Domain.DTOs.Package;
 
 public class CreatePackageDto
 {
-    public int? CategoryID { get; set; }
+    public int? CategoryId { get; set; }
 
     [Required]
     [StringLength(100)]

@@ -1,55 +1,55 @@
-using Eduprompt.Domain.DTOs.APIKey;
+using Eduprompt.Domain.DTOs.Apikey;
 using Eduprompt.Domain.Entities;
 using Eduprompt.Domain.Interface.Repository;
 using Eduprompt.Domain.Interface.Service;
 
 namespace Eduprompt.BLL.Services;
 
-public class APIKeyService : IAPIKeyService
+public class ApikeyService : IApikeyService
 {
-    private readonly IAPIKeyRepository _apiKeyRepository;
+    private readonly IApikeyRepository _apiKeyRepository;
     private readonly IPackageRepository _packageRepository;
 
-    public APIKeyService(IAPIKeyRepository apiKeyRepository, IPackageRepository packageRepository)
+    public ApikeyService(IApikeyRepository apiKeyRepository, IPackageRepository packageRepository)
     {
         _apiKeyRepository = apiKeyRepository;
         _packageRepository = packageRepository;
     }
 
-    public async Task<APIKeyDto?> GetByIdAsync(int apiKeyId)
+    public async Task<ApikeyDto?> GetByIdAsync(int ApikeyId)
     {
-        var entity = await _apiKeyRepository.GetByIdAsync(apiKeyId);
+        var entity = await _apiKeyRepository.GetByIdAsync(ApikeyId);
         return entity == null ? null : MapToDto(entity);
     }
 
-    public async Task<IEnumerable<APIKeyDto>> GetByPackageIdAsync(int packageId)
+    public async Task<IEnumerable<ApikeyDto>> GetByPackageIdAsync(int PackageId)
     {
-        var items = await _apiKeyRepository.GetByPackageIdAsync(packageId);
+        var items = await _apiKeyRepository.GetByPackageIdAsync(PackageId);
         return items.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<APIKeyDto>> GetActiveKeysByPackageIdAsync(int packageId)
+    public async Task<IEnumerable<ApikeyDto>> GetActiveKeysByPackageIdAsync(int PackageId)
     {
-        var items = await _apiKeyRepository.GetActiveKeysByPackageIdAsync(packageId);
+        var items = await _apiKeyRepository.GetActiveKeysByPackageIdAsync(PackageId);
         return items.Select(MapToDto);
     }
 
-    public async Task<APIKeyDto?> GetActiveKeyByProviderAsync(string provider)
+    public async Task<ApikeyDto?> GetActiveKeyByProviderAsync(string provider)
     {
         var item = await _apiKeyRepository.GetActiveKeyByProviderAsync(provider);
         return item == null ? null : MapToDto(item);
     }
 
-    public async Task<APIKeyDto> CreateAsync(CreateAPIKeyDto createDto)
+    public async Task<ApikeyDto> CreateAsync(CreateApikeyDto createDto)
     {
         // Ensure package exists
-        var package = await _packageRepository.GetByIdAsync(createDto.PackageID);
+        var package = await _packageRepository.GetByIdAsync(createDto.PackageId);
         if (package == null) throw new ArgumentException("Package not found");
 
-        var entity = new APIKey
+        var entity = new Apikey
         {
-            PackageID = createDto.PackageID,
-            APIProvider = createDto.APIProvider,
+            PackageId = createDto.PackageId,
+            Apiprovider = createDto.Apiprovider,
             KeyHash = createDto.KeyHash,
             UsageLimit = createDto.UsageLimit,
             CurrentUsage = 0,
@@ -60,12 +60,12 @@ public class APIKeyService : IAPIKeyService
         return MapToDto(created);
     }
 
-    public async Task<APIKeyDto> UpdateAsync(int apiKeyId, CreateAPIKeyDto updateDto)
+    public async Task<ApikeyDto> UpdateAsync(int ApikeyId, CreateApikeyDto updateDto)
     {
-        var apiKey = await _apiKeyRepository.GetByIdAsync(apiKeyId);
+        var apiKey = await _apiKeyRepository.GetByIdAsync(ApikeyId);
         if (apiKey == null) throw new KeyNotFoundException("API key not found");
 
-        apiKey.APIProvider = updateDto.APIProvider;
+        apiKey.Apiprovider = updateDto.Apiprovider;
         apiKey.KeyHash = updateDto.KeyHash;
         apiKey.UsageLimit = updateDto.UsageLimit;
         apiKey.ExpiresAt = updateDto.ExpiresAt;
@@ -79,13 +79,13 @@ public class APIKeyService : IAPIKeyService
         return await _apiKeyRepository.DeleteAsync(id);
     }
 
-    private static APIKeyDto MapToDto(APIKey entity)
+    private static ApikeyDto MapToDto(Apikey entity)
     {
-        return new APIKeyDto
+        return new ApikeyDto
         {
-            APIKeyID = entity.APIKeyID,
-            PackageID = entity.PackageID,
-            APIProvider = entity.APIProvider,
+            ApikeyId = entity.ApikeyId,
+            PackageId = entity.PackageId,
+            Apiprovider = entity.Apiprovider,
             KeyHash = entity.KeyHash,
             UsageLimit = entity.UsageLimit,
             CurrentUsage = entity.CurrentUsage,

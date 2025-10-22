@@ -26,18 +26,22 @@ public class StorageTemplatesController : ControllerBase
     [HttpGet("my-storage")]
     public async Task<IActionResult> GetMyStorage()
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        var storage = await _storageService.GetUserStorageAsync(userId);
+        // Temporarily use default UserId for testing since authorize is disabled
+        var UserId = 1; // Default user ID for testing
+        // var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var storage = await _storageService.GetUserStorageAsync(UserId);
         return Ok(storage);
     }
 
     [HttpPost]
     public async Task<IActionResult> AddToStorage([FromBody] StorageTemplateCreateDto storageDto)
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        var created = await _storageService.AddToStorageAsync(userId, new StorageTemplateCreateServiceDto
+        // Temporarily use default UserId for testing since authorize is disabled
+        var UserId = 1; // Default user ID for testing
+        // var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var created = await _storageService.AddToStorageAsync(UserId, new StorageTemplateCreateServiceDto
         {
-            TemplateId = storageDto.PackageID
+            TemplateId = storageDto.PackageId
         });
         return CreatedAtAction(nameof(GetMyStorage), created);
     }
@@ -45,18 +49,22 @@ public class StorageTemplatesController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> RemoveFromStorage(int id)
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        var result = await _storageService.RemoveFromStorageAsync(id, userId);
+        // Temporarily use default UserId for testing since authorize is disabled
+        var UserId = 1; // Default user ID for testing
+        // var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var result = await _storageService.RemoveFromStorageAsync(id, UserId);
         if (!result)
             return NotFound(new { message = $"Storage item with ID {id} not found" });
         return NoContent();
     }
 
-    [HttpGet("check/{packageId}")]
-    public async Task<IActionResult> CheckStorage(int packageId)
+    [HttpGet("check/{PackageId}")]
+    public async Task<IActionResult> CheckStorage(int PackageId)
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        var isInStorage = await _storageService.IsInStorageAsync(userId, packageId);
-        return Ok(new { packageId, isInStorage });
+        // Temporarily use default UserId for testing since authorize is disabled
+        var UserId = 1; // Default user ID for testing
+        // var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var isInStorage = await _storageService.IsInStorageAsync(UserId, PackageId);
+        return Ok(new { PackageId, isInStorage });
     }
 } 

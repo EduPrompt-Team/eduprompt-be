@@ -21,14 +21,14 @@ public class PackageDetailController : ControllerBase
     /// <summary>
     /// Get package details by package ID (Public)
     /// </summary>
-    /// <param name="packageId">Package ID</param>
+    /// <param name="PackageId">Package ID</param>
     /// <returns>List of details for the package</returns>
     /// <response code="200">Package details retrieved successfully</response>
-    [HttpGet("package/{packageId}")]
+    [HttpGet("package/{PackageId}")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetByPackage(int packageId)
+    public async Task<IActionResult> GetByPackage(int PackageId)
     {
-        return Ok(await _service.GetByPackageIdAsync(packageId));
+        return Ok(await _service.GetByPackageIdAsync(PackageId));
     }
 
     /// <summary>
