@@ -10,6 +10,7 @@ public class GoogleLoginRequestDto
     /// </summary>
     public string IdToken { get; set; } = string.Empty;
     
+    public string? Provider { get; set; } = "Google";
     /// <summary>
     /// Google access token from client
     /// </summary>
