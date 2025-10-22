@@ -8,7 +8,7 @@ public class CreateConversationValidator : AbstractValidator<CreateConversationD
 {
     public CreateConversationValidator()
     {
-        RuleFor(x => x.UserID).GreaterThan(0);
+        RuleFor(x => x.UserId).GreaterThan(0);
         RuleFor(x => x.Title).NotEmpty().MaximumLength(200);
     }
 }
@@ -17,7 +17,7 @@ public class CreateMessageValidator : AbstractValidator<CreateMessageDto>
 {
     public CreateMessageValidator()
     {
-        RuleFor(x => x.ConversationID).GreaterThan(0);
+        RuleFor(x => x.ConversationId).GreaterThan(0);
         RuleFor(x => x.Content).NotEmpty();
     }
 }

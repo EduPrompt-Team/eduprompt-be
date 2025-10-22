@@ -5,7 +5,7 @@ namespace Eduprompt.Domain.DTOs.Wallet;
 public class CreateWalletDto
 {
     [Required]
-    public int UserID { get; set; }
+    public int UserId { get; set; }
 
     [Required]
     [StringLength(10)]

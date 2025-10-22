@@ -25,17 +25,17 @@ public class FeedbackController : ControllerBase
     /// <summary>
     /// Get feedback by post ID
     /// </summary>
-    /// <param name="postId">Post ID</param>
+    /// <param name="PostId">Post ID</param>
     /// <returns>List of feedback for the post</returns>
     /// <response code="200">Feedback retrieved successfully</response>
     /// <response code="400">Error retrieving feedback</response>
     /// <response code="401">User not authenticated</response>
-    [HttpGet("post/{postId}")]
-    public async Task<IActionResult> GetByPostId(int postId)
+    [HttpGet("post/{PostId}")]
+    public async Task<IActionResult> GetByPostId(int PostId)
     {
         try
         {
-            var feedbacks = await _feedbackService.GetByPostIdAsync(postId);
+            var feedbacks = await _feedbackService.GetByPostIdAsync(PostId);
             return Ok(feedbacks);
         }
         catch (Exception ex)
@@ -47,17 +47,17 @@ public class FeedbackController : ControllerBase
     /// <summary>
     /// Get feedback by user ID
     /// </summary>
-    /// <param name="userId">User ID</param>
+    /// <param name="UserId">User ID</param>
     /// <returns>List of feedback by the user</returns>
     /// <response code="200">Feedback retrieved successfully</response>
     /// <response code="400">Error retrieving feedback</response>
     /// <response code="401">User not authenticated</response>
-    [HttpGet("user/{userId}")]
-    public async Task<IActionResult> GetByUserId(int userId)
+    [HttpGet("user/{UserId}")]
+    public async Task<IActionResult> GetByUserId(int UserId)
     {
         try
         {
-            var feedbacks = await _feedbackService.GetByUserIdAsync(userId);
+            var feedbacks = await _feedbackService.GetByUserIdAsync(UserId);
             return Ok(feedbacks);
         }
         catch (Exception ex)
@@ -95,7 +95,7 @@ public class FeedbackController : ControllerBase
         try
         {
             var feedback = await _feedbackService.CreateAsync(createDto);
-            return CreatedAtAction(nameof(GetById), new { id = feedback.FeedbackID }, feedback);
+            return CreatedAtAction(nameof(GetById), new { id = feedback.FeedbackId }, feedback);
         }
         catch (Exception ex)
         {
@@ -143,12 +143,12 @@ public class FeedbackController : ControllerBase
     /// <summary>
     /// Lấy đánh giá trung bình của bài đăng
     /// </summary>
-    [HttpGet("post/{postId}/rating")]
-    public async Task<IActionResult> GetAverageRating(int postId)
+    [HttpGet("post/{PostId}/rating")]
+    public async Task<IActionResult> GetAverageRating(int PostId)
     {
         try
         {
-            var averageRating = await _feedbackService.GetAverageRatingByPostIdAsync(postId);
+            var averageRating = await _feedbackService.GetAverageRatingByPostIdAsync(PostId);
             return Ok(new { averageRating });
         }
         catch (Exception ex)
@@ -160,12 +160,12 @@ public class FeedbackController : ControllerBase
     /// <summary>
     /// Lấy số lượng phản hồi của bài đăng
     /// </summary>
-    [HttpGet("post/{postId}/count")]
-    public async Task<IActionResult> GetFeedbackCount(int postId)
+    [HttpGet("post/{PostId}/count")]
+    public async Task<IActionResult> GetFeedbackCount(int PostId)
     {
         try
         {
-            var count = await _feedbackService.GetFeedbackCountByPostIdAsync(postId);
+            var count = await _feedbackService.GetFeedbackCountByPostIdAsync(PostId);
             return Ok(new { count });
         }
         catch (Exception ex)
@@ -177,12 +177,12 @@ public class FeedbackController : ControllerBase
     /// <summary>
     /// Lấy phản hồi gần đây
     /// </summary>
-    [HttpGet("post/{postId}/recent")]
-    public async Task<IActionResult> GetRecent(int postId, [FromQuery] int count = 10)
+    [HttpGet("post/{PostId}/recent")]
+    public async Task<IActionResult> GetRecent(int PostId, [FromQuery] int count = 10)
     {
         try
         {
-            var feedbacks = await _feedbackService.GetRecentFeedbacksAsync(postId, count);
+            var feedbacks = await _feedbackService.GetRecentFeedbacksAsync(PostId, count);
             return Ok(feedbacks);
         }
         catch (Exception ex)

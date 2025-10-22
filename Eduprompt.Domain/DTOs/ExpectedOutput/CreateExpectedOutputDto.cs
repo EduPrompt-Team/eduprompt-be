@@ -5,7 +5,7 @@ namespace Eduprompt.Domain.DTOs.ExpectedOutput;
 public class CreateExpectedOutputDto
 {
     [Required]
-    public int InstanceID { get; set; }
+    public int PromptInstanceId { get; set; }
 
     [Required]
     [StringLength(100)]

@@ -1,10 +1,10 @@
-namespace Eduprompt.Domain.DTOs.APIKey;
+namespace Eduprompt.Domain.DTOs.Apikey;
 
-public class APIKeyDto
+public class ApikeyDto
 {
-    public int APIKeyID { get; set; }
-    public int PackageID { get; set; }
-    public string APIProvider { get; set; } = string.Empty;
+    public int ApikeyId { get; set; }
+    public int PackageId { get; set; }
+    public string Apiprovider { get; set; } = string.Empty;
     public string KeyHash { get; set; } = string.Empty;
     public int? UsageLimit { get; set; }
     public int CurrentUsage { get; set; }

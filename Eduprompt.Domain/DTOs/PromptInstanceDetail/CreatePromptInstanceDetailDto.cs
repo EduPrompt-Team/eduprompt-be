@@ -5,7 +5,7 @@ namespace Eduprompt.Domain.DTOs.PromptInstanceDetail;
 public class CreatePromptInstanceDetailDto
 {
     [Required]
-    public int InstanceID { get; set; }
+    public int PromptInstanceId { get; set; }
 
     [Required]
     [StringLength(100)]

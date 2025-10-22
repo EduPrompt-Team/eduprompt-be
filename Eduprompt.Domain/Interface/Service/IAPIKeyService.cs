@@ -1,16 +1,16 @@
-using Eduprompt.Domain.DTOs.APIKey;
+using Eduprompt.Domain.DTOs.Apikey;
 
 namespace Eduprompt.Domain.Interface.Service;
 
-public interface IAPIKeyService
+public interface IApikeyService
 {
-    Task<APIKeyDto?> GetByIdAsync(int apiKeyId);
-    Task<IEnumerable<APIKeyDto>> GetByPackageIdAsync(int packageId);
-    Task<IEnumerable<APIKeyDto>> GetActiveKeysByPackageIdAsync(int packageId);
-    Task<APIKeyDto?> GetActiveKeyByProviderAsync(string provider);
-    Task<APIKeyDto> CreateAsync(CreateAPIKeyDto createDto);
-    Task<APIKeyDto> UpdateAsync(int apiKeyId, CreateAPIKeyDto updateDto);
-    Task<bool> DeleteAsync(int apiKeyId);
+    Task<ApikeyDto?> GetByIdAsync(int ApikeyId);
+    Task<IEnumerable<ApikeyDto>> GetByPackageIdAsync(int packageId);
+    Task<IEnumerable<ApikeyDto>> GetActiveKeysByPackageIdAsync(int packageId);
+    Task<ApikeyDto?> GetActiveKeyByProviderAsync(string provider);
+    Task<ApikeyDto> CreateAsync(CreateApikeyDto createDto);
+    Task<ApikeyDto> UpdateAsync(int ApikeyId, CreateApikeyDto updateDto);
+    Task<bool> DeleteAsync(int ApikeyId);
 }
 
 

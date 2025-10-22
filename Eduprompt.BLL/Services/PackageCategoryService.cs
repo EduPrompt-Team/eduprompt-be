@@ -1,4 +1,4 @@
-﻿using Eduprompt.Domain.DTOs.PackageCategory;
+using Eduprompt.Domain.DTOs.PackageCategory;
 using Eduprompt.Domain.Entities;
 using Eduprompt.Domain.Interface.Repository;
 using Eduprompt.Domain.Interface.Service;
@@ -70,7 +70,7 @@ public class PackageCategoryService : IPackageCategoryService
     {
         return new PackageCategoryDto
         {
-            CategoryID = category.CategoryID,
+            CategoryId = category.CategoryId,
             CategoryName = category.CategoryName,
             Description = category.Description,
             DisplayOrder = category.DisplayOrder,

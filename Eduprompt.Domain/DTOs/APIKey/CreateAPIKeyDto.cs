@@ -1,15 +1,15 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Eduprompt.Domain.DTOs.APIKey;
+namespace Eduprompt.Domain.DTOs.Apikey;
 
-public class CreateAPIKeyDto
+public class CreateApikeyDto
 {
     [Required]
-    public int PackageID { get; set; }
+    public int PackageId { get; set; }
 
     [Required]
     [StringLength(100)]
-    public string APIProvider { get; set; } = string.Empty;
+    public string Apiprovider { get; set; } = string.Empty;
 
     [Required]
     [StringLength(500)]

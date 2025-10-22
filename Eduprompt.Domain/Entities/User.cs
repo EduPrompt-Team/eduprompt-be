@@ -2,74 +2,56 @@
 #nullable disable
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Eduprompt.Domain.Entities;
 
-[Table("Users")]
 public partial class User
 {
-    [Key]
-    [Column("UserID")]
     public int UserId { get; set; }
 
-    [Column("RoleId")]
     public int? RoleId { get; set; }
 
-    [Column("FullName")]
     public string FullName { get; set; }
 
-    [Column("Email")]
     public string Email { get; set; }
 
-    [Column("Phone")]
     public string Phone { get; set; }
 
-    [Column("ProfileUrl")]
     public string ProfileUrl { get; set; }
 
-    [Column("CreatedDate")]
     public DateTime? CreatedDate { get; set; }
 
-    [Column("UpdatedDate")]
     public DateTime? UpdatedDate { get; set; }
 
-    [Column("Status")]
     public string Status { get; set; }
 
-    [Column("Password")]
     public string Password { get; set; }
 
-    [Column("GoogleId")]
     public string GoogleId { get; set; }
 
-    [Column("RefreshToken")]
     public string RefreshToken { get; set; }
 
-    [Column("RefreshTokenExpiryTime")]
     public DateTime? RefreshTokenExpiryTime { get; set; }
 
-    public virtual Cart Cart { get; set; }
+    public virtual ICollection<Aihistory> Aihistories { get; set; } = new List<Aihistory>();
+
+    public virtual ICollection<Cart> Carts { get; set; } = new List<Cart>();
+
+    public virtual ICollection<Conversation> Conversations { get; set; } = new List<Conversation>();
+
+    public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 
-    // public virtual ICollection<PromptTemplate> PromptTemplates { get; set; } = new List<PromptTemplate>(); // Removed - PromptTemplate entity deleted
+    public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
 
-    // public virtual ICollection<Review> Reviews { get; set; } = new List<Review>(); // Removed - Review entity deleted
+    public virtual ICollection<PromptInstance> PromptInstances { get; set; } = new List<PromptInstance>();
 
     public virtual Role Role { get; set; }
 
     public virtual ICollection<StorageTemplate> StorageTemplates { get; set; } = new List<StorageTemplate>();
 
-    public virtual ICollection<Wishlist> Wishlists { get; set; } = new List<Wishlist>();
+    public virtual ICollection<Wallet> Wallets { get; set; } = new List<Wallet>();
 
-    // New navigation properties
-    public virtual Wallet Wallet { get; set; }
-    public virtual ICollection<PaymentMethod> PaymentMethods { get; set; } = new List<PaymentMethod>();
-    public virtual ICollection<Conversation> Conversations { get; set; } = new List<Conversation>();
-    public virtual ICollection<AIHistory> AIHistories { get; set; } = new List<AIHistory>();
-    public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
-    public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
-    public virtual ICollection<PromptInstance> PromptInstances { get; set; } = new List<PromptInstance>();
+    public virtual ICollection<Wishlist> Wishlists { get; set; } = new List<Wishlist>();
 }

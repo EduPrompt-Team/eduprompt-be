@@ -31,7 +31,7 @@ public class TransactionController : ControllerBase
     /// <response code="403">User not authorized (Admin role required)</response>
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> GetAll()
+    public IActionResult GetAll()
     {
         // Transaction table structure mismatch with database
         return Ok(new List<object>());
@@ -40,13 +40,13 @@ public class TransactionController : ControllerBase
     /// <summary>
     /// Get transactions by wallet ID
     /// </summary>
-    /// <param name="walletId">Wallet ID</param>
+    /// <param name="WalletId">Wallet ID</param>
     /// <returns>List of transactions for the wallet</returns>
     /// <response code="200">Transactions retrieved successfully</response>
     /// <response code="400">Error retrieving transactions</response>
     /// <response code="401">User not authenticated</response>
-    [HttpGet("wallet/{walletId}")]
-    public async Task<IActionResult> GetByWalletId(int walletId)
+    [HttpGet("wallet/{WalletId}")]
+    public IActionResult GetByWalletId(int WalletId)
     {
         // Transaction table structure issue - temporarily disabled
         return Ok(new List<object>());
@@ -55,13 +55,13 @@ public class TransactionController : ControllerBase
     /// <summary>
     /// Get transactions by user ID
     /// </summary>
-    /// <param name="userId">User ID</param>
+    /// <param name="UserId">User ID</param>
     /// <returns>List of transactions for the user</returns>
     /// <response code="200">Transactions retrieved successfully</response>
     /// <response code="400">Error retrieving transactions</response>
     /// <response code="401">User not authenticated</response>
-    [HttpGet("user/{userId}")]
-    public async Task<IActionResult> GetByUserId(int userId)
+    [HttpGet("user/{UserId}")]
+    public IActionResult GetByUserId(int UserId)
     {
         // Transaction table structure mismatch with database
         return Ok(new List<object>());
@@ -77,7 +77,7 @@ public class TransactionController : ControllerBase
     /// <response code="401">User not authenticated</response>
     /// <response code="404">Transaction not found</response>
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
+    public IActionResult GetById(int id)
     {
         // Transaction table structure mismatch with database
         return Ok(new { message = "Transaction not available" });
@@ -92,7 +92,7 @@ public class TransactionController : ControllerBase
     /// <response code="400">Invalid transaction data</response>
     /// <response code="401">User not authenticated</response>
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateTransactionDto createDto)
+    public IActionResult Create([FromBody] CreateTransactionDto createDto)
     {
         // Transaction table structure mismatch with database
         return Ok(new { message = "Transaction not available" });
@@ -109,7 +109,7 @@ public class TransactionController : ControllerBase
     /// <response code="401">User not authenticated</response>
     /// <response code="404">Transaction not found</response>
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] CreateTransactionDto updateDto)
+    public IActionResult Update(int id, [FromBody] CreateTransactionDto updateDto)
     {
         // Transaction table structure mismatch with database
         return Ok(new { message = "Transaction not available" });
@@ -124,7 +124,7 @@ public class TransactionController : ControllerBase
     /// <response code="401">User not authenticated</response>
     /// <response code="404">Transaction not found</response>
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public IActionResult Delete(int id)
     {
         // Transaction table structure mismatch with database
         return Ok(new { message = "Transaction not available" });

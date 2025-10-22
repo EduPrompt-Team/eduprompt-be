@@ -1,4 +1,5 @@
 using Eduprompt.Domain.Entities;
+using Eduprompt.DAL.DbContexts;
 using Eduprompt.Domain.Interface.Repository;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,19 +7,19 @@ namespace Eduprompt.DAL.Repositories;
 
 public class PostRepository : IPostRepository
 {
-    private readonly EdupromptContext _context;
+    private readonly EdupromptV2Context _context;
 
-    public PostRepository(EdupromptContext context)
+    public PostRepository(EdupromptV2Context context)
     {
         _context = context;
     }
 
-    public async Task<Post?> GetByIdAsync(int postId)
+    public async Task<Post?> GetByIdAsync(int PostId)
     {
         return await _context.Posts
             .Include(p => p.User)
             .Include(p => p.Feedbacks)
-            .FirstOrDefaultAsync(p => p.PostID == postId);
+            .FirstOrDefaultAsync(p => p.PostId == PostId);
     }
 
     public async Task<IEnumerable<Post>> GetAllAsync()
@@ -30,12 +31,12 @@ public class PostRepository : IPostRepository
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Post>> GetByUserIdAsync(int userId)
+    public async Task<IEnumerable<Post>> GetByUserIdAsync(int UserId)
     {
         return await _context.Posts
             .Include(p => p.User)
             .Include(p => p.Feedbacks)
-            .Where(p => p.UserID == userId)
+            .Where(p => p.UserId == UserId)
             .OrderByDescending(p => p.PublishedAt)
             .ToListAsync();
     }
@@ -69,7 +70,7 @@ public class PostRepository : IPostRepository
         return await _context.Posts
             .Include(p => p.User)
             .Include(p => p.Feedbacks)
-            .FirstOrDefaultAsync(p => p.PostID == post.PostID) ?? post;
+            .FirstOrDefaultAsync(p => p.PostId == post.PostId) ?? post;
     }
 
     public async Task<Post> UpdateAsync(Post post)
@@ -79,9 +80,9 @@ public class PostRepository : IPostRepository
         return post;
     }
 
-    public async Task<bool> DeleteAsync(int postId)
+    public async Task<bool> DeleteAsync(int PostId)
     {
-        var post = await _context.Posts.FindAsync(postId);
+        var post = await _context.Posts.FindAsync(PostId);
         if (post == null) return false;
 
         _context.Posts.Remove(post);
@@ -89,9 +90,9 @@ public class PostRepository : IPostRepository
         return true;
     }
 
-    public async Task<bool> ExistsAsync(int postId)
+    public async Task<bool> ExistsAsync(int PostId)
     {
-        return await _context.Posts.AnyAsync(p => p.PostID == postId);
+        return await _context.Posts.AnyAsync(p => p.PostId == PostId);
     }
 
     public async Task<IEnumerable<Post>> SearchAsync(string searchTerm)
@@ -101,14 +102,14 @@ public class PostRepository : IPostRepository
             .Include(p => p.Feedbacks)
             .Where(p => p.Title.Contains(searchTerm) || 
                        p.Content.Contains(searchTerm) ||
-                       (p.PostID.ToString().Contains(searchTerm)))
+                       (p.PostId.ToString().Contains(searchTerm)))
             .OrderByDescending(p => p.PublishedAt)
             .ToListAsync();
     }
 
-    public async Task<bool> IncrementViewCountAsync(int postId)
+    public async Task<bool> IncrementViewCountAsync(int PostId)
     {
-        var post = await _context.Posts.FindAsync(postId);
+        var post = await _context.Posts.FindAsync(PostId);
         if (post == null) return false;
 
         post.ViewCount++;

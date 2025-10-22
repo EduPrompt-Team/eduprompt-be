@@ -1,17 +1,17 @@
-using Eduprompt.Domain.DTOs.AIHistory;
+using Eduprompt.Domain.DTOs.Aihistory;
 
 namespace Eduprompt.Domain.Interface.Service;
 
-public interface IAIHistoryService
+public interface IAihistoryService
 {
-    Task<IEnumerable<AIHistoryDto>> GetAllAsync();
-    Task<AIHistoryDto?> GetByIdAsync(int historyId);
-    Task<IEnumerable<AIHistoryDto>> GetByUserIdAsync(int userId);
-    Task<IEnumerable<AIHistoryDto>> GetByPromptInstanceIdAsync(int promptInstanceId);
-    Task<AIHistoryDto> CreateAsync(CreateAIHistoryDto createDto);
-    Task<AIHistoryDto> UpdateAsync(int historyId, CreateAIHistoryDto updateDto);
+    Task<IEnumerable<AihistoryDto>> GetAllAsync();
+    Task<AihistoryDto?> GetByIdAsync(int historyId);
+    Task<IEnumerable<AihistoryDto>> GetByUserIdAsync(int userId);
+    Task<IEnumerable<AihistoryDto>> GetByPromptInstanceIdAsync(int promptInstanceId);
+    Task<AihistoryDto> CreateAsync(CreateAihistoryDto createDto);
+    Task<AihistoryDto> UpdateAsync(int historyId, CreateAihistoryDto updateDto);
     Task<bool> DeleteAsync(int historyId);
-    Task<IEnumerable<AIHistoryDto>> GetRecentHistoriesAsync(int userId, int count = 10);
+    Task<IEnumerable<AihistoryDto>> GetRecentHistoriesAsync(int userId, int count = 10);
     Task<int> GetHistoryCountByUserAsync(int userId);
     Task<decimal> GetTotalCostByUserAsync(int userId);
 }

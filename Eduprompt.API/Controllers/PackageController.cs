@@ -42,18 +42,18 @@ public class PackageController : ControllerBase
     /// <summary>
     /// Get package by ID
     /// </summary>
-    /// <param name="packageId">Package ID</param>
+    /// <param name="PackageId">Package ID</param>
     /// <returns>Package details</returns>
     /// <response code="200">Package found</response>
     /// <response code="400">Error retrieving package</response>
     /// <response code="404">Package not found</response>
-    [HttpGet("{packageId}")]
+    [HttpGet("{PackageId}")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetById(int packageId)
+    public async Task<IActionResult> GetById(int PackageId)
     {
         try
         {
-            var package = await _packageService.GetByIdAsync(packageId);
+            var package = await _packageService.GetByIdAsync(PackageId);
             if (package == null)
                 return NotFound(new { message = "Package not found" });
 
@@ -68,17 +68,17 @@ public class PackageController : ControllerBase
     /// <summary>
     /// Get packages by category ID
     /// </summary>
-    /// <param name="categoryId">Category ID</param>
+    /// <param name="CategoryId">Category ID</param>
     /// <returns>List of packages in the category</returns>
     /// <response code="200">Packages retrieved successfully</response>
     /// <response code="400">Error retrieving packages</response>
-    [HttpGet("category/{categoryId}")]
+    [HttpGet("category/{CategoryId}")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetByCategory(int categoryId)
+    public async Task<IActionResult> GetByCategory(int CategoryId)
     {
         try
         {
-            var packages = await _packageService.GetByCategoryIdAsync(categoryId);
+            var packages = await _packageService.GetByCategoryIdAsync(CategoryId);
             return Ok(packages);
         }
         catch (Exception ex)
@@ -172,7 +172,7 @@ public class PackageController : ControllerBase
         try
         {
             var package = await _packageService.CreateAsync(createPackageDto);
-            return CreatedAtAction(nameof(GetById), new { packageId = package.PackageID }, package);
+            return CreatedAtAction(nameof(GetById), new { PackageId = package.PackageId }, package);
         }
         catch (Exception ex)
         {
@@ -183,7 +183,7 @@ public class PackageController : ControllerBase
     /// <summary>
     /// Update package by ID (Admin only)
     /// </summary>
-    /// <param name="packageId">Package ID to update</param>
+    /// <param name="PackageId">Package ID to update</param>
     /// <param name="updatePackageDto">Updated package information</param>
     /// <returns>Updated package details</returns>
     /// <response code="200">Package updated successfully</response>
@@ -191,13 +191,13 @@ public class PackageController : ControllerBase
     /// <response code="401">User not authenticated</response>
     /// <response code="403">User not authorized (Admin role required)</response>
     /// <response code="404">Package not found</response>
-    [HttpPut("{packageId}")]
+    [HttpPut("{PackageId}")]
     [Authorize]
-    public async Task<IActionResult> Update(int packageId, [FromBody] UpdatePackageDto updatePackageDto)
+    public async Task<IActionResult> Update(int PackageId, [FromBody] UpdatePackageDto updatePackageDto)
     {
         try
         {
-            var package = await _packageService.UpdateAsync(packageId, updatePackageDto);
+            var package = await _packageService.UpdateAsync(PackageId, updatePackageDto);
             return Ok(package);
         }
         catch (ArgumentException ex)
@@ -213,20 +213,20 @@ public class PackageController : ControllerBase
     /// <summary>
     /// Delete package by ID (Admin only)
     /// </summary>
-    /// <param name="packageId">Package ID to delete</param>
+    /// <param name="PackageId">Package ID to delete</param>
     /// <returns>Success message</returns>
     /// <response code="200">Package deleted successfully</response>
     /// <response code="400">Error deleting package</response>
     /// <response code="401">User not authenticated</response>
     /// <response code="403">User not authorized (Admin role required)</response>
     /// <response code="404">Package not found</response>
-    [HttpDelete("{packageId}")]
+    [HttpDelete("{PackageId}")]
     [Authorize]
-    public async Task<IActionResult> Delete(int packageId)
+    public async Task<IActionResult> Delete(int PackageId)
     {
         try
         {
-            var result = await _packageService.DeleteAsync(packageId);
+            var result = await _packageService.DeleteAsync(PackageId);
             if (!result)
                 return NotFound(new { message = "Package not found" });
 

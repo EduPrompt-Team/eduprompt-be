@@ -4,7 +4,7 @@ public class WishlistDto
 {
     public int WishlistId { get; set; }
     public int UserId { get; set; }
-    public int PackageID { get; set; }
+    public int PackageId { get; set; }
     public DateTime AddedAt { get; set; }
     public string? Notes { get; set; }
     

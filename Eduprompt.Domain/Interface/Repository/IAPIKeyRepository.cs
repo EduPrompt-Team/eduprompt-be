@@ -2,14 +2,14 @@ using Eduprompt.Domain.Entities;
 
 namespace Eduprompt.Domain.Interface.Repository;
 
-public interface IAPIKeyRepository
+public interface IApikeyRepository
 {
-    Task<APIKey?> GetByIdAsync(int apiKeyId);
-    Task<IEnumerable<APIKey>> GetByPackageIdAsync(int packageId);
-    Task<APIKey> CreateAsync(APIKey apiKey);
-    Task<APIKey> UpdateAsync(APIKey apiKey);
-    Task<bool> DeleteAsync(int apiKeyId);
-    Task<bool> ExistsAsync(int apiKeyId);
-    Task<IEnumerable<APIKey>> GetActiveKeysByPackageIdAsync(int packageId);
-    Task<APIKey?> GetActiveKeyByProviderAsync(string provider);
+    Task<Apikey?> GetByIdAsync(int ApikeyId);
+    Task<IEnumerable<Apikey>> GetByPackageIdAsync(int packageId);
+    Task<Apikey> CreateAsync(Apikey Apikey);
+    Task<Apikey> UpdateAsync(Apikey Apikey);
+    Task<bool> DeleteAsync(int ApikeyId);
+    Task<bool> ExistsAsync(int ApikeyId);
+    Task<IEnumerable<Apikey>> GetActiveKeysByPackageIdAsync(int packageId);
+    Task<Apikey?> GetActiveKeyByProviderAsync(string provider);
 }

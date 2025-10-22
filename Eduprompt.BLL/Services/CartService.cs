@@ -18,9 +18,9 @@ public class CartService : ICartService
         _packageRepository = packageRepository;
     }
 
-    public async Task<CartDto?> GetUserCartAsync(int userId)
+    public async Task<CartDto?> GetUserCartAsync(int UserId)
     {
-        var cart = await _cartRepository.GetByUserIdAsync(userId);
+        var cart = await _cartRepository.GetByUserIdAsync(UserId);
         if (cart == null) return null;
 
         var cartDto = MapToDto(cart);
@@ -31,22 +31,22 @@ public class CartService : ICartService
         return cartDto;
     }
 
-    public async Task<CartDto> AddItemAsync(int userId, AddCartItemDto itemDto)
+    public async Task<CartDto> AddItemAsync(int UserId, AddCartItemDto itemDto)
     {
         // Validate package exists
-        var package = await _packageRepository.GetByIdAsync(itemDto.PackageID);
+        var package = await _packageRepository.GetByIdAsync(itemDto.PackageId);
         if (package == null)
         {
-            throw new InvalidOperationException($"Package with ID {itemDto.PackageID} not found");
+            throw new InvalidOperationException($"Package with ID {itemDto.PackageId} not found");
         }
 
         // Get or create cart
-        var cart = await _cartRepository.GetByUserIdAsync(userId);
+        var cart = await _cartRepository.GetByUserIdAsync(UserId);
         if (cart == null)
         {
             cart = new Cart
             {
-                UserId = userId,
+                UserId = UserId,
                 TotalItem = 0,
                 CreatedDate = DateTime.UtcNow
             };
@@ -54,7 +54,7 @@ public class CartService : ICartService
         }
 
         // Check if item already exists in cart
-        var existingItem = await _cartRepository.GetCartItemByPackageAsync(cart.CartId, itemDto.PackageID);
+        var existingItem = await _cartRepository.GetCartItemByPackageAsync(cart.CartId, itemDto.PackageId);
         if (existingItem != null)
         {
             // Update quantity
@@ -67,7 +67,7 @@ public class CartService : ICartService
             var cartDetail = new CartDetail
             {
                 CartId = cart.CartId,
-                PackageID = itemDto.PackageID,
+                PackageId = itemDto.PackageId,
                 Quantity = itemDto.Quantity,
                 UnitPrice = package.Price,
                 AddedDate = DateTime.UtcNow
@@ -80,12 +80,12 @@ public class CartService : ICartService
         cart.UpdatedDate = DateTime.UtcNow;
         await _cartRepository.UpdateAsync(cart);
 
-        return await GetUserCartAsync(userId) ?? new CartDto();
+        return await GetUserCartAsync(UserId) ?? new CartDto();
     }
 
-    public async Task<CartDto> UpdateItemQuantityAsync(int userId, int cartDetailId, int quantity)
+    public async Task<CartDto> UpdateItemQuantityAsync(int UserId, int CartDetailId, int quantity)
     {
-        var cartDetail = await _cartRepository.GetCartItemAsync(cartDetailId);
+        var cartDetail = await _cartRepository.GetCartItemAsync(CartDetailId);
         if (cartDetail == null)
         {
             throw new InvalidOperationException("Cart item not found");
@@ -93,14 +93,14 @@ public class CartService : ICartService
 
         // Verify ownership
         var cart = await _cartRepository.GetByIdAsync(cartDetail.CartId);
-        if (cart?.UserId != userId)
+        if (cart?.UserId != UserId)
         {
             throw new UnauthorizedAccessException("You can only modify your own cart");
         }
 
         if (quantity <= 0)
         {
-            await _cartRepository.RemoveItemAsync(cartDetailId);
+            await _cartRepository.RemoveItemAsync(CartDetailId);
         }
         else
         {
@@ -113,22 +113,22 @@ public class CartService : ICartService
         cart.UpdatedDate = DateTime.UtcNow;
         await _cartRepository.UpdateAsync(cart);
 
-        return await GetUserCartAsync(userId) ?? new CartDto();
+        return await GetUserCartAsync(UserId) ?? new CartDto();
     }
 
-    public async Task<bool> RemoveItemAsync(int userId, int cartDetailId)
+    public async Task<bool> RemoveItemAsync(int UserId, int CartDetailId)
     {
-        var cartDetail = await _cartRepository.GetCartItemAsync(cartDetailId);
+        var cartDetail = await _cartRepository.GetCartItemAsync(CartDetailId);
         if (cartDetail == null) return false;
 
         // Verify ownership
         var cart = await _cartRepository.GetByIdAsync(cartDetail.CartId);
-        if (cart?.UserId != userId)
+        if (cart?.UserId != UserId)
         {
             throw new UnauthorizedAccessException("You can only modify your own cart");
         }
 
-        var result = await _cartRepository.RemoveItemAsync(cartDetailId);
+        var result = await _cartRepository.RemoveItemAsync(CartDetailId);
         
         if (result)
         {
@@ -141,9 +141,9 @@ public class CartService : ICartService
         return result;
     }
 
-    public async Task<bool> ClearCartAsync(int userId)
+    public async Task<bool> ClearCartAsync(int UserId)
     {
-        return await _cartRepository.ClearCartAsync(userId);
+        return await _cartRepository.ClearCartAsync(UserId);
     }
 
     private static CartDto MapToDto(Cart cart)
@@ -160,7 +160,7 @@ public class CartService : ICartService
             {
                 CartDetailId = cd.CartDetailId,
                 CartId = cd.CartId,
-                PackageID = cd.PackageID,
+                PackageId = cd.PackageId,
                 Quantity = cd.Quantity,
                 UnitPrice = cd.UnitPrice,
                 AddedDate = cd.AddedDate,

@@ -14,9 +14,9 @@ public class PackageService : IPackageService
         _packageRepository = packageRepository;
     }
 
-    public async Task<PackageDto?> GetByIdAsync(int packageId)
+    public async Task<PackageDto?> GetByIdAsync(int PackageId)
     {
-        var package = await _packageRepository.GetByIdAsync(packageId);
+        var package = await _packageRepository.GetByIdAsync(PackageId);
         return package != null ? MapToDto(package) : null;
     }
 
@@ -26,9 +26,9 @@ public class PackageService : IPackageService
         return packages.Select(MapToDto);
     }
 
-    public async Task<IEnumerable<PackageDto>> GetByCategoryIdAsync(int categoryId)
+    public async Task<IEnumerable<PackageDto>> GetByCategoryIdAsync(int CategoryId)
     {
-        var packages = await _packageRepository.GetByCategoryIdAsync(categoryId);
+        var packages = await _packageRepository.GetByCategoryIdAsync(CategoryId);
         return packages.Select(MapToDto);
     }
 
@@ -42,7 +42,7 @@ public class PackageService : IPackageService
     {
         var package = new Package
         {
-            CategoryID = createPackageDto.CategoryID,
+            CategoryId = createPackageDto.CategoryId,
             PackageName = createPackageDto.PackageName,
             Description = createPackageDto.Description,
             Price = createPackageDto.Price,
@@ -55,12 +55,12 @@ public class PackageService : IPackageService
         return MapToDto(createdPackage);
     }
 
-    public async Task<PackageDto> UpdateAsync(int packageId, UpdatePackageDto updateDto)
+    public async Task<PackageDto> UpdateAsync(int PackageId, UpdatePackageDto updateDto)
     {
-        var package = await _packageRepository.GetByIdAsync(packageId);
+        var package = await _packageRepository.GetByIdAsync(PackageId);
         if (package == null) throw new KeyNotFoundException("Package not found");
 
-        package.CategoryID = updateDto.CategoryID ?? package.CategoryID;
+        package.CategoryId = updateDto.CategoryId ?? package.CategoryId;
         package.PackageName = updateDto.PackageName ?? package.PackageName;
         package.Description = updateDto.Description ?? package.Description;
         package.Price = updateDto.Price ?? package.Price;
@@ -83,24 +83,24 @@ public class PackageService : IPackageService
         return packages.Select(MapToDto);
     }
 
-    public async Task<bool> DeleteAsync(int packageId)
+    public async Task<bool> DeleteAsync(int PackageId)
     {
-        return await _packageRepository.DeleteAsync(packageId);
+        return await _packageRepository.DeleteAsync(PackageId);
     }
 
     private static PackageDto MapToDto(Package package)
     {
         return new PackageDto
         {
-            PackageID = package.PackageID,
-            CategoryID = package.CategoryID,
+            PackageId = package.PackageId,
+            CategoryId = package.CategoryId,
             PackageName = package.PackageName,
             Description = package.Description,
             Price = package.Price,
             DurationDays = package.DurationDays,
             IsActive = package.IsActive,
             CreatedDate = package.CreatedDate,
-            CategoryName = package.PackageCategory?.CategoryName ?? "Unknown Category"
+            CategoryName = package.Category?.CategoryName ?? "Unknown Category"
         };
     }
 }

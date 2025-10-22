@@ -1,114 +1,114 @@
 using Eduprompt.Domain.Entities;
+using Eduprompt.DAL.DbContexts;
 using Eduprompt.Domain.Interface.Repository;
 using Microsoft.EntityFrameworkCore;
 
 namespace Eduprompt.DAL.Repositories;
 
-public class AIHistoryRepository : IAIHistoryRepository
+public class AIHistoryRepository : IAihistoryRepository
 {
-    private readonly EdupromptContext _context;
+    private readonly EdupromptV2Context _context;
 
-    public AIHistoryRepository(EdupromptContext context)
+    public AIHistoryRepository(EdupromptV2Context context)
     {
         _context = context;
     }
 
-    public async Task<IEnumerable<AIHistory>> GetAllAsync()
+    public async Task<IEnumerable<Aihistory>> GetAllAsync()
     {
-        return await _context.AIHistories
+        return await _context.Aihistories
             .Include(h => h.User)
             .Include(h => h.PromptInstance)
+            .Include(h => h.Conversation)
+            .ToListAsync();
+    }
+
+    public async Task<Aihistory?> GetByIdAsync(int historyId)
+    {
+        return await _context.Aihistories
+            .Include(h => h.User)
+            .Include(h => h.PromptInstance)
+            .Include(h => h.Conversation)
+            .FirstOrDefaultAsync(h => h.AihistoryId == historyId);
+    }
+
+    public async Task<IEnumerable<Aihistory>> GetByUserIdAsync(int UserId)
+    {
+        return await _context.Aihistories
+            .Include(h => h.User)
+            .Include(h => h.PromptInstance)
+            .Include(h => h.Conversation)
+            .Where(h => h.UserId == UserId)
             .OrderByDescending(h => h.ExecutedAt)
             .ToListAsync();
     }
 
-    public async Task<AIHistory?> GetByIdAsync(int historyId)
+    public async Task<IEnumerable<Aihistory>> GetByPromptInstanceIdAsync(int PromptInstanceId)
     {
-        return await _context.AIHistories
+        return await _context.Aihistories
             .Include(h => h.User)
             .Include(h => h.PromptInstance)
-            .FirstOrDefaultAsync(h => h.AIHistoryID == historyId);
-    }
-
-    public async Task<IEnumerable<AIHistory>> GetByUserIdAsync(int userId)
-    {
-        return await _context.AIHistories
-            .Include(h => h.User)
-            .Include(h => h.PromptInstance)
-            .Where(h => h.UserID == userId)
+            .Include(h => h.Conversation)
+            .Where(h => h.PromptInstanceId == PromptInstanceId)
             .OrderByDescending(h => h.ExecutedAt)
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<AIHistory>> GetByPromptInstanceIdAsync(int promptInstanceId)
+    public async Task<Aihistory> CreateAsync(Aihistory aiHistory)
     {
-        return await _context.AIHistories
-            .Include(h => h.User)
-            .Include(h => h.PromptInstance)
-            .Where(h => h.PromptInstanceID == promptInstanceId)
-            .OrderByDescending(h => h.ExecutedAt)
-            .ToListAsync();
-    }
-
-    public async Task<AIHistory> CreateAsync(AIHistory aiHistory)
-    {
-        _context.AIHistories.Add(aiHistory);
+        _context.Aihistories.Add(aiHistory);
         await _context.SaveChangesAsync();
         
         // Reload with navigation properties
-        return await _context.AIHistories
+        return await _context.Aihistories
             .Include(h => h.User)
             .Include(h => h.PromptInstance)
-            .FirstOrDefaultAsync(h => h.AIHistoryID == aiHistory.AIHistoryID) ?? aiHistory;
+            .Include(h => h.Conversation)
+            .FirstOrDefaultAsync(h => h.AihistoryId == aiHistory.AihistoryId) ?? aiHistory;
     }
 
-    public async Task<AIHistory> UpdateAsync(AIHistory aiHistory)
+    public async Task<Aihistory> UpdateAsync(Aihistory aiHistory)
     {
-        _context.AIHistories.Update(aiHistory);
+        _context.Aihistories.Update(aiHistory);
         await _context.SaveChangesAsync();
         
         // Reload with navigation properties
-        return await _context.AIHistories
+        return await _context.Aihistories
             .Include(h => h.User)
             .Include(h => h.PromptInstance)
-            .FirstOrDefaultAsync(h => h.AIHistoryID == aiHistory.AIHistoryID) ?? aiHistory;
+            .Include(h => h.Conversation)
+            .FirstOrDefaultAsync(h => h.AihistoryId == aiHistory.AihistoryId) ?? aiHistory;
     }
 
     public async Task<bool> DeleteAsync(int historyId)
     {
-        var history = await _context.AIHistories.FindAsync(historyId);
+        var history = await _context.Aihistories.FindAsync(historyId);
         if (history == null) return false;
 
-        _context.AIHistories.Remove(history);
+        _context.Aihistories.Remove(history);
         await _context.SaveChangesAsync();
         return true;
     }
 
     public async Task<bool> ExistsAsync(int historyId)
     {
-        return await _context.AIHistories.AnyAsync(h => h.AIHistoryID == historyId);
+        return await _context.Aihistories.AnyAsync(h => h.AihistoryId == historyId);
     }
 
-    public async Task<IEnumerable<AIHistory>> GetRecentHistoriesAsync(int userId, int count = 10)
+    public async Task<IEnumerable<Aihistory>> GetRecentHistoriesAsync(int UserId, int count = 10)
     {
-        return await _context.AIHistories
+        return await _context.Aihistories
             .Include(h => h.User)
             .Include(h => h.PromptInstance)
-            .Where(h => h.UserID == userId)
+            .Include(h => h.Conversation)
+            .Where(h => h.UserId == UserId)
             .OrderByDescending(h => h.ExecutedAt)
             .Take(count)
             .ToListAsync();
     }
 
-    public async Task<int> GetHistoryCountByUserAsync(int userId)
+    public async Task<int> GetHistoryCountByUserAsync(int UserId)
     {
-        return await _context.AIHistories.CountAsync(h => h.UserID == userId);
-    }
-
-    public async Task<decimal> GetTotalCostByUserAsync(int userId)
-    {
-        return await _context.AIHistories
-            .Where(h => h.UserID == userId && h.ProcessingTimeMs.HasValue)
-            .SumAsync(h => h.ProcessingTimeMs ?? 0);
+        return await _context.Aihistories.CountAsync(h => h.UserId == UserId);
     }
 }

@@ -1,4 +1,4 @@
-using Eduprompt.Domain.DTOs.Category;
+using Eduprompt.Domain.DTOs.PackageCategory;
 using Eduprompt.Domain.Interface.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,11 +15,11 @@ namespace Eduprompt.API.Controllers;
 [Authorize(Roles = "Admin")] // Only Admin can manage categories
 public class CategoriesController : ControllerBase
 {
-    private readonly ICategoryService _categoryService;
+    private readonly IPackageCategoryService _PackageCategoryService;
 
-    public CategoriesController(ICategoryService categoryService)
+    public CategoriesController(IPackageCategoryService PackageCategoryService)
     {
-        _categoryService = categoryService;
+        _PackageCategoryService = PackageCategoryService;
     }
 
     /// <summary>
@@ -32,32 +32,17 @@ public class CategoriesController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var categories = await _categoryService.GetAllAsync();
-        var categoryDtos = categories.Select(c => new CategoryDto
+        var categories = await _PackageCategoryService.GetAllAsync();
+        var PackageCategoryDtos = categories.Select(c => new PackageCategoryDto
         {
             CategoryId = c.CategoryId,
-            ParentCategoryId = c.ParentCategoryId,
             CategoryName = c.CategoryName,
             Description = c.Description,
-            ImageUrl = null, // Not available in current model
-            NumberOfTemplates = c.NumberOfTemplates,
-            CreatedDate = c.CreatedDate,
-            UpdatedDate = c.UpdatedDate,
-            Status = c.Status,
-            ParentCategoryName = c.ParentCategoryName,
-            SubCategories = c.SubCategories?.Select(sc => new CategoryDto
-            {
-                CategoryId = sc.CategoryId,
-                ParentCategoryId = sc.ParentCategoryId,
-                CategoryName = sc.CategoryName,
-                Description = sc.Description,
-                ImageUrl = null, // Not available in current model
-                NumberOfTemplates = sc.NumberOfTemplates,
-                Status = sc.Status
-            }).ToList()
-        });
+            DisplayOrder = c.DisplayOrder,
+            PackageCount = 0 // Will be calculated by service
+        }).ToList();
 
-        return Ok(categoryDtos);
+        return Ok(PackageCategoryDtos);
     }
 
     /// <summary>
@@ -66,32 +51,17 @@ public class CategoriesController : ControllerBase
     [HttpGet("root")]
     public async Task<IActionResult> GetRootCategories()
     {
-        var categories = await _categoryService.GetRootCategoriesAsync();
-        var categoryDtos = categories.Select(c => new CategoryDto
+        var categories = await _PackageCategoryService.GetAllAsync(); // Use GetAllAsync instead of GetRootCategoriesAsync
+        var PackageCategoryDtos = categories.Select(c => new PackageCategoryDto
         {
             CategoryId = c.CategoryId,
-            ParentCategoryId = c.ParentCategoryId,
             CategoryName = c.CategoryName,
             Description = c.Description,
-            ImageUrl = null,
-            NumberOfTemplates = c.NumberOfTemplates,
-            CreatedDate = c.CreatedDate,
-            UpdatedDate = c.UpdatedDate,
-            Status = c.Status,
-            ParentCategoryName = c.ParentCategoryName,
-            SubCategories = c.SubCategories?.Select(sc => new CategoryDto
-            {
-                CategoryId = sc.CategoryId,
-                ParentCategoryId = sc.ParentCategoryId,
-                CategoryName = sc.CategoryName,
-                Description = sc.Description,
-                ImageUrl = null,
-                NumberOfTemplates = sc.NumberOfTemplates,
-                Status = sc.Status
-            }).ToList()
-        });
+            DisplayOrder = c.DisplayOrder,
+            PackageCount = 0 // Will be calculated by service
+        }).ToList();
 
-        return Ok(categoryDtos);
+        return Ok(PackageCategoryDtos);
     }
 
     /// <summary>
@@ -100,140 +70,86 @@ public class CategoriesController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var category = await _categoryService.GetByIdAsync(id);
-        
+        var category = await _PackageCategoryService.GetByIdAsync(id);
         if (category == null)
-            return NotFound(new { message = $"Category with ID {id} not found" });
+            return NotFound();
 
-        var categoryDto = new CategoryDto
+        var PackageCategoryDto = new PackageCategoryDto
         {
             CategoryId = category.CategoryId,
-            ParentCategoryId = category.ParentCategoryId,
             CategoryName = category.CategoryName,
             Description = category.Description,
-            ImageUrl = null,
-            NumberOfTemplates = category.NumberOfTemplates,
-            CreatedDate = category.CreatedDate,
-            UpdatedDate = category.UpdatedDate,
-            Status = category.Status,
-            ParentCategoryName = category.ParentCategoryName,
-            SubCategories = category.SubCategories?.Select(sc => new CategoryDto
-            {
-                CategoryId = sc.CategoryId,
-                ParentCategoryId = sc.ParentCategoryId,
-                CategoryName = sc.CategoryName,
-                Description = sc.Description,
-                ImageUrl = null,
-                NumberOfTemplates = sc.NumberOfTemplates,
-                Status = sc.Status
-            }).ToList()
+            DisplayOrder = category.DisplayOrder,
+            PackageCount = 0 // Will be calculated by service
         };
 
-        return Ok(categoryDto);
+        return Ok(PackageCategoryDto);
     }
 
     /// <summary>
-    /// Get subcategories of a parent category
+    /// Get subcategories of a specific category
     /// </summary>
-    [HttpGet("{parentId}/subcategories")]
-    public async Task<IActionResult> GetSubCategories(int parentId)
+    [HttpGet("{id}/subcategories")]
+    public async Task<IActionResult> GetSubCategories(int id)
     {
-        var categories = await _categoryService.GetSubCategoriesAsync(parentId);
-        var categoryDtos = categories.Select(c => new CategoryDto
+        var categories = await _PackageCategoryService.GetAllAsync(); // Use GetAllAsync instead of GetSubCategoriesAsync
+        var PackageCategoryDtos = categories.Select(c => new PackageCategoryDto
         {
             CategoryId = c.CategoryId,
-            ParentCategoryId = c.ParentCategoryId,
             CategoryName = c.CategoryName,
             Description = c.Description,
-            ImageUrl = null,
-            NumberOfTemplates = c.NumberOfTemplates,
-            CreatedDate = c.CreatedDate,
-            UpdatedDate = c.UpdatedDate,
-            Status = c.Status,
-            ParentCategoryName = c.ParentCategoryName
-        });
+            DisplayOrder = c.DisplayOrder,
+            PackageCount = 0 // Will be calculated by service
+        }).ToList();
 
-        return Ok(categoryDtos);
+        return Ok(PackageCategoryDtos);
     }
 
     /// <summary>
     /// Create a new category
     /// </summary>
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CategoryCreateDto categoryDto)
+    public async Task<IActionResult> Create([FromBody] CreatePackageCategoryDto createDto)
     {
-        try
-        {
-            var createServiceDto = new CategoryCreateServiceDto
-            {
-                ParentCategoryId = categoryDto.ParentCategoryId,
-                CategoryName = categoryDto.CategoryName,
-                Description = categoryDto.Description,
-                Status = categoryDto.Status
-            };
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
-            var category = await _categoryService.CreateAsync(createServiceDto);
-            
-            var resultDto = new CategoryDto
-            {
-                CategoryId = category.CategoryId,
-                ParentCategoryId = category.ParentCategoryId,
-                CategoryName = category.CategoryName,
-                Description = category.Description,
-                ImageUrl = null,
-                NumberOfTemplates = category.NumberOfTemplates,
-                CreatedDate = category.CreatedDate,
-                UpdatedDate = category.UpdatedDate,
-                Status = category.Status,
-                ParentCategoryName = category.ParentCategoryName
-            };
-
-            return CreatedAtAction(nameof(GetById), new { id = category.CategoryId }, resultDto);
-        }
-        catch (InvalidOperationException ex)
+        var category = await _PackageCategoryService.CreateAsync(createDto);
+        var PackageCategoryDto = new PackageCategoryDto
         {
-            return BadRequest(new { message = ex.Message });
-        }
+            CategoryId = category.CategoryId,
+            CategoryName = category.CategoryName,
+            Description = category.Description,
+            DisplayOrder = category.DisplayOrder,
+            PackageCount = 0 // Will be calculated by service
+        };
+
+        return CreatedAtAction(nameof(GetById), new { id = PackageCategoryDto.CategoryId }, PackageCategoryDto);
     }
 
     /// <summary>
-    /// Update a category
+    /// Update an existing category
     /// </summary>
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] CategoryUpdateDto categoryDto)
+    public async Task<IActionResult> Update(int id, [FromBody] CreatePackageCategoryDto updateDto)
     {
-        try
-        {
-            var updateServiceDto = new CategoryUpdateServiceDto
-            {
-                ParentCategoryId = categoryDto.ParentCategoryId,
-                CategoryName = categoryDto.CategoryName,
-                Description = categoryDto.Description,
-                Status = categoryDto.Status
-            };
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
-            var category = await _categoryService.UpdateAsync(id, updateServiceDto);
-            
-            var resultDto = new CategoryDto
-            {
-                CategoryId = category.CategoryId,
-                ParentCategoryId = category.ParentCategoryId,
-                CategoryName = category.CategoryName,
-                Description = category.Description,
-                ImageUrl = null,
-                NumberOfTemplates = category.NumberOfTemplates,
-                CreatedDate = category.CreatedDate,
-                UpdatedDate = category.UpdatedDate,
-                Status = category.Status,
-                ParentCategoryName = category.ParentCategoryName
-            };
+        var category = await _PackageCategoryService.UpdateAsync(id, updateDto);
+        if (category == null)
+            return NotFound();
 
-            return Ok(resultDto);
-        }
-        catch (KeyNotFoundException ex)
+        var PackageCategoryDto = new PackageCategoryDto
         {
-            return NotFound(new { message = ex.Message });
-        }
+            CategoryId = category.CategoryId,
+            CategoryName = category.CategoryName,
+            Description = category.Description,
+            DisplayOrder = category.DisplayOrder,
+            PackageCount = 0 // Will be calculated by service
+        };
+
+        return Ok(PackageCategoryDto);
     }
 
     /// <summary>
@@ -242,11 +158,10 @@ public class CategoriesController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var result = await _categoryService.DeleteAsync(id);
-        
+        var result = await _PackageCategoryService.DeleteAsync(id);
         if (!result)
-            return NotFound(new { message = $"Category with ID {id} not found" });
+            return NotFound();
 
         return NoContent();
     }
-} 
+}

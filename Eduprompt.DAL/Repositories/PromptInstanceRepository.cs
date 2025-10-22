@@ -1,4 +1,5 @@
 using Eduprompt.Domain.Entities;
+using Eduprompt.DAL.DbContexts;
 using Eduprompt.Domain.Interface.Repository;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,103 +7,132 @@ namespace Eduprompt.DAL.Repositories;
 
 public class PromptInstanceRepository : IPromptInstanceRepository
 {
-    private readonly EdupromptContext _context;
+    private readonly EdupromptV2Context _context;
 
-    public PromptInstanceRepository(EdupromptContext context)
+    public PromptInstanceRepository(EdupromptV2Context context)
     {
         _context = context;
     }
 
-    public async Task<PromptInstance?> GetByIdAsync(int instanceId)
+    public async Task<PromptInstance?> GetByIdAsync(int PromptInstanceId)
     {
         return await _context.PromptInstances
-            .Include(pi => pi.User)
-            .Include(pi => pi.Package)
-            .Include(pi => pi.PromptInstanceDetails)
-            .FirstOrDefaultAsync(pi => pi.InstanceID == instanceId);
+            .Include(p => p.PromptInstanceDetails)
+            .Include(p => p.Package)
+            .Include(p => p.ExpectedOutputs)
+            .FirstOrDefaultAsync(p => p.InstanceId == PromptInstanceId);
+    }
+
+    public async Task<IEnumerable<PromptInstance>> GetByPackageIdAsync(int PackageId)
+    {
+        return await _context.PromptInstances
+            .Include(p => p.PromptInstanceDetails)
+            .Include(p => p.Package)
+            .Where(p => p.PackageId == PackageId)
+            .OrderBy(p => p.InstanceId)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<PromptInstance>> GetByUserIdAsync(int UserId)
+    {
+        return await _context.PromptInstances
+            .Include(p => p.PromptInstanceDetails)
+            .Include(p => p.Package)
+            .Where(p => p.UserId == UserId)
+            .OrderByDescending(p => p.ExecutedAt)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<PromptInstance>> GetActiveInstancesAsync()
+    {
+        return await _context.PromptInstances
+            .Include(p => p.PromptInstanceDetails)
+            .Include(p => p.Package)
+            .Where(p => p.Status == "Active")
+            .OrderByDescending(p => p.ExecutedAt)
+            .ToListAsync();
+    }
+
+    public async Task<PromptInstance> CreateAsync(PromptInstance PromptInstance)
+    {
+        _context.PromptInstances.Add(PromptInstance);
+        await _context.SaveChangesAsync();
+        
+        // Reload with navigation properties
+        return await _context.PromptInstances
+            .Include(p => p.PromptInstanceDetails)
+            .Include(p => p.Package)
+            .FirstOrDefaultAsync(p => p.InstanceId == PromptInstance.InstanceId) ?? PromptInstance;
+    }
+
+    public async Task<PromptInstance> UpdateAsync(PromptInstance PromptInstance)
+    {
+        _context.PromptInstances.Update(PromptInstance);
+        await _context.SaveChangesAsync();
+        return PromptInstance;
+    }
+
+    public async Task<bool> DeleteAsync(int PromptInstanceId)
+    {
+        var PromptInstance = await _context.PromptInstances.FindAsync(PromptInstanceId);
+        if (PromptInstance == null) return false;
+
+        _context.PromptInstances.Remove(PromptInstance);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> ExistsAsync(int PromptInstanceId)
+    {
+        return await _context.PromptInstances.AnyAsync(p => p.InstanceId == PromptInstanceId);
+    }
+
+    public async Task<IEnumerable<PromptInstance>> GetByUserAndPackageAsync(int UserId, int PackageId)
+    {
+        return await _context.PromptInstances
+            .Include(p => p.PromptInstanceDetails)
+            .Include(p => p.Package)
+            .Where(p => p.UserId == UserId && p.PackageId == PackageId)
+            .OrderByDescending(p => p.ExecutedAt)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<PromptInstance>> GetRecentInstancesAsync(int count = 10)
+    {
+        return await _context.PromptInstances
+            .Include(p => p.PromptInstanceDetails)
+            .Include(p => p.Package)
+            .OrderByDescending(p => p.ExecutedAt)
+            .Take(count)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<PromptInstance>> SearchByTitleAsync(string searchTerm)
+    {
+        return await _context.PromptInstances
+            .Include(p => p.PromptInstanceDetails)
+            .Include(p => p.Package)
+            .Where(p => p.PromptName.Contains(searchTerm))
+            .OrderByDescending(p => p.ExecutedAt)
+            .ToListAsync();
     }
 
     public async Task<IEnumerable<PromptInstance>> GetAllAsync()
     {
         return await _context.PromptInstances
-            .Include(pi => pi.User)
-            .Include(pi => pi.Package)
-            .Include(pi => pi.PromptInstanceDetails)
-            .OrderByDescending(pi => pi.ExecutedAt)
+            .Include(p => p.PromptInstanceDetails)
+            .Include(p => p.Package)
+            .OrderByDescending(p => p.ExecutedAt)
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<PromptInstance>> GetByUserIdAsync(int userId)
+    public async Task<IEnumerable<PromptInstance>> GetByTemplateIdAsync(int TemplateId)
     {
         return await _context.PromptInstances
-            .Include(pi => pi.User)
-            .Include(pi => pi.Package)
-            .Include(pi => pi.PromptInstanceDetails)
-            .Where(pi => pi.UserID == userId)
-            .OrderByDescending(pi => pi.ExecutedAt)
-            .ToListAsync();
-    }
-
-    public async Task<IEnumerable<PromptInstance>> GetByTemplateIdAsync(int templateId)
-    {
-        return await _context.PromptInstances
-            .Include(pi => pi.User)
-            .Include(pi => pi.Package)
-            .Include(pi => pi.PromptInstanceDetails)
-            .Where(pi => pi.PackageID == templateId)
-            .OrderByDescending(pi => pi.ExecutedAt)
-            .ToListAsync();
-    }
-
-    public async Task<PromptInstance> CreateAsync(PromptInstance promptInstance)
-    {
-        _context.PromptInstances.Add(promptInstance);
-        await _context.SaveChangesAsync();
-        return promptInstance;
-    }
-
-    public async Task<PromptInstance> UpdateAsync(PromptInstance promptInstance)
-    {
-        _context.PromptInstances.Update(promptInstance);
-        await _context.SaveChangesAsync();
-        return promptInstance;
-    }
-
-    public async Task<bool> DeleteAsync(int instanceId)
-    {
-        var promptInstance = await _context.PromptInstances.FindAsync(instanceId);
-        if (promptInstance == null) return false;
-
-        _context.PromptInstances.Remove(promptInstance);
-        await _context.SaveChangesAsync();
-        return true;
-    }
-
-    public async Task<bool> ExistsAsync(int instanceId)
-    {
-        return await _context.PromptInstances.AnyAsync(pi => pi.InstanceID == instanceId);
-    }
-
-    public async Task<IEnumerable<PromptInstance>> GetByStatusAsync(string status)
-    {
-        return await _context.PromptInstances
-            .Include(pi => pi.PromptInstanceDetails)
-            .Include(pi => pi.Package)
-            .Include(pi => pi.PromptInstanceDetails)
-            .Where(pi => pi.Status == status)
-            .OrderByDescending(pi => pi.ExecutedAt)
-            .ToListAsync();
-    }
-
-    public async Task<IEnumerable<PromptInstance>> GetRecentInstancesAsync(int userId, int count = 10)
-    {
-        return await _context.PromptInstances
-            .Include(pi => pi.PromptInstanceDetails)
-            .Include(pi => pi.Package)
-            .Include(pi => pi.PromptInstanceDetails)
-            .Where(pi => pi.UserID == userId)
-            .OrderByDescending(pi => pi.ExecutedAt)
-            .Take(count)
+            .Include(p => p.PromptInstanceDetails)
+            .Include(p => p.Package)
+            .Where(p => p.PackageId == TemplateId) // Assuming TemplateId maps to PackageId
+            .OrderByDescending(p => p.ExecutedAt)
             .ToListAsync();
     }
 }

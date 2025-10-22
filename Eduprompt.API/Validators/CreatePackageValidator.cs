@@ -7,7 +7,7 @@ public class CreatePackageValidator : AbstractValidator<CreatePackageDto>
 {
     public CreatePackageValidator()
     {
-        When(x => x.CategoryID.HasValue, () => RuleFor(x => x.CategoryID!.Value).GreaterThan(0));
+        When(x => x.CategoryId.HasValue, () => RuleFor(x => x.CategoryId!.Value).GreaterThan(0));
         RuleFor(x => x.PackageName).NotEmpty().MaximumLength(100);
         RuleFor(x => x.Price).GreaterThanOrEqualTo(0);
         When(x => x.DurationDays.HasValue, () => RuleFor(x => x.DurationDays!.Value).GreaterThan(0));

@@ -5,7 +5,7 @@ namespace Eduprompt.Domain.DTOs.Conversation;
 public class CreateConversationDto
 {
     [Required]
-    public int UserID { get; set; }
+    public int UserId { get; set; }
 
     [StringLength(200)]
     public string? Title { get; set; }

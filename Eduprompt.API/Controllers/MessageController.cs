@@ -25,17 +25,17 @@ public class MessageController : ControllerBase
     /// <summary>
     /// Get messages by conversation ID
     /// </summary>
-    /// <param name="conversationId">Conversation ID</param>
+    /// <param name="ConversationId">Conversation ID</param>
     /// <returns>List of messages in the conversation</returns>
     /// <response code="200">Messages retrieved successfully</response>
     /// <response code="400">Error retrieving messages</response>
     /// <response code="401">User not authenticated</response>
-    [HttpGet("conversation/{conversationId}")]
-    public async Task<IActionResult> GetByConversationId(int conversationId)
+    [HttpGet("conversation/{ConversationId}")]
+    public async Task<IActionResult> GetByConversationId(int ConversationId)
     {
         try
         {
-            var messages = await _messageService.GetByConversationIdAsync(conversationId);
+            var messages = await _messageService.GetByConversationIdAsync(ConversationId);
             return Ok(messages);
         }
         catch (Exception ex)
@@ -79,7 +79,7 @@ public class MessageController : ControllerBase
         try
         {
             var message = await _messageService.CreateAsync(createDto);
-            return CreatedAtAction(nameof(GetById), new { id = message.MessageID }, message);
+            return CreatedAtAction(nameof(GetById), new { id = message.MessageId }, message);
         }
         catch (Exception ex)
         {
@@ -127,12 +127,12 @@ public class MessageController : ControllerBase
     /// <summary>
     /// Lấy tin nhắn gần đây
     /// </summary>
-    [HttpGet("conversation/{conversationId}/recent")]
-    public async Task<IActionResult> GetRecent(int conversationId, [FromQuery] int count = 50)
+    [HttpGet("conversation/{ConversationId}/recent")]
+    public async Task<IActionResult> GetRecent(int ConversationId, [FromQuery] int count = 50)
     {
         try
         {
-            var messages = await _messageService.GetRecentMessagesAsync(conversationId, count);
+            var messages = await _messageService.GetRecentMessagesAsync(ConversationId, count);
             return Ok(messages);
         }
         catch (Exception ex)
@@ -144,12 +144,12 @@ public class MessageController : ControllerBase
     /// <summary>
     /// Lấy tin nhắn cuối cùng
     /// </summary>
-    [HttpGet("conversation/{conversationId}/last")]
-    public async Task<IActionResult> GetLastMessage(int conversationId)
+    [HttpGet("conversation/{ConversationId}/last")]
+    public async Task<IActionResult> GetLastMessage(int ConversationId)
     {
         try
         {
-            var message = await _messageService.GetLastMessageAsync(conversationId);
+            var message = await _messageService.GetLastMessageAsync(ConversationId);
             return Ok(message);
         }
         catch (Exception ex)

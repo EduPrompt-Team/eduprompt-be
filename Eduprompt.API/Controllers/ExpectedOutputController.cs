@@ -21,14 +21,14 @@ public class ExpectedOutputController : ControllerBase
     /// <summary>
     /// Get expected outputs by instance ID (Public)
     /// </summary>
-    /// <param name="instanceId">Prompt instance ID</param>
+    /// <param name="InstanceId">Prompt instance ID</param>
     /// <returns>List of expected outputs for the instance</returns>
     /// <response code="200">Expected outputs retrieved successfully</response>
-    [HttpGet("instance/{instanceId}")]
+    [HttpGet("instance/{InstanceId}")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetByInstance(int instanceId)
+    public async Task<IActionResult> GetByInstance(int InstanceId)
     {
-        return Ok(await _service.GetByInstanceIdAsync(instanceId));
+        return Ok(await _service.GetByInstanceIdAsync(InstanceId));
     }
 
     /// <summary>

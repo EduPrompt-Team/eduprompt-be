@@ -1,5 +1,6 @@
 
 using Eduprompt.Domain.Entities;
+using Eduprompt.DAL.DbContexts;
 using Eduprompt.Domain.Interface.Repository;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,9 +8,9 @@ namespace Eduprompt.DAL.Repositories;
 
 public class WishlistRepository : IWishlistRepository
 {
-    private readonly EdupromptContext _context;
+    private readonly EdupromptV2Context _context;
 
-    public WishlistRepository(EdupromptContext context)
+    public WishlistRepository(EdupromptV2Context context)
     {
         _context = context;
     }
@@ -22,22 +23,22 @@ public class WishlistRepository : IWishlistRepository
             .FirstOrDefaultAsync(w => w.WishlistId == id);
     }
 
-    public async Task<IEnumerable<Wishlist>> GetByUserIdAsync(int userId)
+    public async Task<IEnumerable<Wishlist>> GetByUserIdAsync(int UserId)
     {
         return await _context.Wishlists
             .Include(w => w.User)
             .Include(w => w.Package)
-            .Where(w => w.UserId == userId)
+            .Where(w => w.UserId == UserId)
             .OrderByDescending(w => w.AddedAt)
             .ToListAsync();
     }
 
-    public async Task<Wishlist?> GetUserWishlistItemAsync(int userId, int templateId)
+    public async Task<Wishlist?> GetUserWishlistItemAsync(int UserId, int templateId)
     {
         return await _context.Wishlists
             .Include(w => w.User)
             .Include(w => w.Package)
-            .FirstOrDefaultAsync(w => w.UserId == userId && w.PackageID == templateId);
+            .FirstOrDefaultAsync(w => w.UserId == UserId && w.PackageId == templateId);
     }
 
     public async Task<Wishlist> CreateAsync(Wishlist wishlist)
@@ -61,9 +62,9 @@ public class WishlistRepository : IWishlistRepository
         return true;
     }
 
-    public async Task<bool> ExistsAsync(int userId, int templateId)
+    public async Task<bool> ExistsAsync(int UserId, int templateId)
     {
         return await _context.Wishlists
-            .AnyAsync(w => w.UserId == userId && w.PackageID == templateId);
+            .AnyAsync(w => w.UserId == UserId && w.PackageId == templateId);
     }
 } 

@@ -18,37 +18,37 @@ public class WishlistService : IWishlistService
         _packageRepository = packageRepository;
     }
 
-    public async Task<IEnumerable<WishlistDto>> GetByUserIdAsync(int userId)
+    public async Task<IEnumerable<WishlistDto>> GetByUserIdAsync(int UserId)
     {
-        var wishlists = await _wishlistRepository.GetByUserIdAsync(userId);
+        var wishlists = await _wishlistRepository.GetByUserIdAsync(UserId);
         return wishlists.Select(MapToDto);
     }
 
-    public async Task<WishlistDto?> GetByIdAsync(int wishlistId)
+    public async Task<WishlistDto?> GetByIdAsync(int WishlistId)
     {
-        var wishlist = await _wishlistRepository.GetByIdAsync(wishlistId);
+        var wishlist = await _wishlistRepository.GetByIdAsync(WishlistId);
         return wishlist != null ? MapToDto(wishlist) : null;
     }
 
-    public async Task<WishlistDto> CreateAsync(int userId, WishlistCreateDto createDto)
+    public async Task<WishlistDto> CreateAsync(int UserId, WishlistCreateDto createDto)
     {
         // Validate package exists
-        var package = await _packageRepository.GetByIdAsync(createDto.PackageID);
+        var package = await _packageRepository.GetByIdAsync(createDto.PackageId);
         if (package == null)
         {
-            throw new InvalidOperationException($"Package with ID {createDto.PackageID} not found");
+            throw new InvalidOperationException($"Package with ID {createDto.PackageId} not found");
         }
 
         // Check if already in wishlist
-        if (await _wishlistRepository.ExistsAsync(userId, createDto.PackageID))
+        if (await _wishlistRepository.ExistsAsync(UserId, createDto.PackageId))
         {
             throw new InvalidOperationException("Package is already in your wishlist");
         }
 
         var wishlist = new Wishlist
         {
-            UserId = userId,
-            PackageID = createDto.PackageID,
+            UserId = UserId,
+            PackageId = createDto.PackageId,
             AddedAt = DateTime.UtcNow,
             Notes = createDto.Notes
         };
@@ -57,14 +57,14 @@ public class WishlistService : IWishlistService
         return MapToDto(createdWishlist);
     }
 
-    public async Task<bool> DeleteAsync(int wishlistId)
+    public async Task<bool> DeleteAsync(int WishlistId)
     {
-        return await _wishlistRepository.DeleteAsync(wishlistId);
+        return await _wishlistRepository.DeleteAsync(WishlistId);
     }
 
-    public async Task<bool> IsInWishlistAsync(int userId, int packageId)
+    public async Task<bool> IsInWishlistAsync(int UserId, int PackageId)
     {
-        return await _wishlistRepository.ExistsAsync(userId, packageId);
+        return await _wishlistRepository.ExistsAsync(UserId, PackageId);
     }
 
     private static WishlistDto MapToDto(Wishlist wishlist)
@@ -73,7 +73,7 @@ public class WishlistService : IWishlistService
         {
             WishlistId = wishlist.WishlistId,
             UserId = wishlist.UserId,
-            PackageID = wishlist.PackageID,
+            PackageId = wishlist.PackageId,
             AddedAt = wishlist.AddedAt,
             Notes = wishlist.Notes,
             UserName = wishlist.User?.FullName,

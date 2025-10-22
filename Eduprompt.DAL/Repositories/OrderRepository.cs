@@ -1,4 +1,5 @@
 using Eduprompt.Domain.Entities;
+using Eduprompt.DAL.DbContexts;
 using Eduprompt.Domain.Interface.Repository;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,9 +7,9 @@ namespace Eduprompt.DAL.Repositories;
 
 public class OrderRepository : IOrderRepository
 {
-    private readonly EdupromptContext _context;
+    private readonly EdupromptV2Context _context;
 
-    public OrderRepository(EdupromptContext context)
+    public OrderRepository(EdupromptV2Context context)
     {
         _context = context;
     }
@@ -33,14 +34,14 @@ public class OrderRepository : IOrderRepository
             .FirstOrDefaultAsync(o => o.OrderId.ToString() == orderNumber);
     }
 
-    public async Task<IEnumerable<Order>> GetByUserIdAsync(int userId)
+    public async Task<IEnumerable<Order>> GetByUserIdAsync(int UserId)
     {
         return await _context.Orders
             // .Include(o => o.OrderDetails) // Removed - OrderDetails navigation property deleted
             //     .ThenInclude(od => od.Template) // Removed - OrderDetails navigation property deleted
             .Include(o => o.User)
             // .Include(o => o.Payments) // Removed - Payments navigation property deleted
-            .Where(o => o.UserId == userId)
+            .Where(o => o.UserId == UserId)
             .OrderByDescending(o => o.OrderDate)
             .ToListAsync();
     }
