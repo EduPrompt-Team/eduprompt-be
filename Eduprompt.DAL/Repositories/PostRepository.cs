@@ -117,7 +117,14 @@ public class PostRepository : IPostRepository
         return true;
     }
 
-    // IncrementLikeCountAsync removed - LikeCount property no longer exists
-    // Use ViewCount instead if needed
+    public async Task<bool> IncrementLikeCountAsync(int PostId)
+    {
+        var post = await _context.Posts.FindAsync(PostId);
+        if (post == null) return false;
+
+        post.LikeCount++;
+        await _context.SaveChangesAsync();
+        return true;
+    }
 }
 

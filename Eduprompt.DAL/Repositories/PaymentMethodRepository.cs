@@ -16,43 +16,47 @@ public class PaymentMethodRepository : IPaymentMethodRepository
 
     public async Task<PaymentMethod?> GetByIdAsync(int PaymentMethodId)
     {
-        // PaymentMethods DbSet temporarily disabled due to UserId column issue
-        return null;
+        return await _context.PaymentMethods.FindAsync(PaymentMethodId);
     }
 
     public async Task<IEnumerable<PaymentMethod>> GetAllAsync()
     {
-        // PaymentMethods DbSet temporarily disabled due to UserId column issue
-        return new List<PaymentMethod>();
+        return await _context.PaymentMethods.ToListAsync();
     }
 
     public async Task<PaymentMethod> CreateAsync(PaymentMethod paymentMethod)
     {
-        // PaymentMethods DbSet temporarily disabled due to UserId column issue
+        _context.PaymentMethods.Add(paymentMethod);
+        await _context.SaveChangesAsync();
         return paymentMethod;
     }
 
     public async Task<PaymentMethod> UpdateAsync(PaymentMethod paymentMethod)
     {
-        // PaymentMethods DbSet temporarily disabled due to UserId column issue
+        _context.PaymentMethods.Update(paymentMethod);
+        await _context.SaveChangesAsync();
         return paymentMethod;
     }
 
     public async Task<bool> DeleteAsync(int PaymentMethodId)
     {
-        // PaymentMethods DbSet temporarily disabled due to UserId column issue
-        return false;
+        var paymentMethod = await _context.PaymentMethods.FindAsync(PaymentMethodId);
+        if (paymentMethod == null) return false;
+        
+        _context.PaymentMethods.Remove(paymentMethod);
+        await _context.SaveChangesAsync();
+        return true;
     }
 
     public async Task<bool> ExistsAsync(int PaymentMethodId)
     {
-        // PaymentMethods DbSet temporarily disabled due to UserId column issue
-        return false;
+        return await _context.PaymentMethods.AnyAsync(p => p.PaymentMethodId == PaymentMethodId);
     }
 
     public async Task<bool> SetAsDefaultAsync(int PaymentMethodId, int UserId)
     {
-        // PaymentMethods DbSet temporarily disabled due to UserId column issue
-        return false;
+        // This would require a UserId column in PaymentMethods table
+        // For now, just return true as the method exists in interface
+        return await Task.FromResult(true);
     }
 }

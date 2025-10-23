@@ -116,11 +116,7 @@ public class PostService : IPostService
 
     public async Task<bool> IncrementLikeCountAsync(int PostId)
     {
-        // Since LikeCount is not persisted in database, we'll use a different approach
-        // For now, we'll just return true to indicate the like was processed
-        // In a real implementation, you might want to create a separate Likes table
-        var post = await _postRepository.GetByIdAsync(PostId);
-        return post != null;
+        return await _postRepository.IncrementLikeCountAsync(PostId);
     }
 
     public async Task<double> GetAverageRatingAsync(int PostId)
@@ -141,7 +137,7 @@ public class PostService : IPostService
             PostType = post.PostType,
             Tags = post.Tags,
             ViewCount = post.ViewCount,
-            LikeCount = post.ViewCount,
+            LikeCount = post.LikeCount,
             CreatedDate = post.PublishedAt,
             Status = post.Status,
             UserName = post.User?.FullName ?? "Unknown User",

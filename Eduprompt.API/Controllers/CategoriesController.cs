@@ -33,16 +33,7 @@ public class CategoriesController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var categories = await _PackageCategoryService.GetAllAsync();
-        var PackageCategoryDtos = categories.Select(c => new PackageCategoryDto
-        {
-            CategoryId = c.CategoryId,
-            CategoryName = c.CategoryName,
-            Description = c.Description,
-            DisplayOrder = c.DisplayOrder,
-            PackageCount = 0 // Will be calculated by service
-        }).ToList();
-
-        return Ok(PackageCategoryDtos);
+        return Ok(categories);
     }
 
     /// <summary>
@@ -52,16 +43,7 @@ public class CategoriesController : ControllerBase
     public async Task<IActionResult> GetRootCategories()
     {
         var categories = await _PackageCategoryService.GetAllAsync(); // Use GetAllAsync instead of GetRootCategoriesAsync
-        var PackageCategoryDtos = categories.Select(c => new PackageCategoryDto
-        {
-            CategoryId = c.CategoryId,
-            CategoryName = c.CategoryName,
-            Description = c.Description,
-            DisplayOrder = c.DisplayOrder,
-            PackageCount = 0 // Will be calculated by service
-        }).ToList();
-
-        return Ok(PackageCategoryDtos);
+        return Ok(categories);
     }
 
     /// <summary>
@@ -74,16 +56,7 @@ public class CategoriesController : ControllerBase
         if (category == null)
             return NotFound();
 
-        var PackageCategoryDto = new PackageCategoryDto
-        {
-            CategoryId = category.CategoryId,
-            CategoryName = category.CategoryName,
-            Description = category.Description,
-            DisplayOrder = category.DisplayOrder,
-            PackageCount = 0 // Will be calculated by service
-        };
-
-        return Ok(PackageCategoryDto);
+        return Ok(category);
     }
 
     /// <summary>
@@ -93,16 +66,7 @@ public class CategoriesController : ControllerBase
     public async Task<IActionResult> GetSubCategories(int id)
     {
         var categories = await _PackageCategoryService.GetAllAsync(); // Use GetAllAsync instead of GetSubCategoriesAsync
-        var PackageCategoryDtos = categories.Select(c => new PackageCategoryDto
-        {
-            CategoryId = c.CategoryId,
-            CategoryName = c.CategoryName,
-            Description = c.Description,
-            DisplayOrder = c.DisplayOrder,
-            PackageCount = 0 // Will be calculated by service
-        }).ToList();
-
-        return Ok(PackageCategoryDtos);
+        return Ok(categories);
     }
 
     /// <summary>
@@ -115,16 +79,7 @@ public class CategoriesController : ControllerBase
             return BadRequest(ModelState);
 
         var category = await _PackageCategoryService.CreateAsync(createDto);
-        var PackageCategoryDto = new PackageCategoryDto
-        {
-            CategoryId = category.CategoryId,
-            CategoryName = category.CategoryName,
-            Description = category.Description,
-            DisplayOrder = category.DisplayOrder,
-            PackageCount = 0 // Will be calculated by service
-        };
-
-        return CreatedAtAction(nameof(GetById), new { id = PackageCategoryDto.CategoryId }, PackageCategoryDto);
+        return CreatedAtAction(nameof(GetById), new { id = category.CategoryId }, category);
     }
 
     /// <summary>
@@ -140,16 +95,7 @@ public class CategoriesController : ControllerBase
         if (category == null)
             return NotFound();
 
-        var PackageCategoryDto = new PackageCategoryDto
-        {
-            CategoryId = category.CategoryId,
-            CategoryName = category.CategoryName,
-            Description = category.Description,
-            DisplayOrder = category.DisplayOrder,
-            PackageCount = 0 // Will be calculated by service
-        };
-
-        return Ok(PackageCategoryDto);
+        return Ok(category);
     }
 
     /// <summary>

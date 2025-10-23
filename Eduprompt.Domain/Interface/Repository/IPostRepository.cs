@@ -15,4 +15,5 @@ public interface IPostRepository
     Task<bool> ExistsAsync(int postId);
     Task<IEnumerable<Post>> SearchAsync(string searchTerm);
     Task<bool> IncrementViewCountAsync(int postId);
+    Task<bool> IncrementLikeCountAsync(int postId);
 }
