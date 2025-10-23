@@ -63,6 +63,7 @@ public class TemplateArchitectureService : ITemplateArchitectureService
         return new TemplateArchitectureDto
         {
             ArchitectureId = e.ArchitectureId,
+            PromptInstanceId = e.StorageId, // Map StorageId to PromptInstanceId
             StorageId = e.StorageId,
             ArchitectureName = e.ArchitectureName,
             ArchitectureType = e.ArchitectureType,

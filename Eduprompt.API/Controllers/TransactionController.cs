@@ -31,10 +31,17 @@ public class TransactionController : ControllerBase
     /// <response code="403">User not authorized (Admin role required)</response>
     [HttpGet]
     [Authorize]
-    public IActionResult GetAll()
+    public async Task<IActionResult> GetAll()
     {
-        // Transaction table structure mismatch with database
-        return Ok(new List<object>());
+        try
+        {
+            var transactions = await _transactionService.GetAllAsync();
+            return Ok(transactions);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     /// <summary>
@@ -46,10 +53,17 @@ public class TransactionController : ControllerBase
     /// <response code="400">Error retrieving transactions</response>
     /// <response code="401">User not authenticated</response>
     [HttpGet("wallet/{WalletId}")]
-    public IActionResult GetByWalletId(int WalletId)
+    public async Task<IActionResult> GetByWalletId(int WalletId)
     {
-        // Transaction table structure issue - temporarily disabled
-        return Ok(new List<object>());
+        try
+        {
+            var transactions = await _transactionService.GetByWalletIdAsync(WalletId);
+            return Ok(transactions);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     /// <summary>
@@ -61,10 +75,17 @@ public class TransactionController : ControllerBase
     /// <response code="400">Error retrieving transactions</response>
     /// <response code="401">User not authenticated</response>
     [HttpGet("user/{UserId}")]
-    public IActionResult GetByUserId(int UserId)
+    public async Task<IActionResult> GetByUserId(int UserId)
     {
-        // Transaction table structure mismatch with database
-        return Ok(new List<object>());
+        try
+        {
+            var transactions = await _transactionService.GetByUserIdAsync(UserId);
+            return Ok(transactions);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     /// <summary>
@@ -77,10 +98,20 @@ public class TransactionController : ControllerBase
     /// <response code="401">User not authenticated</response>
     /// <response code="404">Transaction not found</response>
     [HttpGet("{id}")]
-    public IActionResult GetById(int id)
+    public async Task<IActionResult> GetById(int id)
     {
-        // Transaction table structure mismatch with database
-        return Ok(new { message = "Transaction not available" });
+        try
+        {
+            var transaction = await _transactionService.GetByIdAsync(id);
+            if (transaction == null)
+                return NotFound(new { message = "Transaction not found" });
+            
+            return Ok(transaction);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     /// <summary>
@@ -92,10 +123,20 @@ public class TransactionController : ControllerBase
     /// <response code="400">Invalid transaction data</response>
     /// <response code="401">User not authenticated</response>
     [HttpPost]
-    public IActionResult Create([FromBody] CreateTransactionDto createDto)
+    public async Task<IActionResult> Create([FromBody] CreateTransactionDto createDto)
     {
-        // Transaction table structure mismatch with database
-        return Ok(new { message = "Transaction not available" });
+        try
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var transaction = await _transactionService.CreateAsync(createDto);
+            return CreatedAtAction(nameof(GetById), new { id = transaction.TransactionId }, transaction);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     /// <summary>
@@ -109,10 +150,24 @@ public class TransactionController : ControllerBase
     /// <response code="401">User not authenticated</response>
     /// <response code="404">Transaction not found</response>
     [HttpPut("{id}")]
-    public IActionResult Update(int id, [FromBody] CreateTransactionDto updateDto)
+    public async Task<IActionResult> Update(int id, [FromBody] CreateTransactionDto updateDto)
     {
-        // Transaction table structure mismatch with database
-        return Ok(new { message = "Transaction not available" });
+        try
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var transaction = await _transactionService.UpdateAsync(id, updateDto);
+            return Ok(transaction);
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound(new { message = "Transaction not found" });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     /// <summary>
@@ -124,9 +179,19 @@ public class TransactionController : ControllerBase
     /// <response code="401">User not authenticated</response>
     /// <response code="404">Transaction not found</response>
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        // Transaction table structure mismatch with database
-        return Ok(new { message = "Transaction not available" });
+        try
+        {
+            var result = await _transactionService.DeleteAsync(id);
+            if (!result)
+                return NotFound(new { message = "Transaction not found" });
+            
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 }

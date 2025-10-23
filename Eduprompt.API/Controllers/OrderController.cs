@@ -60,9 +60,7 @@ public class OrderController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetMyOrders()
     {
-        // Temporarily use default UserId for testing since authorize is disabled
-        var UserId = 1; // Default user ID for testing
-        // var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var UserId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
         var orders = await _orderService.GetUserOrdersAsync(UserId);
         return Ok(orders);
     }
@@ -71,9 +69,7 @@ public class OrderController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetById(int orderId)
     {
-        // Temporarily use default UserId for testing since authorize is disabled
-        var UserId = 1; // Default user ID for testing
-        // var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var UserId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
         var order = await _orderService.GetByIdAsync(orderId, UserId);
         if (order == null) 
             return NotFound(new { message = "Order not found or you don't have permission to view this order" });
@@ -97,9 +93,7 @@ public class OrderController : ControllerBase
     [Authorize]
     public async Task<IActionResult> Cancel(int orderId)
     {
-        // Temporarily use default UserId for testing since authorize is disabled
-        var UserId = 1; // Default user ID for testing
-        // var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var UserId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
         var order = await _orderService.CancelOrderAsync(orderId, UserId);
         return Ok(order);
     }

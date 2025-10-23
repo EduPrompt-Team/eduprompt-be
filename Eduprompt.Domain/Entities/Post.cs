@@ -19,6 +19,8 @@ public partial class Post
 
     public int ViewCount { get; set; }
 
+    public int LikeCount { get; set; }
+
     public DateTime PublishedAt { get; set; }
 
     public string Status { get; set; }
