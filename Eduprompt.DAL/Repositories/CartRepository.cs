@@ -102,6 +102,13 @@ public class CartRepository : ICartRepository
 
     public async Task<CartDetail> UpdateItemAsync(CartDetail cartDetail)
     {
+        // Detach the existing entity to avoid tracking conflicts
+        var existingEntity = await _context.CartDetails.FindAsync(cartDetail.CartDetailId);
+        if (existingEntity != null)
+        {
+            _context.Entry(existingEntity).State = EntityState.Detached;
+        }
+
         var cart = await _context.Carts.FindAsync(cartDetail.CartId);
         if (cart != null)
         {
@@ -119,8 +126,11 @@ public class CartRepository : ICartRepository
         var cartDetail = await _context.CartDetails.FindAsync(cartDetailId);
         if (cartDetail == null) return false;
 
+        // Store cartId before removing
+        var cartId = cartDetail.CartId;
+
         // Update cart total items
-        var cart = await _context.Carts.FindAsync(cartDetail.CartId);
+        var cart = await _context.Carts.FindAsync(cartId);
         if (cart != null && (cart.TotalItem ?? 0) > 0)
         {
             cart.TotalItem = (cart.TotalItem ?? 0) - 1;
