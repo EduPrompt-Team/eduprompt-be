@@ -122,7 +122,14 @@ public class PostRepository : IPostRepository
         var post = await _context.Posts.FindAsync(PostId);
         if (post == null) return false;
 
-        post.LikeCount++;
+        // Detach if already tracked to avoid conflicts
+        _context.Entry(post).State = EntityState.Detached;
+        
+        // Re-fetch and update
+        var postToUpdate = await _context.Posts.FindAsync(PostId);
+        if (postToUpdate == null) return false;
+        
+        postToUpdate.LikeCount++;
         await _context.SaveChangesAsync();
         return true;
     }
