@@ -26,9 +26,7 @@ public class StorageTemplatesController : ControllerBase
     [HttpGet("my-storage")]
     public async Task<IActionResult> GetMyStorage()
     {
-        // Temporarily use default UserId for testing since authorize is disabled
-        var UserId = 1; // Default user ID for testing
-        // var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         var storage = await _storageService.GetUserStorageAsync(UserId);
         return Ok(storage);
     }
@@ -36,9 +34,7 @@ public class StorageTemplatesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> AddToStorage([FromBody] StorageTemplateCreateDto storageDto)
     {
-        // Temporarily use default UserId for testing since authorize is disabled
-        var UserId = 1; // Default user ID for testing
-        // var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         var created = await _storageService.AddToStorageAsync(UserId, new StorageTemplateCreateServiceDto
         {
             TemplateId = storageDto.PackageId
@@ -49,9 +45,7 @@ public class StorageTemplatesController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> RemoveFromStorage(int id)
     {
-        // Temporarily use default UserId for testing since authorize is disabled
-        var UserId = 1; // Default user ID for testing
-        // var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         var result = await _storageService.RemoveFromStorageAsync(id, UserId);
         if (!result)
             return NotFound(new { message = $"Storage item with ID {id} not found" });
@@ -61,10 +55,68 @@ public class StorageTemplatesController : ControllerBase
     [HttpGet("check/{PackageId}")]
     public async Task<IActionResult> CheckStorage(int PackageId)
     {
-        // Temporarily use default UserId for testing since authorize is disabled
-        var UserId = 1; // Default user ID for testing
-        // var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         var isInStorage = await _storageService.IsInStorageAsync(UserId, PackageId);
         return Ok(new { PackageId, isInStorage });
+    }
+
+    /// <summary>
+    /// Get public storage templates (discoverable)
+    /// </summary>
+    [HttpGet("public")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetPublic([FromQuery] int? packageId, [FromQuery] string? grade, [FromQuery] string? subject, [FromQuery] string? chapter)
+    {
+        var list = await _storageService.GetPublicAsync(packageId, grade, subject, chapter);
+        return Ok(list);
+    }
+
+    /// <summary>
+    /// Update a storage template (owner or admin)
+    /// </summary>
+    [HttpPatch("{id}")]
+    public async Task<IActionResult> Update(int id, [FromBody] StorageTemplateUpdateDto request)
+    {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var isAdmin = User.IsInRole("Admin");
+        var dto = new StorageTemplateUpdateServiceDto
+        {
+            TemplateName = request.TemplateName,
+            TemplateContent = request.TemplateContent,
+            Grade = request.Grade,
+            Subject = request.Subject,
+            Chapter = request.Chapter,
+            IsPublic = request.IsPublic
+        };
+
+        var updated = await _storageService.UpdateAsync(id, userId, dto, isAdmin);
+        if (updated == null) return Forbid();
+        return Ok(updated);
+    }
+
+    /// <summary>
+    /// Publish a storage template (Admin only)
+    /// </summary>
+    [HttpPost("{id}/publish")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Publish(int id)
+    {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var ok = await _storageService.PublishAsync(id, true, userId, true);
+        if (!ok) return BadRequest(new { message = "Publish failed (missing content or not found)" });
+        return Ok(new { message = "Published" });
+    }
+
+    /// <summary>
+    /// Unpublish a storage template (Admin or Owner)
+    /// </summary>
+    [HttpPost("{id}/unpublish")]
+    public async Task<IActionResult> Unpublish(int id)
+    {
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var isAdmin = User.IsInRole("Admin");
+        var ok = await _storageService.PublishAsync(id, false, userId, isAdmin);
+        if (!ok) return Forbid();
+        return Ok(new { message = "Unpublished" });
     }
 } 

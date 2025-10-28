@@ -67,4 +67,37 @@ public class StorageTemplateRepository : IStorageTemplateRepository
         return await _context.StorageTemplates
             .AnyAsync(s => s.UserId == UserId && s.PackageId == templateId);
     }
+
+        public async Task<IEnumerable<StorageTemplate>> GetPublicAsync(int? packageId, string? grade, string? subject, string? chapter)
+        {
+            var query = _context.StorageTemplates
+                .Include(s => s.User)
+                .Include(s => s.Package)
+                .Where(s => s.IsPublic)
+                .AsQueryable();
+
+            if (packageId.HasValue) query = query.Where(s => s.PackageId == packageId.Value);
+            if (!string.IsNullOrWhiteSpace(grade)) query = query.Where(s => s.Grade == grade);
+            if (!string.IsNullOrWhiteSpace(subject)) query = query.Where(s => s.Subject == subject);
+            if (!string.IsNullOrWhiteSpace(chapter)) query = query.Where(s => s.Chapter == chapter);
+
+            return await query.OrderByDescending(s => s.CreatedAt).ToListAsync();
+        }
+
+        public async Task<StorageTemplate?> UpdateAsync(StorageTemplate entity)
+        {
+            _context.ChangeTracker.Clear();
+            _context.StorageTemplates.Update(entity);
+            await _context.SaveChangesAsync();
+            return await GetByIdAsync(entity.StorageId);
+        }
+
+        public async Task<bool> SetPublishAsync(int id, bool isPublic)
+        {
+            var item = await _context.StorageTemplates.FirstOrDefaultAsync(s => s.StorageId == id);
+            if (item == null) return false;
+            item.IsPublic = isPublic;
+            await _context.SaveChangesAsync();
+            return true;
+        }
 } 

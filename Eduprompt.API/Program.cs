@@ -154,7 +154,11 @@ if (app.Environment.IsDevelopment())
 // Use global exception handling middleware
 app.UseMiddleware<Eduprompt.API.Middleware.ExceptionHandlingMiddleware>();
 
-app.UseHttpsRedirection();
+// Only use HTTPS redirection in production
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseCors("AllowAll");
 

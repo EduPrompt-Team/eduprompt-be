@@ -10,4 +10,7 @@ public interface IStorageTemplateRepository
     Task<StorageTemplate> CreateAsync(StorageTemplate storage);
     Task<bool> DeleteAsync(int id);
     Task<bool> ExistsAsync(int userId, int templateId);
+    Task<IEnumerable<StorageTemplate>> GetPublicAsync(int? packageId, string? grade, string? subject, string? chapter);
+    Task<StorageTemplate?> UpdateAsync(StorageTemplate entity);
+    Task<bool> SetPublishAsync(int id, bool isPublic);
 } 
