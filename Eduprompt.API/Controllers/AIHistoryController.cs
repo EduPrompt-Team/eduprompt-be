@@ -9,7 +9,7 @@ namespace Eduprompt.API.Controllers;
 /// AI interaction history management
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/ai-histories")]
 [ApiExplorerSettings(GroupName = "15. AI History")]
 [Produces("application/json")]
 [Authorize]

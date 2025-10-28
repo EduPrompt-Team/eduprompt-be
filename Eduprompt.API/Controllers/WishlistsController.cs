@@ -10,7 +10,7 @@ namespace Eduprompt.API.Controllers;
 /// User wishlist management for favorite packages
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/wishlists")]
 [Authorize]
 [ApiExplorerSettings(GroupName = "08. Wishlists")]
 [Produces("application/json")]

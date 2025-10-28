@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Eduprompt.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/expected-outputs")]
 [ApiExplorerSettings(GroupName = "19. ExpectedOutput")]
 [Produces("application/json")]
 public class ExpectedOutputController : ControllerBase

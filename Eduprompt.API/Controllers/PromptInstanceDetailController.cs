@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Eduprompt.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/prompt-instances/{instanceId}/details")]
 [ApiExplorerSettings(GroupName = "18. PromptInstanceDetail")]
 [Produces("application/json")]
 public class PromptInstanceDetailController : ControllerBase
@@ -21,14 +21,14 @@ public class PromptInstanceDetailController : ControllerBase
     /// <summary>
     /// Get prompt instance details by instance ID (Public)
     /// </summary>
-    /// <param name="InstanceId">Prompt instance ID</param>
+    /// <param name="instanceId">Prompt instance ID</param>
     /// <returns>List of details for the prompt instance</returns>
     /// <response code="200">Prompt instance details retrieved successfully</response>
-    [HttpGet("instance/{InstanceId}")]
+    [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> GetByInstance(int InstanceId)
+    public async Task<IActionResult> GetByInstance(int instanceId)
     {
-        return Ok(await _service.GetByInstanceIdAsync(InstanceId));
+        return Ok(await _service.GetByInstanceIdAsync(instanceId));
     }
 
     /// <summary>

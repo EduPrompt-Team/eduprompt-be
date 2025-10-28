@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Eduprompt.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/prompt-instances")]
 [ApiExplorerSettings(GroupName = "17. Prompt Instance")]
 [Produces("application/json")]
 [Authorize]

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Eduprompt.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/packages")]
 [ApiExplorerSettings(GroupName = "13. Package")]
 [Produces("application/json")]
 public class PackageController : ControllerBase

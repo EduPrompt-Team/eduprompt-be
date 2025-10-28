@@ -9,7 +9,7 @@ namespace Eduprompt.API.Controllers;
 /// User management endpoints for CRUD operations
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/users")]
 [Authorize] // Require authentication for all endpoints
 [ApiExplorerSettings(GroupName = "02. Users")]
 [Produces("application/json")]

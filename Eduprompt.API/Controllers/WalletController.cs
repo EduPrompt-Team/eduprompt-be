@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Eduprompt.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/wallets")]
 [ApiExplorerSettings(GroupName = "12. Wallet")]
 [Produces("application/json")]
 [Authorize]

@@ -9,7 +9,7 @@ namespace Eduprompt.API.Controllers;
 /// Message management for chat conversations
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/messages")]
 [ApiExplorerSettings(GroupName = "06. Messages")]
 [Produces("application/json")]
 [Authorize]

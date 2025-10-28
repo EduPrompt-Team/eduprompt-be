@@ -9,7 +9,7 @@ namespace Eduprompt.API.Controllers;
 /// Package category management for product organization
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/package-categories")]
 [ApiExplorerSettings(GroupName = "14. Package Categories")]
 [Produces("application/json")]
 [Authorize]
