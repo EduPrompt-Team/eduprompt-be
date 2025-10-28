@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Eduprompt.API.DependencyInjection;
 
 namespace Eduprompt.API.DependencyInjection;
 
@@ -21,6 +22,9 @@ public static class DependencyInjection
 
         // Add AutoMapper
         services.AddAutoMapper(typeof(MappingProfile));
+
+        // Schema updater
+        services.AddScoped<IDatabaseSchemaUpdater, DatabaseSchemaUpdater>();
 
         // Add Repositories
         services.AddScoped<IUserRepository, UserRepository>();

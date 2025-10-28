@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Eduprompt.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/posts")]
 [ApiExplorerSettings(GroupName = "07. Post")]
 [Produces("application/json")]
 public class PostController : ControllerBase

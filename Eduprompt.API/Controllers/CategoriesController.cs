@@ -9,7 +9,7 @@ namespace Eduprompt.API.Controllers;
 /// Category management for prompt templates (Admin only)
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/categories")]
 [ApiExplorerSettings(GroupName = "04. Categories")]
 [Produces("application/json")]
 [Authorize(Roles = "Admin")] // Only Admin can manage categories

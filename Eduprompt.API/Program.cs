@@ -170,4 +170,11 @@ app.MapControllers();
 // Redirect root to Swagger
 app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
 
+// Ensure DB schema aligns with code on startup
+using (var scope = app.Services.CreateScope())
+{
+    var schemaUpdater = scope.ServiceProvider.GetRequiredService<IDatabaseSchemaUpdater>();
+    await schemaUpdater.EnsureSchemaAsync();
+}
+
 app.Run();

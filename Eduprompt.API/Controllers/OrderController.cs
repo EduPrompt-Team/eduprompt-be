@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Eduprompt.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/orders")]
 [ApiExplorerSettings(GroupName = "14. Order")]
 [Produces("application/json")]
 public class OrderController : ControllerBase

@@ -10,7 +10,7 @@ namespace Eduprompt.API.Controllers;
 /// Shopping cart management for authenticated users
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/cart")]
 [Authorize]
 [ApiExplorerSettings(GroupName = "18. Shopping Cart")]
 [Produces("application/json")]
