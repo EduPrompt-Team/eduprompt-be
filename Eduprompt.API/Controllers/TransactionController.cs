@@ -9,7 +9,7 @@ namespace Eduprompt.API.Controllers;
 /// Transaction management for wallet operations
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/transactions")]
 [ApiExplorerSettings(GroupName = "11. Transactions")]
 [Produces("application/json")]
 [Authorize]

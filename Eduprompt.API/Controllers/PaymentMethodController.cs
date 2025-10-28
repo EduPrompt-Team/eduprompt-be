@@ -9,7 +9,7 @@ namespace Eduprompt.API.Controllers;
 /// Payment method management for user transactions
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/payment-methods")]
 [ApiExplorerSettings(GroupName = "10. Payment Methods")]
 [Produces("application/json")]
 [Authorize]

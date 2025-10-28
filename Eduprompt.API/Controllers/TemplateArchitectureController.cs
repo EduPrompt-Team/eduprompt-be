@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Eduprompt.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/template-architectures")]
 [ApiExplorerSettings(GroupName = "17. TemplateArchitecture")]
 [Produces("application/json")]
 public class TemplateArchitectureController : ControllerBase
