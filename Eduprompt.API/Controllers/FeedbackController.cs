@@ -9,7 +9,7 @@ namespace Eduprompt.API.Controllers;
 /// Feedback and rating management for posts and templates
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/feedbacks")]
 [ApiExplorerSettings(GroupName = "16. Feedback")]
 [Produces("application/json")]
 [Authorize]

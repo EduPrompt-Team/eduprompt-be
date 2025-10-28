@@ -11,7 +11,7 @@ namespace Eduprompt.API.Controllers;
 /// Authentication and user management endpoints
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/auth")]
 [ApiExplorerSettings(GroupName = "01. Authentication")]
 [Produces("application/json")]
 public class AuthController : ControllerBase

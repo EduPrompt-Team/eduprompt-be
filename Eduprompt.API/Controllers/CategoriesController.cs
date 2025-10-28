@@ -12,7 +12,7 @@ namespace Eduprompt.API.Controllers;
 [Route("api/categories")]
 [ApiExplorerSettings(GroupName = "04. Categories")]
 [Produces("application/json")]
-[Authorize(Roles = "Admin")] // Only Admin can manage categories
+[Authorize(Policy = "AdminOnly")] // Only Admin can manage categories
 public class CategoriesController : ControllerBase
 {
     private readonly IPackageCategoryService _PackageCategoryService;

@@ -9,7 +9,7 @@ namespace Eduprompt.API.Controllers;
 /// Role management for user permissions (Admin only)
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/roles")]
 [Authorize] // Only Admin can manage roles
 [ApiExplorerSettings(GroupName = "03. Roles (Admin)")]
 [Produces("application/json")]

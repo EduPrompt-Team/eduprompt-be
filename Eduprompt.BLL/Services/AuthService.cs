@@ -116,7 +116,7 @@ public class AuthService : IAuthService
         return hashOfInput == hashedPassword;
     }
 
-    private string GenerateJwtToken(User user)
+    private async Task<string> GenerateJwtTokenAsync(User user)
     {
         var jwtSettings = _configuration.GetSection("Jwt");
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]!));
@@ -129,7 +129,16 @@ public class AuthService : IAuthService
             new Claim(ClaimTypes.Name, user.FullName)
         };
 
-        if (user.Role != null)
+        // Load role if not already loaded
+        if (user.Role == null && user.RoleId.HasValue)
+        {
+            var role = await _roleRepository.GetByIdAsync(user.RoleId.Value);
+            if (role != null)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role.RoleName));
+            }
+        }
+        else if (user.Role != null)
         {
             claims.Add(new Claim(ClaimTypes.Role, user.Role.RoleName));
         }
@@ -143,6 +152,12 @@ public class AuthService : IAuthService
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+    
+    private string GenerateJwtToken(User user)
+    {
+        // Backward compatibility wrapper
+        return GenerateJwtTokenAsync(user).GetAwaiter().GetResult();
     }
 
     private static string HashToken(string token)

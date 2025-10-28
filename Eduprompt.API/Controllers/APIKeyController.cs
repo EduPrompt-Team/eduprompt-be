@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Eduprompt.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/api-keys")]
 [ApiExplorerSettings(GroupName = "15. APIKey")]
 [Produces("application/json")]
 public class APIKeyController : ControllerBase

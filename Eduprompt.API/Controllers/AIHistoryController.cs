@@ -9,7 +9,7 @@ namespace Eduprompt.API.Controllers;
 /// AI interaction history management
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/ai-histories")]
 [ApiExplorerSettings(GroupName = "15. AI History")]
 [Produces("application/json")]
 [Authorize]
@@ -30,7 +30,7 @@ public class AIHistoryController : ControllerBase
     /// <response code="401">User not authenticated</response>
     /// <response code="403">User not authorized (Admin role required)</response>
     [HttpGet]
-    [Authorize]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> GetAll()
     {
         try
