@@ -49,7 +49,7 @@ public class OrderController : ControllerBase
     /// <response code="401">User not authenticated</response>
     /// <response code="403">User not authorized (Admin role required)</response>
     [HttpGet]
-    [Authorize]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> GetAll()
     {
         var orders = await _orderService.GetAllOrdersAsync();
@@ -80,7 +80,7 @@ public class OrderController : ControllerBase
     /// Get order by ID (Admin only - can view any order)
     /// </summary>
     [HttpGet("admin/{orderId}")]
-    [Authorize]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> GetByIdAdmin(int orderId)
     {
         var order = await _orderService.GetByIdAdminAsync(orderId);

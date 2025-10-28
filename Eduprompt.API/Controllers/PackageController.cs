@@ -166,7 +166,7 @@ public class PackageController : ControllerBase
     /// <response code="401">User not authenticated</response>
     /// <response code="403">User not authorized (Admin role required)</response>
     [HttpPost]
-    [Authorize]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> Create([FromBody] CreatePackageDto createPackageDto)
     {
         try
@@ -192,7 +192,7 @@ public class PackageController : ControllerBase
     /// <response code="403">User not authorized (Admin role required)</response>
     /// <response code="404">Package not found</response>
     [HttpPut("{PackageId}")]
-    [Authorize]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> Update(int PackageId, [FromBody] UpdatePackageDto updatePackageDto)
     {
         try
@@ -221,7 +221,7 @@ public class PackageController : ControllerBase
     /// <response code="403">User not authorized (Admin role required)</response>
     /// <response code="404">Package not found</response>
     [HttpDelete("{PackageId}")]
-    [Authorize]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> Delete(int PackageId)
     {
         try

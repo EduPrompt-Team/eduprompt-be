@@ -30,7 +30,7 @@ public class UsersController : ControllerBase
     /// <response code="401">User not authenticated</response>
     /// <response code="403">User not authorized (Admin role required)</response>
     [HttpGet]
-    [Authorize]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> GetAll()
     {
         var users = await _userService.GetAllAsync();
@@ -66,7 +66,7 @@ public class UsersController : ControllerBase
     /// <response code="401">User not authenticated</response>
     /// <response code="403">User not authorized (Admin role required)</response>
     [HttpPost]
-    [Authorize]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> Create([FromBody] UserCreateDto userDto)
     {
         try
@@ -114,7 +114,7 @@ public class UsersController : ControllerBase
     /// <response code="403">User not authorized (Admin role required)</response>
     /// <response code="404">User not found</response>
     [HttpDelete("{id}")]
-    [Authorize]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> Delete(int id)
     {
         var result = await _userService.DeleteAsync(id);

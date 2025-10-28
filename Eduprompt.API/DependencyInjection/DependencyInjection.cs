@@ -113,6 +113,28 @@ public static class DependencyInjection
             };
         });
 
+        // Add Authorization policies
+        services.AddAuthorization(options =>
+        {
+            // Policy for Admin-only endpoints
+            options.AddPolicy("AdminOnly", policy =>
+            {
+                policy.RequireRole("Admin");
+            });
+
+            // Policy for Admin or User own resource
+            options.AddPolicy("AdminOrOwner", policy =>
+            {
+                policy.RequireAuthenticatedUser();
+            });
+
+            // Policy for authenticated users (any role)
+            options.AddPolicy("AuthenticatedUser", policy =>
+            {
+                policy.RequireAuthenticatedUser();
+            });
+        });
+
         return services;
     }
 }
