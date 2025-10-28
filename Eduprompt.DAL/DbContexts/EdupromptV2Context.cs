@@ -506,6 +506,11 @@ public partial class EdupromptV2Context : DbContext
             entity.Property(e => e.TemplateName)
                 .IsRequired()
                 .HasMaxLength(200);
+            entity.Property(e => e.TemplateContent);
+            entity.Property(e => e.Grade).HasMaxLength(10);
+            entity.Property(e => e.Subject).HasMaxLength(50);
+            entity.Property(e => e.Chapter).HasMaxLength(100);
+            entity.Property(e => e.IsPublic).HasDefaultValue(false);
             entity.Property(e => e.UserId).HasColumnName("UserID");
 
             entity.HasOne(d => d.Package).WithMany(p => p.StorageTemplates)

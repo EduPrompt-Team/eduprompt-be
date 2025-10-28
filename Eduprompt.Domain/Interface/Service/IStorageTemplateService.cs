@@ -6,6 +6,9 @@ public interface IStorageTemplateService
     Task<StorageTemplateServiceDto> AddToStorageAsync(int userId, StorageTemplateCreateServiceDto storageDto);
     Task<bool> RemoveFromStorageAsync(int id, int userId);
     Task<bool> IsInStorageAsync(int userId, int templateId);
+    Task<IEnumerable<StorageTemplateServiceDto>> GetPublicAsync(int? packageId, string? grade, string? subject, string? chapter);
+    Task<StorageTemplateServiceDto?> UpdateAsync(int id, int currentUserId, StorageTemplateUpdateServiceDto updateDto, bool currentUserIsAdmin);
+    Task<bool> PublishAsync(int id, bool isPublish, int currentUserId, bool currentUserIsAdmin);
 }
 
 public class StorageTemplateServiceDto
@@ -27,3 +30,13 @@ public class StorageTemplateCreateServiceDto
 {
     public int TemplateId { get; set; }
 } 
+
+public class StorageTemplateUpdateServiceDto
+{
+    public string? TemplateName { get; set; }
+    public string? TemplateContent { get; set; }
+    public string? Grade { get; set; }
+    public string? Subject { get; set; }
+    public string? Chapter { get; set; }
+    public bool? IsPublic { get; set; }
+}
