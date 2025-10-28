@@ -71,6 +71,21 @@ END";
         await _dbContext.Database.ExecuteSqlRawAsync(addStorageTemplateChapter, cancellationToken);
         await _dbContext.Database.ExecuteSqlRawAsync(addStorageTemplateIsPublic, cancellationToken);
         await _dbContext.Database.ExecuteSqlRawAsync(addIdxStorageTemplatesIsPublic, cancellationToken);
+
+        // Link Post to TemplateArchitecture if not present
+        const string addPostTemplateFk = @"IF NOT EXISTS (
+    SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Posts') AND name = 'TemplateArchitectureID'
+) BEGIN
+    ALTER TABLE Posts ADD TemplateArchitectureID INT NULL;
+END
+IF NOT EXISTS (
+    SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Posts_TemplateArchitectures'
+) BEGIN
+    ALTER TABLE Posts WITH CHECK ADD CONSTRAINT FK_Posts_TemplateArchitectures FOREIGN KEY(TemplateArchitectureID)
+    REFERENCES TemplateArchitectures(ArchitectureID);
+END";
+
+        await _dbContext.Database.ExecuteSqlRawAsync(addPostTemplateFk, cancellationToken);
     }
 }
 

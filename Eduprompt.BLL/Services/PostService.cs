@@ -79,6 +79,14 @@ public class PostService : IPostService
             Tags = createPostDto.Tags,
             PublishedAt = DateTime.UtcNow
         };
+        // Attach template link if provided
+        if (createPostDto.TemplateArchitectureId.HasValue)
+        {
+            // Column added via schema updater; use raw set through EF
+            _ = _postRepository; // placeholder to keep context
+            // set via reflection to keep entity POCO unchanged
+            typeof(Post).GetProperty("TemplateArchitectureId")?.SetValue(post, createPostDto.TemplateArchitectureId.Value);
+        }
 
         var createdPost = await _postRepository.CreateAsync(post);
         return MapToDto(createdPost);
@@ -94,6 +102,10 @@ public class PostService : IPostService
         post.Status = updateDto.Status ?? post.Status;
         post.PostType = updateDto.PostType ?? post.PostType;
         post.Tags = updateDto.Tags ?? post.Tags;
+        if (updateDto.TemplateArchitectureId.HasValue)
+        {
+            typeof(Post).GetProperty("TemplateArchitectureId")?.SetValue(post, updateDto.TemplateArchitectureId.Value);
+        }
 
         var updatedPost = await _postRepository.UpdateAsync(post);
         return MapToDto(updatedPost);

@@ -25,6 +25,7 @@ public static class DependencyInjection
 
         // Schema updater
         services.AddScoped<IDatabaseSchemaUpdater, DatabaseSchemaUpdater>();
+        services.AddScoped<IDatabaseDataSeeder, DatabaseDataSeeder>();
 
         // Add Repositories
         services.AddScoped<IUserRepository, UserRepository>();
@@ -81,6 +82,7 @@ public static class DependencyInjection
         services.AddScoped<ITemplateArchitectureService, TemplateArchitectureService>();
         services.AddScoped<IPromptInstanceDetailService, PromptInstanceDetailService>();
         services.AddScoped<IExpectedOutputService, ExpectedOutputService>();
+        services.AddScoped<ITemplateCommerceService, TemplateCommerceService>();
 
         // Add HttpClient for Google API calls
         services.AddHttpClient<IGoogleAuthService, GoogleAuthService>();

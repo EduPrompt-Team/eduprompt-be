@@ -175,6 +175,8 @@ using (var scope = app.Services.CreateScope())
 {
     var schemaUpdater = scope.ServiceProvider.GetRequiredService<IDatabaseSchemaUpdater>();
     await schemaUpdater.EnsureSchemaAsync();
+    var dataSeeder = scope.ServiceProvider.GetRequiredService<IDatabaseDataSeeder>();
+    await dataSeeder.SeedAsync();
 }
 
 app.Run();

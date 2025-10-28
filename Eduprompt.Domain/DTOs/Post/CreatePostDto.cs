@@ -22,4 +22,7 @@ public class CreatePostDto
 
     [StringLength(50)]
     public string? Status { get; set; } = "Published";
+
+    // Link to TemplateArchitecture when posting a template for sale/exchange
+    public int? TemplateArchitectureId { get; set; }
 }
