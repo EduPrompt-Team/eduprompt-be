@@ -7,7 +7,7 @@ namespace Eduprompt.API.Controllers;
 
 [ApiController]
 [Route("api/package-details")]
-[ApiExplorerSettings(GroupName = "16. PackageDetail")]
+[ApiExplorerSettings(GroupName = "19. PackageDetail")]
 [Produces("application/json")]
 public class PackageDetailController : ControllerBase
 {

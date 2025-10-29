@@ -7,7 +7,7 @@ namespace Eduprompt.API.Controllers;
 
 [ApiController]
 [Route("api/template-architectures")]
-[ApiExplorerSettings(GroupName = "17. TemplateArchitecture")]
+[ApiExplorerSettings(GroupName = "21. TemplateArchitecture")]
 [Produces("application/json")]
 public class TemplateArchitectureController : ControllerBase
 {

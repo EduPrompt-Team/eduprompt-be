@@ -6,7 +6,7 @@ namespace Eduprompt.API.Controllers;
 
 [ApiController]
 [Route("api/templates")]
-[ApiExplorerSettings(GroupName = "17. TemplateCommerce")]
+[ApiExplorerSettings(GroupName = "22. TemplateCommerce")]
 [Produces("application/json")]
 public class TemplateCommerceController : ControllerBase
 {

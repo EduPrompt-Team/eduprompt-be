@@ -10,7 +10,7 @@ namespace Eduprompt.API.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/package-categories")]
-[ApiExplorerSettings(GroupName = "14. Package Categories")]
+[ApiExplorerSettings(GroupName = "15. Package Categories")]
 [Produces("application/json")]
 [Authorize]
 public class PackageCategoryController : ControllerBase

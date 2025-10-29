@@ -12,7 +12,7 @@ namespace Eduprompt.API.Controllers;
 [ApiController]
 [Route("api/cart")]
 [Authorize]
-[ApiExplorerSettings(GroupName = "18. Shopping Cart")]
+[ApiExplorerSettings(GroupName = "23. Cart")]
 [Produces("application/json")]
 public class CartController : ControllerBase
 {
