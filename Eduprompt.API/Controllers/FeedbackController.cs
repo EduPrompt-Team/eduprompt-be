@@ -10,7 +10,7 @@ namespace Eduprompt.API.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/feedbacks")]
-[ApiExplorerSettings(GroupName = "16. Feedback")]
+[ApiExplorerSettings(GroupName = "18. Feedback")]
 [Produces("application/json")]
 [Authorize]
 public class FeedbackController : ControllerBase

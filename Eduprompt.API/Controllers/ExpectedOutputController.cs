@@ -7,7 +7,7 @@ namespace Eduprompt.API.Controllers;
 
 [ApiController]
 [Route("api/expected-outputs")]
-[ApiExplorerSettings(GroupName = "19. ExpectedOutput")]
+[ApiExplorerSettings(GroupName = "24. ExpectedOutput")]
 [Produces("application/json")]
 public class ExpectedOutputController : ControllerBase
 {

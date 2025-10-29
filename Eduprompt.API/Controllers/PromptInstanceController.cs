@@ -7,7 +7,7 @@ namespace Eduprompt.API.Controllers;
 
 [ApiController]
 [Route("api/prompt-instances")]
-[ApiExplorerSettings(GroupName = "17. Prompt Instance")]
+[ApiExplorerSettings(GroupName = "20. Prompt Instance")]
 [Produces("application/json")]
 [Authorize]
 public class PromptInstanceController : ControllerBase
