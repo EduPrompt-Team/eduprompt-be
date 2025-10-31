@@ -13,6 +13,10 @@ public interface IPaymentService
     // Manual Payment (for COD or other methods)
     Task<PaymentServiceDto> CreateManualPaymentAsync(int orderId, PaymentCreateServiceDto paymentDto);
     Task<PaymentServiceDto> UpdatePaymentStatusAsync(int paymentId, string status); // Admin only
+
+    // VNPay query/refund
+    Task<object> QueryVnpayTransactionAsync(VnpayQueryRequestDto requestDto);
+    Task<object> RefundVnpayTransactionAsync(VnpayRefundRequestDto requestDto);
 }
 
 // Service DTOs
@@ -43,6 +47,7 @@ public class VnpayRequestServiceDto
     public string? BankCode { get; set; }
     public string Language { get; set; } = "vn";
     public string? ReturnUrl { get; set; }
+    public string? IpAddr { get; set; }
 }
 
 public class VnpayCallbackServiceDto
@@ -60,3 +65,20 @@ public class VnpayCallbackServiceDto
     public string vnp_TxnRef { get; set; } = string.Empty;
     public string vnp_SecureHash { get; set; } = string.Empty;
 } 
+
+public class VnpayQueryRequestDto
+{
+    public string TxnRef { get; set; } = string.Empty; // vnp_TxnRef
+    public string TransactionDate { get; set; } = string.Empty; // yyyyMMddHHmmss GMT+7
+    public string? OrderInfo { get; set; }
+    public string? IpAddr { get; set; }
+}
+
+public class VnpayRefundRequestDto
+{
+    public string TxnRef { get; set; } = string.Empty;
+    public string Amount { get; set; } = string.Empty; // amount*100
+    public string TransactionDate { get; set; } = string.Empty;
+    public string CreateBy { get; set; } = "system";
+    public string? IpAddr { get; set; }
+}
