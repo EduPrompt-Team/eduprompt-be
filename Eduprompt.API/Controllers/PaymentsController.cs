@@ -45,6 +45,7 @@ public class PaymentsController : ControllerBase
     public async Task<IActionResult> CreateVnpayUrl(int orderId, [FromBody] VnpayRequestServiceDto dto)
     {
         var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+        dto.IpAddr ??= HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
         var url = await _paymentService.CreateVnpayPaymentUrlAsync(orderId, userId, dto);
         return Ok(new { url });
     }
@@ -55,6 +56,40 @@ public class PaymentsController : ControllerBase
     {
         var result = await _paymentService.ProcessVnpayCallbackAsync(cb);
         return Ok(result);
+    }
+
+    [HttpPost("querydr")]
+    [Authorize(Policy = "AdminOnly")]
+    public async Task<IActionResult> Query([FromBody] VnpayQueryRequestDto dto)
+    {
+        dto.IpAddr ??= HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
+        var result = await _paymentService.QueryVnpayTransactionAsync(dto);
+        return Ok(result);
+    }
+
+    [HttpPost("refund")]
+    [Authorize(Policy = "AdminOnly")]
+    public async Task<IActionResult> Refund([FromBody] VnpayRefundRequestDto dto)
+    {
+        dto.IpAddr ??= HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
+        var result = await _paymentService.RefundVnpayTransactionAsync(dto);
+        return Ok(result);
+    }
+
+    // IPN (Instant Payment Notification) - server to server
+    [HttpPost("vnpay-ipn")]
+    [AllowAnonymous]
+    public async Task<IActionResult> VnpayIpn([FromForm] VnpayCallbackServiceDto cb)
+    {
+        try
+        {
+            var _ = await _paymentService.ProcessVnpayCallbackAsync(cb);
+            return Ok(new { RspCode = "00", Message = "Confirm Success" });
+        }
+        catch
+        {
+            return Ok(new { RspCode = "97", Message = "Invalid signature or data" });
+        }
     }
 
     [HttpPost("orders/{orderId}/manual")]
