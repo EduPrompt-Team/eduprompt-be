@@ -54,4 +54,6 @@ public partial class User
     public virtual ICollection<Wallet> Wallets { get; set; } = new List<Wallet>();
 
     public virtual ICollection<Wishlist> Wishlists { get; set; } = new List<Wishlist>();
+
+    public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 }

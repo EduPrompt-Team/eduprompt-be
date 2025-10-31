@@ -86,6 +86,36 @@ IF NOT EXISTS (
 END";
 
         await _dbContext.Database.ExecuteSqlRawAsync(addPostTemplateFk, cancellationToken);
+
+        // Ensure Payments table exists and indexes/constraints
+        const string ensurePayments = @"IF OBJECT_ID(N'dbo.Payments', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Payments (
+        PaymentID INT IDENTITY(1,1) PRIMARY KEY,
+        OrderID INT NOT NULL,
+        UserID INT NULL,
+        Amount DECIMAL(18,2) NOT NULL,
+        PaymentMethod NVARCHAR(50) NOT NULL,
+        Provider NVARCHAR(50) NOT NULL,
+        Status NVARCHAR(50) NULL DEFAULT 'Pending',
+        CreatedAt DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+        UpdatedAt DATETIME2 NULL,
+        TransactionNo NVARCHAR(100) NULL,
+        ResponseCode NVARCHAR(20) NULL,
+        BankCode NVARCHAR(20) NULL,
+        PayDate NVARCHAR(20) NULL,
+        TxnRef NVARCHAR(100) NULL
+    );
+
+    ALTER TABLE dbo.Payments ADD CONSTRAINT FK_Payments_Orders FOREIGN KEY (OrderID) REFERENCES dbo.Orders(OrderID);
+    ALTER TABLE dbo.Payments ADD CONSTRAINT FK_Payments_Users FOREIGN KEY (UserID) REFERENCES dbo.Users(UserId);
+
+    CREATE INDEX IX_Payments_OrderID ON dbo.Payments(OrderID);
+    CREATE INDEX IX_Payments_UserID ON dbo.Payments(UserID);
+    CREATE INDEX IX_Payments_Status ON dbo.Payments(Status);
+END";
+
+        await _dbContext.Database.ExecuteSqlRawAsync(ensurePayments, cancellationToken);
     }
 }
 
