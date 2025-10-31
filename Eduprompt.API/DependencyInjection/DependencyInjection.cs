@@ -39,6 +39,7 @@ public static class DependencyInjection
         services.AddScoped<IWalletRepository, WalletRepository>();
         services.AddScoped<IPaymentMethodRepository, PaymentMethodRepository>(); // Repository disabled but interface maintained
         services.AddScoped<ITransactionRepository, TransactionRepository>();
+        services.AddScoped<IPaymentRepository, PaymentRepository>();
         services.AddScoped<IConversationRepository, ConversationRepository>();
         services.AddScoped<IMessageRepository, MessageRepository>();
         services.AddScoped<IPackageRepository, PackageRepository>();
@@ -83,6 +84,7 @@ public static class DependencyInjection
         services.AddScoped<IPromptInstanceDetailService, PromptInstanceDetailService>();
         services.AddScoped<IExpectedOutputService, ExpectedOutputService>();
         services.AddScoped<ITemplateCommerceService, TemplateCommerceService>();
+        services.AddScoped<IPaymentService, PaymentService>();
 
         // Add HttpClient for Google API calls
         services.AddHttpClient<IGoogleAuthService, GoogleAuthService>();

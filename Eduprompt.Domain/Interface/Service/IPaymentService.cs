@@ -35,6 +35,7 @@ public class PaymentCreateServiceDto
 {
     public string PaymentMethod { get; set; } = string.Empty;
     public decimal Amount { get; set; }
+    public string Provider { get; set; } = "VNPay";
 }
 
 public class VnpayRequestServiceDto

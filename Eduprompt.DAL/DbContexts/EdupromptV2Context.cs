@@ -47,6 +47,8 @@ public partial class EdupromptV2Context : DbContext
 
     public virtual DbSet<PaymentMethod> PaymentMethods { get; set; }
 
+    public virtual DbSet<Payment> Payments { get; set; }
+
     public virtual DbSet<Post> Posts { get; set; }
 
     public virtual DbSet<PromptInstance> PromptInstances { get; set; }
@@ -393,6 +395,39 @@ public partial class EdupromptV2Context : DbContext
             entity.Property(e => e.Provider)
                 .IsRequired()
                 .HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<Payment>(entity =>
+        {
+            entity.HasKey(e => e.PaymentId).HasName("PK__Payments__9B556A58");
+
+            entity.ToTable("Payments");
+
+            entity.HasIndex(e => e.OrderId, "IX_Payments_OrderID");
+            entity.HasIndex(e => e.UserId, "IX_Payments_UserID");
+            entity.HasIndex(e => e.Status, "IX_Payments_Status");
+
+            entity.Property(e => e.PaymentId).HasColumnName("PaymentID");
+            entity.Property(e => e.OrderId).HasColumnName("OrderID");
+            entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.Amount).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.PaymentMethod).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Provider).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Status).HasMaxLength(50).HasDefaultValue("Pending");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getutcdate())");
+            entity.Property(e => e.TransactionNo).HasMaxLength(100);
+            entity.Property(e => e.ResponseCode).HasMaxLength(20);
+            entity.Property(e => e.BankCode).HasMaxLength(20);
+            entity.Property(e => e.PayDate).HasMaxLength(20);
+            entity.Property(e => e.TxnRef).HasMaxLength(100);
+
+            entity.HasOne(d => d.Order).WithMany(p => p.Payments)
+                .HasForeignKey(d => d.OrderId)
+                .HasConstraintName("FK_Payments_Orders");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Payments)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK_Payments_Users");
         });
 
         modelBuilder.Entity<Post>(entity =>
