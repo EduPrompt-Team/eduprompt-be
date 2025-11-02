@@ -37,7 +37,13 @@ public class StorageTemplatesController : ControllerBase
         var UserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         var created = await _storageService.AddToStorageAsync(UserId, new StorageTemplateCreateServiceDto
         {
-            TemplateId = storageDto.PackageId
+            TemplateId = storageDto.PackageId,
+            TemplateName = storageDto.TemplateName,
+            TemplateContent = storageDto.TemplateContent,
+            Grade = storageDto.Grade,
+            Subject = storageDto.Subject,
+            Chapter = storageDto.Chapter,
+            IsPublic = storageDto.IsPublic
         });
         return CreatedAtAction(nameof(GetMyStorage), created);
     }

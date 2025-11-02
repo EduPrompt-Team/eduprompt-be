@@ -8,9 +8,17 @@ public class CreateFeedbackValidator : AbstractValidator<CreateFeedbackDto>
 {
     public CreateFeedbackValidator()
     {
-        RuleFor(x => x.UserId).GreaterThan(0);
+        // PostId or StorageId must be provided (at least one)
+        RuleFor(x => x)
+            .Must(x => x.PostId.HasValue || x.StorageId.HasValue)
+            .WithMessage("PostId or StorageId is required");
+
         RuleFor(x => x.Rating).InclusiveBetween(1, 5);
-        When(x => x.Comment != null, () => RuleFor(x => x.Comment!).MaximumLength(500));
+        When(x => x.Comment != null, () => RuleFor(x => x.Comment!).MaximumLength(1000));
+        
+        // UserId will be set from token, but validate if provided
+        When(x => x.UserId.HasValue, () => 
+            RuleFor(x => x.UserId!.Value).GreaterThan(0));
     }
 }
 

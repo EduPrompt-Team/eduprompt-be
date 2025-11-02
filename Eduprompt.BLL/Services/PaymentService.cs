@@ -14,6 +14,7 @@ public class PaymentService : IPaymentService
     private readonly IConfiguration _configuration;
     private readonly IPaymentMethodRepository _paymentMethodRepository;
     private readonly IWalletRepository _walletRepository;
+    private readonly IWalletService _walletService;
     private readonly ITransactionRepository _transactionRepository;
 
     public PaymentService(
@@ -22,6 +23,7 @@ public class PaymentService : IPaymentService
         IConfiguration configuration,
         IPaymentMethodRepository paymentMethodRepository,
         IWalletRepository walletRepository,
+        IWalletService walletService,
         ITransactionRepository transactionRepository)
     {
         _paymentRepository = paymentRepository;
@@ -29,6 +31,7 @@ public class PaymentService : IPaymentService
         _configuration = configuration;
         _paymentMethodRepository = paymentMethodRepository;
         _walletRepository = walletRepository;
+        _walletService = walletService;
         _transactionRepository = transactionRepository;
     }
 
@@ -157,43 +160,110 @@ public class PaymentService : IPaymentService
 
             if (success)
             {
-                // Update order status
-                if (payment.OrderId != 0)
+                // Check if this is a wallet top-up (TxnRef starts with "WLT-")
+                if (payment.TxnRef?.StartsWith("WLT-", StringComparison.OrdinalIgnoreCase) == true)
                 {
-                    var order = await _orderRepository.GetByIdAsync(payment.OrderId);
+                    // Handle wallet top-up
+                    if (payment.UserId.HasValue)
+                    {
+                        await _walletService.AddFundsByUserIdAsync(payment.UserId.Value, payment.Amount);
+                        
+                        // Create transaction record for top-up
+                        try
+                        {
+                            var methods = await _paymentMethodRepository.GetAllAsync();
+                            var vnpMethod = methods.FirstOrDefault(m => (m.Provider ?? "").Equals("VNPay", StringComparison.OrdinalIgnoreCase) || (m.MethodName ?? "").Contains("vnp", StringComparison.OrdinalIgnoreCase));
+                            if (vnpMethod != null)
+                            {
+                                var wallet = await _walletRepository.GetByUserIdAsync(payment.UserId.Value);
+                                if (wallet != null)
+                                {
+                                    var trx = new Transaction
+                                    {
+                                        PaymentMethodId = vnpMethod.PaymentMethodId,
+                                        WalletId = wallet.WalletId,
+                                        OrderId = null, // Top-up doesn't have OrderId
+                                        Amount = payment.Amount,
+                                        TransactionType = "TopUp",
+                                        TransactionDate = DateTime.UtcNow,
+                                        Status = "Completed",
+                                        TransactionReference = payment.TransactionNo ?? payment.TxnRef
+                                    };
+                                    await _transactionRepository.CreateAsync(trx);
+                                }
+                            }
+                        }
+                        catch { /* ignore optional transaction creation errors */ }
+                    }
+                }
+                // Check if this is a transaction payment (TxnRef starts with "TXN-")
+                else if (payment.TxnRef?.StartsWith("TXN-", StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    // Handle transaction payment - amount already processed, just create transaction record
+                    try
+                    {
+                        var methods = await _paymentMethodRepository.GetAllAsync();
+                        var vnpMethod = methods.FirstOrDefault(m => (m.Provider ?? "").Equals("VNPay", StringComparison.OrdinalIgnoreCase) || (m.MethodName ?? "").Contains("vnp", StringComparison.OrdinalIgnoreCase));
+                        if (vnpMethod != null && payment.UserId.HasValue)
+                        {
+                            var wallet = await _walletRepository.GetByUserIdAsync(payment.UserId.Value);
+                            if (wallet != null)
+                            {
+                                var trx = new Transaction
+                                {
+                                    PaymentMethodId = vnpMethod.PaymentMethodId,
+                                    WalletId = wallet.WalletId,
+                                    OrderId = null, // Transaction payment may not have OrderId
+                                    Amount = payment.Amount,
+                                    TransactionType = "ExternalPayment",
+                                    TransactionDate = DateTime.UtcNow,
+                                    Status = "Completed",
+                                    TransactionReference = payment.TransactionNo ?? payment.TxnRef
+                                };
+                                await _transactionRepository.CreateAsync(trx);
+                            }
+                        }
+                    }
+                    catch { /* ignore optional transaction creation errors */ }
+                }
+                // Regular order payment
+                else if (payment.OrderId.HasValue && payment.OrderId.Value != 0)
+                {
+                    // Update order status
+                    var order = await _orderRepository.GetByIdAsync(payment.OrderId.Value);
                     if (order != null)
                     {
                         order.Status = "Paid";
                         await _orderRepository.UpdateAsync(order);
                     }
-                }
 
-                // Create transaction if possible (optional, no wallet balance mutation)
-                try
-                {
-                    var methods = await _paymentMethodRepository.GetAllAsync();
-                    var vnpMethod = methods.FirstOrDefault(m => (m.Provider ?? "").Equals("VNPay", StringComparison.OrdinalIgnoreCase) || (m.MethodName ?? "").Contains("vnp", StringComparison.OrdinalIgnoreCase));
-                    if (vnpMethod != null && payment.UserId.HasValue)
+                    // Create transaction if possible (optional, no wallet balance mutation)
+                    try
                     {
-                        var wallet = await _walletRepository.GetByUserIdAsync(payment.UserId.Value);
-                        if (wallet != null)
+                        var methods = await _paymentMethodRepository.GetAllAsync();
+                        var vnpMethod = methods.FirstOrDefault(m => (m.Provider ?? "").Equals("VNPay", StringComparison.OrdinalIgnoreCase) || (m.MethodName ?? "").Contains("vnp", StringComparison.OrdinalIgnoreCase));
+                        if (vnpMethod != null && payment.UserId.HasValue)
                         {
-                            var trx = new Transaction
+                            var wallet = await _walletRepository.GetByUserIdAsync(payment.UserId.Value);
+                            if (wallet != null)
                             {
-                                PaymentMethodId = vnpMethod.PaymentMethodId,
-                                WalletId = wallet.WalletId,
-                                OrderId = payment.OrderId,
-                                Amount = payment.Amount,
-                                TransactionType = "ExternalPayment",
-                                TransactionDate = DateTime.UtcNow,
-                                Status = "Completed",
-                                TransactionReference = payment.TransactionNo ?? payment.TxnRef
-                            };
-                            await _transactionRepository.CreateAsync(trx);
+                                    var trx = new Transaction
+                                    {
+                                        PaymentMethodId = vnpMethod.PaymentMethodId,
+                                        WalletId = wallet.WalletId,
+                                        OrderId = payment.OrderId, // Nullable, can be null for wallet top-up
+                                        Amount = payment.Amount,
+                                        TransactionType = "ExternalPayment",
+                                        TransactionDate = DateTime.UtcNow,
+                                        Status = "Completed",
+                                        TransactionReference = payment.TransactionNo ?? payment.TxnRef
+                                    };
+                                await _transactionRepository.CreateAsync(trx);
+                            }
                         }
                     }
+                    catch { /* ignore optional transaction creation errors */ }
                 }
-                catch { /* ignore optional transaction creation errors */ }
             }
         }
         payment.UpdatedAt = DateTime.UtcNow;
@@ -298,12 +368,146 @@ public class PaymentService : IPaymentService
         return Map(payment);
     }
 
+    public async Task<string> CreateVnpayUrlForWalletTopupAsync(int walletId, decimal amount, int userId, VnpayRequestServiceDto requestDto)
+    {
+        var wallet = await _walletRepository.GetByIdAsync(walletId);
+        if (wallet == null) throw new InvalidOperationException("Wallet not found");
+        if (wallet.UserId != userId) throw new UnauthorizedAccessException("Wallet does not belong to user");
+
+        if (amount <= 0) throw new ArgumentException("Amount must be greater than 0", nameof(amount));
+
+        var vnp = _configuration.GetSection("VNPay");
+        var baseUrl = vnp["Url"] ?? string.Empty;
+        var tmnCode = vnp["TmnCode"] ?? string.Empty;
+        var returnUrl = requestDto.ReturnUrl ?? vnp["ReturnUrl"] ?? string.Empty;
+        var hashSecret = vnp["HashSecret"] ?? string.Empty;
+
+        var txnRef = $"WLT-{walletId}-{DateTime.UtcNow:yyyyMMddHHmmss}";
+        var vnpAmount = (long)(amount * 100);
+
+        var nowGmt7 = DateTime.UtcNow.AddHours(7);
+        var createDate = nowGmt7.ToString("yyyyMMddHHmmss");
+        var ipAddr = string.IsNullOrWhiteSpace(requestDto.IpAddr) ? "127.0.0.1" : requestDto.IpAddr;
+
+        var dict = new SortedDictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["vnp_Version"] = "2.1.0",
+            ["vnp_Command"] = "pay",
+            ["vnp_TmnCode"] = tmnCode,
+            ["vnp_Amount"] = vnpAmount.ToString(),
+            ["vnp_CurrCode"] = "VND",
+            ["vnp_TxnRef"] = txnRef,
+            ["vnp_OrderInfo"] = $"wallet_topup_{walletId}",
+            ["vnp_OrderType"] = "topup",
+            ["vnp_Locale"] = requestDto.Language ?? "vn",
+            ["vnp_CreateDate"] = createDate,
+            ["vnp_IpAddr"] = ipAddr,
+            ["vnp_ReturnUrl"] = returnUrl
+        };
+        if (!string.IsNullOrWhiteSpace(requestDto.BankCode))
+        {
+            dict["vnp_BankCode"] = requestDto.BankCode!;
+        }
+
+        // build signData (no URL-encode for signing)
+        var raw = string.Join("&", dict.Select(kv => $"{kv.Key}={kv.Value}"));
+        using var hmac = new System.Security.Cryptography.HMACSHA512(System.Text.Encoding.UTF8.GetBytes(hashSecret));
+        var signature = BitConverter.ToString(hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(raw))).Replace("-", string.Empty).ToLowerInvariant();
+
+        // build final url with URL-encoded values plus vnp_SecureHash
+        var encoded = string.Join("&", dict.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value)}"));
+        var url = $"{baseUrl}?{encoded}&vnp_SecureHash={signature}";
+
+        // create pending payment record (OrderId = null for wallet top-up)
+        var payment = new Payment
+        {
+            OrderId = null, // Nullable - wallet top-up doesn't require OrderId
+            UserId = userId,
+            Amount = amount,
+            PaymentMethod = "Online",
+            Provider = "VNPay",
+            Status = "Pending",
+            CreatedAt = DateTime.UtcNow,
+            TxnRef = txnRef
+        };
+        await _paymentRepository.CreateAsync(payment);
+
+        return url;
+    }
+
+    public async Task<string> CreateVnpayUrlForTransactionAsync(int transactionId, int userId, VnpayRequestServiceDto requestDto)
+    {
+        var transaction = await _transactionRepository.GetByIdAsync(transactionId);
+        if (transaction == null) throw new InvalidOperationException("Transaction not found");
+
+        var wallet = await _walletRepository.GetByIdAsync(transaction.WalletId);
+        if (wallet == null || wallet.UserId != userId) throw new UnauthorizedAccessException("Transaction does not belong to user");
+
+        var vnp = _configuration.GetSection("VNPay");
+        var baseUrl = vnp["Url"] ?? string.Empty;
+        var tmnCode = vnp["TmnCode"] ?? string.Empty;
+        var returnUrl = requestDto.ReturnUrl ?? vnp["ReturnUrl"] ?? string.Empty;
+        var hashSecret = vnp["HashSecret"] ?? string.Empty;
+
+        var txnRef = $"TXN-{transactionId}-{DateTime.UtcNow:yyyyMMddHHmmss}";
+        var vnpAmount = (long)(transaction.Amount * 100);
+
+        var nowGmt7 = DateTime.UtcNow.AddHours(7);
+        var createDate = nowGmt7.ToString("yyyyMMddHHmmss");
+        var ipAddr = string.IsNullOrWhiteSpace(requestDto.IpAddr) ? "127.0.0.1" : requestDto.IpAddr;
+
+        var dict = new SortedDictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["vnp_Version"] = "2.1.0",
+            ["vnp_Command"] = "pay",
+            ["vnp_TmnCode"] = tmnCode,
+            ["vnp_Amount"] = vnpAmount.ToString(),
+            ["vnp_CurrCode"] = "VND",
+            ["vnp_TxnRef"] = txnRef,
+            ["vnp_OrderInfo"] = $"transaction_{transactionId}",
+            ["vnp_OrderType"] = "other",
+            ["vnp_Locale"] = requestDto.Language ?? "vn",
+            ["vnp_CreateDate"] = createDate,
+            ["vnp_IpAddr"] = ipAddr,
+            ["vnp_ReturnUrl"] = returnUrl
+        };
+        if (!string.IsNullOrWhiteSpace(requestDto.BankCode))
+        {
+            dict["vnp_BankCode"] = requestDto.BankCode!;
+        }
+
+        // build signData (no URL-encode for signing)
+        var raw = string.Join("&", dict.Select(kv => $"{kv.Key}={kv.Value}"));
+        using var hmac = new System.Security.Cryptography.HMACSHA512(System.Text.Encoding.UTF8.GetBytes(hashSecret));
+        var signature = BitConverter.ToString(hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(raw))).Replace("-", string.Empty).ToLowerInvariant();
+
+        // build final url with URL-encoded values plus vnp_SecureHash
+        var encoded = string.Join("&", dict.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value)}"));
+        var url = $"{baseUrl}?{encoded}&vnp_SecureHash={signature}";
+
+        // create pending payment record (OrderId = null for transaction payment)
+        var payment = new Payment
+        {
+            OrderId = null, // Nullable - transaction payment may not require OrderId
+            UserId = userId,
+            Amount = transaction.Amount,
+            PaymentMethod = "Online",
+            Provider = "VNPay",
+            Status = "Pending",
+            CreatedAt = DateTime.UtcNow,
+            TxnRef = txnRef
+        };
+        await _paymentRepository.CreateAsync(payment);
+
+        return url;
+    }
+
     private static PaymentServiceDto Map(Payment p)
     {
         return new PaymentServiceDto
         {
             PaymentId = p.PaymentId,
-            OrderId = p.OrderId,
+            OrderId = p.OrderId ?? 0, // Map null to 0 for DTO compatibility
             PaymentMethod = p.PaymentMethod,
             Amount = p.Amount,
             PaymentDate = p.CreatedAt,

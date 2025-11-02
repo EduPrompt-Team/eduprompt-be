@@ -16,11 +16,17 @@ public class StorageTemplateServiceDto
     public int StorageId { get; set; }
     public int UserId { get; set; }
     public int TemplateId { get; set; }
+    public string? TemplateName { get; set; }
+    public string? TemplateContent { get; set; }
+    public string? Grade { get; set; }
+    public string? Subject { get; set; }
+    public string? Chapter { get; set; }
+    public bool IsPublic { get; set; }
     public DateTime? UploadDate { get; set; }
+    public DateTime? CreatedAt { get; set; }
     public DateTime? UpdatedDate { get; set; }
     public string? Status { get; set; }
     public string? UserName { get; set; }
-    public string? TemplateName { get; set; }
     public string? TemplateDescription { get; set; }
     public decimal? TemplatePrice { get; set; }
     public string? TemplatePreviewUrl { get; set; }
@@ -29,6 +35,12 @@ public class StorageTemplateServiceDto
 public class StorageTemplateCreateServiceDto
 {
     public int TemplateId { get; set; }
+    public string? TemplateName { get; set; }
+    public string? TemplateContent { get; set; }
+    public string? Grade { get; set; }
+    public string? Subject { get; set; }
+    public string? Chapter { get; set; }
+    public bool? IsPublic { get; set; }
 } 
 
 public class StorageTemplateUpdateServiceDto

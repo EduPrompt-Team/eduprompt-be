@@ -24,11 +24,23 @@ public sealed class DatabaseDataSeeder : IDatabaseDataSeeder
         var hasAny = await _db.TemplateArchitectures.AnyAsync(cancellationToken);
         if (hasAny) return;
 
+        // Need at least one StorageTemplate to satisfy FK
+        var anyStorage = await _db.StorageTemplates
+            .AsNoTracking()
+            .Select(s => s.StorageId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (anyStorage == 0)
+        {
+            // No storage available; skip seeding to avoid FK violation
+            return;
+        }
+
         var samples = new List<TemplateArchitecture>
         {
-            new TemplateArchitecture { ArchitectureName = "Math10 Quadratic", ArchitectureType = "Sequential", StorageId = 1, ConfigurationJson = "{\"steps\":[\"input\",\"solve\",\"format\"]}" },
-            new TemplateArchitecture { ArchitectureName = "Math11 Trigonometry", ArchitectureType = "Sequential", StorageId = 1, ConfigurationJson = "{\"steps\":[\"input\",\"simplify\"]}" },
-            new TemplateArchitecture { ArchitectureName = "Math12 Calculus", ArchitectureType = "Branching", StorageId = 1, ConfigurationJson = "{\"graph\":true}" }
+            new TemplateArchitecture { ArchitectureName = "Math10 Quadratic", ArchitectureType = "Sequential", StorageId = anyStorage, ConfigurationJson = "{\"steps\":[\"input\",\"solve\",\"format\"]}" },
+            new TemplateArchitecture { ArchitectureName = "Math11 Trigonometry", ArchitectureType = "Sequential", StorageId = anyStorage, ConfigurationJson = "{\"steps\":[\"input\",\"simplify\"]}" },
+            new TemplateArchitecture { ArchitectureName = "Math12 Calculus", ArchitectureType = "Branching", StorageId = anyStorage, ConfigurationJson = "{\"graph\":true}" }
         };
 
         _db.TemplateArchitectures.AddRange(samples);

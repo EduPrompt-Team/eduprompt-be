@@ -94,6 +94,21 @@ public class FeedbackController : ControllerBase
     {
         try
         {
+            // Lấy userId từ JWT token
+            var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+            createDto.UserId = userId;
+
+            // Support frontend mapping: Frontend đang gửi storageId trong postId (backward compatibility)
+            // Nếu frontend gửi postId nhưng không có StorageId, coi postId là storageId
+            if (!createDto.StorageId.HasValue && createDto.PostId.HasValue && createDto.PostId.Value > 0)
+            {
+                // Frontend gửi: { "postId": 5, "comment": "...", "rating": 4 }
+                // Nhưng postId = 5 thực ra là storageId của StorageTemplate
+                // Map postId → storageId để support backward compatibility
+                createDto.StorageId = createDto.PostId.Value;
+                createDto.PostId = null; // Clear postId
+            }
+
             var feedback = await _feedbackService.CreateAsync(createDto);
             return CreatedAtAction(nameof(GetById), new { id = feedback.FeedbackId }, feedback);
         }

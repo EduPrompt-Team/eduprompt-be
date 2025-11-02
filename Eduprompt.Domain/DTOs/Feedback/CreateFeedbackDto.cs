@@ -4,11 +4,11 @@ namespace Eduprompt.Domain.DTOs.Feedback;
 
 public class CreateFeedbackDto
 {
-    [Required]
-    public int PostId { get; set; }
+    public int? PostId { get; set; }
 
-    [Required]
-    public int UserId { get; set; }
+    public int? StorageId { get; set; }
+
+    public int? UserId { get; set; } // Optional - will be set from JWT token
 
     public int? PackageId { get; set; }
 

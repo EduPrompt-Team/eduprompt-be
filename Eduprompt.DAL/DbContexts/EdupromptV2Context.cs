@@ -229,10 +229,17 @@ public partial class EdupromptV2Context : DbContext
 
             entity.HasIndex(e => e.UserId, "IX_Feedbacks_UserID");
 
+            entity.HasIndex(e => e.StorageId, "IX_Feedbacks_StorageId");
+
             entity.Property(e => e.FeedbackId).HasColumnName("FeedbackID");
             entity.Property(e => e.CreatedDate).HasDefaultValueSql("(getutcdate())");
             entity.Property(e => e.PackageId).HasColumnName("PackageID");
-            entity.Property(e => e.PostId).HasColumnName("PostID");
+            entity.Property(e => e.PostId)
+                .HasColumnName("PostID")
+                .HasConversion(
+                    v => v == 0 ? (int?)null : v, // Entity int -> DB int? (0 -> NULL)
+                    v => v ?? 0); // DB int? -> Entity int (NULL -> 0)
+            entity.Property(e => e.StorageId).HasColumnName("StorageId");
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
                 .HasDefaultValue("Active");
@@ -245,7 +252,13 @@ public partial class EdupromptV2Context : DbContext
 
             entity.HasOne(d => d.Post).WithMany(p => p.Feedbacks)
                 .HasForeignKey(d => d.PostId)
+                .OnDelete(DeleteBehavior.NoAction)
                 .HasConstraintName("FK_Feedbacks_Posts");
+
+            entity.HasOne(d => d.StorageTemplate).WithMany()
+                .HasForeignKey(d => d.StorageId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_Feedbacks_StorageTemplates");
 
             entity.HasOne(d => d.User).WithMany(p => p.Feedbacks)
                 .HasForeignKey(d => d.UserId)

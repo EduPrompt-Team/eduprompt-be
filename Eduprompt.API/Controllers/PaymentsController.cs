@@ -1,5 +1,6 @@
 using Eduprompt.Domain.Interface.Service;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Eduprompt.API.Controllers;
@@ -107,6 +108,95 @@ public class PaymentsController : ControllerBase
         var result = await _paymentService.UpdatePaymentStatusAsync(paymentId, status);
         return Ok(result);
     }
+
+    /// <summary>
+    /// Tạo VNPay payment URL cho wallet top-up (nạp tiền vào ví)
+    /// </summary>
+    /// <param name="walletId">ID của wallet cần nạp tiền</param>
+    /// <param name="dto">Thông tin nạp tiền</param>
+    /// <returns>VNPay payment URL</returns>
+    /// <response code="200">Trả về payment URL thành công</response>
+    /// <response code="400">Amount <= 0 hoặc wallet không hợp lệ</response>
+    /// <response code="401">User chưa đăng nhập</response>
+    /// <response code="403">Wallet không thuộc về user hiện tại</response>
+    /// <response code="404">Wallet không tồn tại</response>
+    [HttpPost("wallets/{walletId}/topup")]
+    [Authorize]
+    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> CreateVnpayUrlForWalletTopup(int walletId, [FromBody] WalletTopupRequestDto dto)
+    {
+        var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+        var requestDto = new VnpayRequestServiceDto
+        {
+            BankCode = dto.BankCode,
+            Language = dto.Language ?? "vn",
+            ReturnUrl = dto.ReturnUrl,
+            IpAddr = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1"
+        };
+        var url = await _paymentService.CreateVnpayUrlForWalletTopupAsync(walletId, dto.Amount, userId, requestDto);
+        return Ok(new { url });
+    }
+
+    /// <summary>
+    /// Tạo VNPay payment URL cho transaction payment
+    /// </summary>
+    /// <param name="transactionId">ID của transaction cần thanh toán</param>
+    /// <param name="dto">Thông tin thanh toán VNPay</param>
+    /// <returns>VNPay payment URL</returns>
+    /// <response code="200">Trả về payment URL thành công</response>
+    /// <response code="400">Transaction không hợp lệ</response>
+    /// <response code="401">User chưa đăng nhập</response>
+    /// <response code="403">Transaction không thuộc về user hiện tại</response>
+    /// <response code="404">Transaction không tồn tại</response>
+    [HttpPost("transactions/{transactionId}/vnpay-url")]
+    [Authorize]
+    [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> CreateVnpayUrlForTransaction(int transactionId, [FromBody] VnpayRequestServiceDto dto)
+    {
+        var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+        dto.IpAddr ??= HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
+        var url = await _paymentService.CreateVnpayUrlForTransactionAsync(transactionId, userId, dto);
+        return Ok(new { url });
+    }
+}
+
+// DTO for wallet top-up request
+/// <summary>
+/// Request DTO for wallet top-up payment
+/// </summary>
+public class WalletTopupRequestDto
+{
+    /// <summary>
+    /// Số tiền nạp (VND), phải > 0
+    /// </summary>
+    /// <example>100000</example>
+    public decimal Amount { get; set; }
+    
+    /// <summary>
+    /// Mã ngân hàng (optional), ví dụ: NCB, VIETCOMBANK
+    /// </summary>
+    /// <example>NCB</example>
+    public string? BankCode { get; set; }
+    
+    /// <summary>
+    /// Ngôn ngữ (optional), mặc định: "vn"
+    /// </summary>
+    /// <example>vn</example>
+    public string? Language { get; set; }
+    
+    /// <summary>
+    /// URL callback sau khi thanh toán (optional), override default ReturnUrl
+    /// </summary>
+    /// <example>https://yourapp.com/payment/callback</example>
+    public string? ReturnUrl { get; set; }
 }
 
 

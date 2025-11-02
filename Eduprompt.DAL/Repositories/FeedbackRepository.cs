@@ -19,6 +19,7 @@ public class FeedbackRepository : IFeedbackRepository
         return await _context.Feedbacks
             .Include(f => f.User)
             .Include(f => f.Post)
+            .Include(f => f.StorageTemplate)
             .FirstOrDefaultAsync(f => f.FeedbackId == FeedbackId);
     }
 
@@ -27,6 +28,7 @@ public class FeedbackRepository : IFeedbackRepository
         return await _context.Feedbacks
             .Include(f => f.User)
             .Include(f => f.Post)
+            .Include(f => f.StorageTemplate)
             .Where(f => f.PostId == PostId)
             .OrderByDescending(f => f.CreatedDate)
             .ToListAsync();
@@ -37,6 +39,7 @@ public class FeedbackRepository : IFeedbackRepository
         return await _context.Feedbacks
             .Include(f => f.User)
             .Include(f => f.Post)
+            .Include(f => f.StorageTemplate)
             .Where(f => f.UserId == UserId)
             .OrderByDescending(f => f.CreatedDate)
             .ToListAsync();
@@ -91,6 +94,7 @@ public class FeedbackRepository : IFeedbackRepository
         return await _context.Feedbacks
             .Include(f => f.User)
             .Include(f => f.Post)
+            .Include(f => f.StorageTemplate)
             .Where(f => f.PostId == PostId)
             .OrderByDescending(f => f.CreatedDate)
             .Take(count)

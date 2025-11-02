@@ -36,17 +36,19 @@ public class StorageTemplateService : IStorageTemplateService
             throw new InvalidOperationException($"Package with ID {storageDto.TemplateId} not found");
         }
 
-        // Check if already exists
-        if (await _storageRepository.ExistsAsync(UserId, storageDto.TemplateId))
-        {
-            throw new InvalidOperationException("Template already in storage");
-        }
+        // Allow multiple templates per package - removed duplicate check
+        // Users can create multiple templates for the same package with different names, grades, subjects, chapters, or content
 
         var storage = new StorageTemplate
         {
             UserId = UserId,
             PackageId = storageDto.TemplateId,
-            TemplateName = package.PackageName ?? "",
+            TemplateName = storageDto.TemplateName ?? package.PackageName ?? "",
+            TemplateContent = storageDto.TemplateContent,
+            Grade = storageDto.Grade,
+            Subject = storageDto.Subject,
+            Chapter = storageDto.Chapter,
+            IsPublic = storageDto.IsPublic ?? false,
             IsFavorite = false,
             CreatedAt = DateTime.UtcNow
         };
@@ -114,11 +116,17 @@ public class StorageTemplateService : IStorageTemplateService
             StorageId = s.StorageId,
             UserId = s.UserId,
             TemplateId = s.PackageId,
+            TemplateName = s.TemplateName ?? s.Package?.PackageName,
+            TemplateContent = s.TemplateContent,
+            Grade = s.Grade,
+            Subject = s.Subject,
+            Chapter = s.Chapter,
+            IsPublic = s.IsPublic,
             UploadDate = s.CreatedAt,
+            CreatedAt = s.CreatedAt,
             UpdatedDate = null,
             Status = s.IsPublic ? "Public" : "Private",
             UserName = s.User?.FullName,
-            TemplateName = s.Package?.PackageName,
             TemplateDescription = s.Package?.Description,
             TemplatePrice = s.Package?.Price,
             TemplatePreviewUrl = null

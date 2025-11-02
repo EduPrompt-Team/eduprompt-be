@@ -17,6 +17,10 @@ public interface IPaymentService
     // VNPay query/refund
     Task<object> QueryVnpayTransactionAsync(VnpayQueryRequestDto requestDto);
     Task<object> RefundVnpayTransactionAsync(VnpayRefundRequestDto requestDto);
+    
+    // Wallet Top-up & Transaction Payment (without Order)
+    Task<string> CreateVnpayUrlForWalletTopupAsync(int walletId, decimal amount, int userId, VnpayRequestServiceDto requestDto);
+    Task<string> CreateVnpayUrlForTransactionAsync(int transactionId, int userId, VnpayRequestServiceDto requestDto);
 }
 
 // Service DTOs
