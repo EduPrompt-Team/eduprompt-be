@@ -132,10 +132,38 @@ IF NOT EXISTS (
     SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Feedbacks_StorageTemplates'
 ) BEGIN
     ALTER TABLE Feedbacks WITH CHECK ADD CONSTRAINT FK_Feedbacks_StorageTemplates FOREIGN KEY(StorageId)
-    REFERENCES StorageTemplates(StorageID) ON DELETE CASCADE;
+    REFERENCES StorageTemplates(StorageID) ON DELETE NO ACTION;
 END";
 
         await _dbContext.Database.ExecuteSqlRawAsync(ensureFeedbacksStorage, cancellationToken);
+
+        // Ensure Feedbacks.PostID is nullable to allow storage-only feedbacks
+        const string ensureFeedbacksPostNullable = @"
+DECLARE @isNullable BIT;
+SELECT @isNullable = c.is_nullable
+FROM sys.columns c
+JOIN sys.objects o ON c.object_id = o.object_id
+WHERE o.name = 'Feedbacks' AND c.name = 'PostID';
+
+IF @isNullable = 0
+BEGIN
+    -- Drop FK if exists to alter column
+    IF EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Feedbacks_Posts')
+    BEGIN
+        ALTER TABLE Feedbacks DROP CONSTRAINT FK_Feedbacks_Posts;
+    END
+
+    ALTER TABLE Feedbacks ALTER COLUMN PostID INT NULL;
+
+    -- Recreate FK without cascade
+    IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Feedbacks_Posts')
+    BEGIN
+        ALTER TABLE Feedbacks WITH CHECK ADD CONSTRAINT FK_Feedbacks_Posts FOREIGN KEY(PostID)
+        REFERENCES Posts(PostID) ON DELETE NO ACTION;
+    END
+END";
+
+        await _dbContext.Database.ExecuteSqlRawAsync(ensureFeedbacksPostNullable, cancellationToken);
     }
 }
 
