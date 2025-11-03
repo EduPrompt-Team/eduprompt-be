@@ -116,6 +116,26 @@ BEGIN
 END";
 
         await _dbContext.Database.ExecuteSqlRawAsync(ensurePayments, cancellationToken);
+
+        // Ensure Feedbacks.StorageId exists and is linked to StorageTemplates
+        const string ensureFeedbacksStorage = @"IF NOT EXISTS (
+    SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Feedbacks') AND name = 'StorageId'
+) BEGIN
+    ALTER TABLE Feedbacks ADD StorageId INT NULL;
+END
+IF NOT EXISTS (
+    SELECT 1 FROM sys.indexes WHERE name = 'IX_Feedbacks_StorageId' AND object_id = OBJECT_ID('Feedbacks')
+) BEGIN
+    CREATE NONCLUSTERED INDEX IX_Feedbacks_StorageId ON Feedbacks(StorageId);
+END
+IF NOT EXISTS (
+    SELECT 1 FROM sys.foreign_keys WHERE name = 'FK_Feedbacks_StorageTemplates'
+) BEGIN
+    ALTER TABLE Feedbacks WITH CHECK ADD CONSTRAINT FK_Feedbacks_StorageTemplates FOREIGN KEY(StorageId)
+    REFERENCES StorageTemplates(StorageID) ON DELETE CASCADE;
+END";
+
+        await _dbContext.Database.ExecuteSqlRawAsync(ensureFeedbacksStorage, cancellationToken);
     }
 }
 
