@@ -41,6 +41,12 @@ public class FeedbackService : IFeedbackService
         return feedbacks.Select(MapToDto);
     }
 
+    public async Task<IEnumerable<FeedbackDto>> GetByStorageIdAsync(int StorageId)
+    {
+        var feedbacks = await _feedbackRepository.GetByStorageIdAsync(StorageId);
+        return feedbacks.Select(MapToDto);
+    }
+
     public async Task<FeedbackDto> CreateAsync(CreateFeedbackDto createDto)
     {
         // Validate: Phải có PostId HOẶC StorageId
@@ -130,6 +136,22 @@ public class FeedbackService : IFeedbackService
     public async Task<int> GetFeedbackCountByPostIdAsync(int PostId)
     {
         return await _feedbackRepository.GetFeedbackCountByPostIdAsync(PostId);
+    }
+
+    public async Task<IEnumerable<FeedbackDto>> GetRecentFeedbacksByStorageIdAsync(int StorageId, int count = 10)
+    {
+        var feedbacks = await _feedbackRepository.GetRecentFeedbacksByStorageIdAsync(StorageId, count);
+        return feedbacks.Select(MapToDto);
+    }
+
+    public async Task<double> GetAverageRatingByStorageIdAsync(int StorageId)
+    {
+        return await _feedbackRepository.GetAverageRatingByStorageIdAsync(StorageId);
+    }
+
+    public async Task<int> GetFeedbackCountByStorageIdAsync(int StorageId)
+    {
+        return await _feedbackRepository.GetFeedbackCountByStorageIdAsync(StorageId);
     }
 
     private static FeedbackDto MapToDto(Feedback feedback)

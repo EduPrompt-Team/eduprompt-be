@@ -45,6 +45,28 @@ public class FeedbackController : ControllerBase
     }
 
     /// <summary>
+    /// Get feedback by storage template ID
+    /// </summary>
+    /// <param name="StorageId">Storage Template ID</param>
+    /// <returns>List of feedback for the storage template</returns>
+    /// <response code="200">Feedback retrieved successfully</response>
+    /// <response code="400">Error retrieving feedback</response>
+    /// <response code="401">User not authenticated</response>
+    [HttpGet("storage/{StorageId}")]
+    public async Task<IActionResult> GetByStorageId(int StorageId)
+    {
+        try
+        {
+            var feedbacks = await _feedbackService.GetByStorageIdAsync(StorageId);
+            return Ok(feedbacks);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Get feedback by user ID
     /// </summary>
     /// <param name="UserId">User ID</param>
@@ -173,6 +195,23 @@ public class FeedbackController : ControllerBase
     }
 
     /// <summary>
+    /// Lấy đánh giá trung bình theo storage template
+    /// </summary>
+    [HttpGet("storage/{StorageId}/rating")]
+    public async Task<IActionResult> GetAverageRatingByStorage(int StorageId)
+    {
+        try
+        {
+            var averageRating = await _feedbackService.GetAverageRatingByStorageIdAsync(StorageId);
+            return Ok(new { averageRating });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Lấy số lượng phản hồi của bài đăng
     /// </summary>
     [HttpGet("post/{PostId}/count")]
@@ -181,6 +220,23 @@ public class FeedbackController : ControllerBase
         try
         {
             var count = await _feedbackService.GetFeedbackCountByPostIdAsync(PostId);
+            return Ok(new { count });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Lấy số lượng phản hồi theo storage template
+    /// </summary>
+    [HttpGet("storage/{StorageId}/count")]
+    public async Task<IActionResult> GetFeedbackCountByStorage(int StorageId)
+    {
+        try
+        {
+            var count = await _feedbackService.GetFeedbackCountByStorageIdAsync(StorageId);
             return Ok(new { count });
         }
         catch (Exception ex)

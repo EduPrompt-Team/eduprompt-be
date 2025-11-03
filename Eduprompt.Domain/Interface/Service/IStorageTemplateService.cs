@@ -16,6 +16,7 @@ public class StorageTemplateServiceDto
     public int StorageId { get; set; }
     public int UserId { get; set; }
     public int TemplateId { get; set; }
+    public int PackageId { get; set; }
     public string? TemplateName { get; set; }
     public string? TemplateContent { get; set; }
     public string? Grade { get; set; }

@@ -116,6 +116,7 @@ public class StorageTemplateService : IStorageTemplateService
             StorageId = s.StorageId,
             UserId = s.UserId,
             TemplateId = s.PackageId,
+            PackageId = s.PackageId,
             TemplateName = s.TemplateName ?? s.Package?.PackageName,
             TemplateContent = s.TemplateContent,
             Grade = s.Grade,

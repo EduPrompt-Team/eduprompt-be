@@ -17,6 +17,7 @@ public class FeedbackRepository : IFeedbackRepository
     public async Task<Feedback?> GetByIdAsync(int FeedbackId)
     {
         return await _context.Feedbacks
+            .AsNoTracking()
             .Include(f => f.User)
             .Include(f => f.Post)
             .Include(f => f.StorageTemplate)
@@ -26,6 +27,7 @@ public class FeedbackRepository : IFeedbackRepository
     public async Task<IEnumerable<Feedback>> GetByPostIdAsync(int PostId)
     {
         return await _context.Feedbacks
+            .AsNoTracking()
             .Include(f => f.User)
             .Include(f => f.Post)
             .Include(f => f.StorageTemplate)
@@ -34,9 +36,22 @@ public class FeedbackRepository : IFeedbackRepository
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<Feedback>> GetByStorageIdAsync(int StorageId)
+    {
+        return await _context.Feedbacks
+            .AsNoTracking()
+            .Include(f => f.User)
+            .Include(f => f.Post)
+            .Include(f => f.StorageTemplate)
+            .Where(f => f.StorageId == StorageId)
+            .OrderByDescending(f => f.CreatedDate)
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<Feedback>> GetByUserIdAsync(int UserId)
     {
         return await _context.Feedbacks
+            .AsNoTracking()
             .Include(f => f.User)
             .Include(f => f.Post)
             .Include(f => f.StorageTemplate)
@@ -77,7 +92,19 @@ public class FeedbackRepository : IFeedbackRepository
     public async Task<double> GetAverageRatingByPostIdAsync(int PostId)
     {
         var feedbacks = await _context.Feedbacks
+            .AsNoTracking()
             .Where(f => f.PostId == PostId)
+            .Select(f => f.Rating)
+            .ToListAsync();
+
+        return feedbacks.Any() ? feedbacks.Average() : 0.0;
+    }
+
+    public async Task<double> GetAverageRatingByStorageIdAsync(int StorageId)
+    {
+        var feedbacks = await _context.Feedbacks
+            .AsNoTracking()
+            .Where(f => f.StorageId == StorageId)
             .Select(f => f.Rating)
             .ToListAsync();
 
@@ -86,16 +113,39 @@ public class FeedbackRepository : IFeedbackRepository
 
     public async Task<int> GetFeedbackCountByPostIdAsync(int PostId)
     {
-        return await _context.Feedbacks.CountAsync(f => f.PostId == PostId);
+        return await _context.Feedbacks
+            .AsNoTracking()
+            .CountAsync(f => f.PostId == PostId);
     }
 
     public async Task<IEnumerable<Feedback>> GetRecentFeedbacksAsync(int PostId, int count = 10)
     {
         return await _context.Feedbacks
+            .AsNoTracking()
             .Include(f => f.User)
             .Include(f => f.Post)
             .Include(f => f.StorageTemplate)
             .Where(f => f.PostId == PostId)
+            .OrderByDescending(f => f.CreatedDate)
+            .Take(count)
+            .ToListAsync();
+    }
+
+    public async Task<int> GetFeedbackCountByStorageIdAsync(int StorageId)
+    {
+        return await _context.Feedbacks
+            .AsNoTracking()
+            .CountAsync(f => f.StorageId == StorageId);
+    }
+
+    public async Task<IEnumerable<Feedback>> GetRecentFeedbacksByStorageIdAsync(int StorageId, int count = 10)
+    {
+        return await _context.Feedbacks
+            .AsNoTracking()
+            .Include(f => f.User)
+            .Include(f => f.Post)
+            .Include(f => f.StorageTemplate)
+            .Where(f => f.StorageId == StorageId)
             .OrderByDescending(f => f.CreatedDate)
             .Take(count)
             .ToListAsync();
