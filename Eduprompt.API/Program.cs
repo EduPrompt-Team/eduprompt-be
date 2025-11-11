@@ -42,7 +42,12 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "https://localhost:5173", "http://localhost:3000")
+        policy.WithOrigins(
+                "http://localhost:5173", 
+                "https://localhost:5173", 
+                "http://localhost:3000",
+                "http://localhost:8081" // Expo web dev server
+              )
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
