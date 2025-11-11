@@ -21,18 +21,23 @@ public class OrderController : ControllerBase
     /// Create order from user's cart
     /// </summary>
     /// <param name="notes">Optional order notes</param>
-    /// <param name="UserId">User ID (default: 1)</param>
     /// <returns>Created order details</returns>
     /// <response code="200">Order created successfully</response>
     /// <response code="400">Invalid cart or order data</response>
     /// <response code="401">User not authenticated</response>
     [HttpPost("create-from-cart")]
     [Authorize]
-    public async Task<IActionResult> CreateFromCart([FromQuery] string? notes, [FromQuery] int UserId = 1)
+    public async Task<IActionResult> CreateFromCart([FromQuery] string? notes)
     {
         try
         {
-            var result = await _orderService.CreateOrderFromCartAsync(UserId, notes);
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "Missing or invalid user claim" });
+            }
+
+            var result = await _orderService.CreateOrderFromCartAsync(userId, notes);
             return Ok(result);
         }
         catch (Exception ex)
@@ -99,11 +104,55 @@ public class OrderController : ControllerBase
     }
 
     [HttpPatch("{orderId}/status")]
-    [Authorize]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> UpdateStatus(int orderId, [FromQuery] string status)
     {
-        var updated = await _orderService.UpdateOrderStatusAsync(orderId, status);
-        return Ok(updated);
+        try
+        {
+            var updated = await _orderService.UpdateOrderStatusAsync(orderId, status);
+            return Ok(updated);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Pay order directly with wallet
+    /// </summary>
+    /// <param name="orderId">Order ID</param>
+    /// <returns>Updated order details</returns>
+    /// <response code="200">Order paid successfully</response>
+    /// <response code="400">Invalid order or insufficient balance</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="404">Order not found</response>
+    [HttpPost("{orderId}/pay-with-wallet")]
+    [Authorize]
+    public async Task<IActionResult> PayWithWallet(int orderId)
+    {
+        try
+        {
+            var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+            var result = await _orderService.PayOrderWithWalletAsync(orderId, userId);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 }
 

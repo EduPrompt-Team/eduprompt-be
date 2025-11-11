@@ -5,6 +5,7 @@ namespace Eduprompt.Domain.Interface.Repository;
 public interface ITemplateArchitectureRepository
 {
     Task<TemplateArchitecture?> GetByIdAsync(int architectureId);
+    Task<IEnumerable<TemplateArchitecture>> GetAllAsync();
     Task<IEnumerable<TemplateArchitecture>> GetByInstanceIdAsync(int instanceId);
     Task<TemplateArchitecture> CreateAsync(TemplateArchitecture architecture);
     Task<TemplateArchitecture> UpdateAsync(TemplateArchitecture architecture);

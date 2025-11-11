@@ -15,4 +15,6 @@ public class PostDto
     public string? UserName { get; set; }
     public double AverageRating { get; set; }
     public int FeedbackCount { get; set; }
+    public int? StorageId { get; set; }
+    public decimal? Price { get; set; }
 }

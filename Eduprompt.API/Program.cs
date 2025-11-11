@@ -42,9 +42,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("http://localhost:5173", "https://localhost:5173", "http://localhost:3000")
               .AllowAnyMethod()
-              .AllowAnyHeader();
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
 
@@ -160,7 +161,16 @@ if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 }
 
+// Configure CORS and COOP for Google OAuth
 app.UseCors("AllowAll");
+
+// Set Cross-Origin-Opener-Policy to allow Google OAuth popup
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Append("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+    context.Response.Headers.Append("Cross-Origin-Embedder-Policy", "unsafe-none");
+    await next();
+});
 
 app.UseAuthentication();
 app.UseAuthorization();

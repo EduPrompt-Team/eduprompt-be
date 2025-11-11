@@ -21,6 +21,13 @@ public class TemplateArchitectureRepository : ITemplateArchitectureRepository
             .FirstOrDefaultAsync(a => a.ArchitectureId == ArchitectureId);
     }
 
+    public async Task<IEnumerable<TemplateArchitecture>> GetAllAsync()
+    {
+        return await _context.TemplateArchitectures
+            .OrderBy(a => a.ArchitectureId)
+            .ToListAsync();
+    }
+
     public async Task<IEnumerable<TemplateArchitecture>> GetByPromptInstanceIdAsync(int PromptInstanceId)
     {
         return await _context.TemplateArchitectures

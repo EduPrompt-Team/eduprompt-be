@@ -152,6 +152,16 @@ public class PostController : ControllerBase
     {
         try
         {
+            // Verify userId from token matches request
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "Missing or invalid user claim" });
+            }
+
+            // Override UserId from token to prevent user creating post for others
+            createPostDto.UserId = userId;
+
             var post = await _postService.CreateAsync(createPostDto);
             return CreatedAtAction(nameof(GetById), new { PostId = post.PostId }, post);
         }
@@ -162,7 +172,7 @@ public class PostController : ControllerBase
     }
 
     /// <summary>
-    /// Cập nhật bài đăng
+    /// Cập nhật bài đăng (only owner or admin)
     /// </summary>
     [HttpPut("{PostId}")]
     [Authorize]
@@ -170,6 +180,23 @@ public class PostController : ControllerBase
     {
         try
         {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "Missing or invalid user claim" });
+            }
+
+            // Verify ownership
+            var existingPost = await _postService.GetByIdAsync(PostId);
+            if (existingPost == null)
+                return NotFound(new { message = "Post not found" });
+
+            if (existingPost.UserId != userId && !User.IsInRole("Admin"))
+                return StatusCode(403, new { message = "You can only update your own posts" });
+
+            // Override UserId from token to prevent user updating post for others
+            updatePostDto.UserId = existingPost.UserId;
+
             var post = await _postService.UpdateAsync(PostId, updatePostDto);
             return Ok(post);
         }
@@ -184,7 +211,7 @@ public class PostController : ControllerBase
     }
 
     /// <summary>
-    /// Xóa bài đăng
+    /// Xóa bài đăng (only owner or admin)
     /// </summary>
     [HttpDelete("{PostId}")]
     [Authorize]
@@ -192,6 +219,20 @@ public class PostController : ControllerBase
     {
         try
         {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "Missing or invalid user claim" });
+            }
+
+            // Verify ownership
+            var existingPost = await _postService.GetByIdAsync(PostId);
+            if (existingPost == null)
+                return NotFound(new { message = "Post not found" });
+
+            if (existingPost.UserId != userId && !User.IsInRole("Admin"))
+                return StatusCode(403, new { message = "You can only delete your own posts" });
+
             var result = await _postService.DeleteAsync(PostId);
             if (!result)
                 return NotFound(new { message = "Post not found" });
@@ -236,6 +277,39 @@ public class PostController : ControllerBase
         {
             var rating = await _postService.GetAverageRatingAsync(PostId);
             return Ok(new { averageRating = rating });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Purchase template from post
+    /// </summary>
+    /// <param name="PostId">Post ID</param>
+    /// <returns>Purchase result with StorageId and PromptInstanceId</returns>
+    /// <response code="200">Purchase completed successfully</response>
+    /// <response code="400">Invalid request or purchase failed</response>
+    /// <response code="401">User not authenticated</response>
+    /// <response code="404">Post not found</response>
+    [HttpPost("{PostId}/purchase")]
+    [Authorize]
+    public async Task<IActionResult> PurchasePost(int PostId)
+    {
+        try
+        {
+            var buyerUserId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+            var result = await _postService.PurchasePostAsync(PostId, buyerUserId);
+            return Ok(result);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
         catch (Exception ex)
         {

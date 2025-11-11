@@ -24,9 +24,10 @@ public class PromptInstanceService : IPromptInstanceService
         return instance != null ? MapToDto(instance) : null;
     }
 
-    public Task<IEnumerable<PromptInstanceDto>> GetByUserIdAsync(int UserId)
+    public async Task<IEnumerable<PromptInstanceDto>> GetByUserIdAsync(int UserId)
     {
-        return Task.FromResult(Enumerable.Empty<PromptInstanceDto>());
+        var instances = await _promptInstanceRepository.GetByUserIdAsync(UserId);
+        return instances.Select(MapToDto);
     }
 
     public async Task<IEnumerable<PromptInstanceDto>> GetByTemplateIdAsync(int templateId)
