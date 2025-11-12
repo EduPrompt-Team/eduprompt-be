@@ -37,14 +37,57 @@ public class PaymentService : IPaymentService
 
     public async Task<PaymentServiceDto?> GetByIdAsync(int id)
     {
-        var p = await _paymentRepository.GetByIdAsync(id);
-        return p == null ? null : Map(p);
+        var payment = await _paymentRepository.GetByIdAsync(id);
+        if (payment == null) return null;
+
+        Order? order = null;
+        if (payment.OrderId.HasValue)
+        {
+            order = await _orderRepository.GetByIdAsync(payment.OrderId.Value);
+        }
+
+        return Map(payment, order);
     }
 
     public async Task<IEnumerable<PaymentServiceDto>> GetByOrderIdAsync(int orderId)
     {
-        var list = await _paymentRepository.GetByOrderIdAsync(orderId);
-        return list.Select(Map);
+        var payments = await _paymentRepository.GetByOrderIdAsync(orderId);
+        Order? order = await _orderRepository.GetByIdAsync(orderId);
+        return payments.Select(p => Map(p, order));
+    }
+
+    public async Task<IEnumerable<PaymentServiceDto>> GetAllPaymentsAsync()
+    {
+        var payments = (await _paymentRepository.GetAllAsync()).ToList();
+        if (payments.Count == 0)
+        {
+            return Array.Empty<PaymentServiceDto>();
+        }
+
+        var orderIds = payments
+            .Where(p => p.OrderId.HasValue)
+            .Select(p => p.OrderId!.Value)
+            .Distinct()
+            .ToList();
+
+        Dictionary<int, Order>? orderLookup = null;
+        if (orderIds.Count > 0)
+        {
+            var orders = await _orderRepository.GetAllAsync();
+            orderLookup = orders
+                .Where(o => orderIds.Contains(o.OrderId))
+                .ToDictionary(o => o.OrderId);
+        }
+
+        return payments.Select(payment =>
+        {
+            Order? order = null;
+            if (orderLookup != null && payment.OrderId.HasValue)
+            {
+                orderLookup.TryGetValue(payment.OrderId.Value, out order);
+            }
+            return Map(payment, order);
+        }).ToList();
     }
 
     public async Task<string> CreateVnpayPaymentUrlAsync(int orderId, int userId, VnpayRequestServiceDto requestDto)
@@ -148,6 +191,7 @@ public class PaymentService : IPaymentService
 
         var all = await _paymentRepository.GetAllAsync();
         var payment = all.FirstOrDefault(p => p.TxnRef == cb.vnp_TxnRef) ?? throw new InvalidOperationException("Payment not found");
+        Order? relatedOrder = null;
 
         if (signed != secure)
         {
@@ -239,11 +283,11 @@ public class PaymentService : IPaymentService
                     else if (payment.OrderId.HasValue && payment.OrderId.Value != 0)
                     {
                         // Update order status
-                        var order = await _orderRepository.GetByIdAsync(payment.OrderId.Value);
-                        if (order != null)
+                        relatedOrder = await _orderRepository.GetByIdAsync(payment.OrderId.Value);
+                        if (relatedOrder != null)
                         {
-                            order.Status = "Paid";
-                            await _orderRepository.UpdateAsync(order);
+                            relatedOrder.Status = "Paid";
+                            await _orderRepository.UpdateAsync(relatedOrder);
                         }
 
                         // Create transaction if possible (optional, no wallet balance mutation)
@@ -281,7 +325,7 @@ public class PaymentService : IPaymentService
 
         await _paymentRepository.UpdateAsync(payment);
 
-        return Map(payment);
+        return Map(payment, relatedOrder);
     }
 
     public async Task<object> QueryVnpayTransactionAsync(VnpayQueryRequestDto request)
@@ -367,7 +411,7 @@ public class PaymentService : IPaymentService
             CreatedAt = DateTime.UtcNow
         };
         await _paymentRepository.CreateAsync(payment);
-        return Map(payment);
+        return Map(payment, order);
     }
 
     public async Task<PaymentServiceDto> UpdatePaymentStatusAsync(int paymentId, string status)
@@ -376,7 +420,12 @@ public class PaymentService : IPaymentService
         payment.Status = status;
         payment.UpdatedAt = DateTime.UtcNow;
         await _paymentRepository.UpdateAsync(payment);
-        return Map(payment);
+        Order? order = null;
+        if (payment.OrderId.HasValue)
+        {
+            order = await _orderRepository.GetByIdAsync(payment.OrderId.Value);
+        }
+        return Map(payment, order);
     }
 
     public async Task<string> CreateVnpayUrlForWalletTopupAsync(int walletId, decimal amount, int userId, VnpayRequestServiceDto requestDto)
@@ -553,18 +602,21 @@ public class PaymentService : IPaymentService
         return url;
     }
 
-    private static PaymentServiceDto Map(Payment p)
+    private static PaymentServiceDto Map(Payment payment, Order? order = null)
     {
         return new PaymentServiceDto
         {
-            PaymentId = p.PaymentId,
-            OrderId = p.OrderId ?? 0, // Map null to 0 for DTO compatibility
-            PaymentMethod = p.PaymentMethod,
-            Amount = p.Amount,
-            PaymentDate = p.CreatedAt,
-            Status = p.Status,
-            VnpayTransactionId = p.TransactionNo,
-            VnpayResponseCode = p.ResponseCode
+            PaymentId = payment.PaymentId,
+            OrderId = payment.OrderId ?? 0,
+            PaymentMethod = payment.PaymentMethod,
+            Amount = payment.Amount,
+            PaymentDate = payment.CreatedAt,
+            Status = payment.Status,
+            OrderNumber = order?.OrderId.ToString() ?? payment.OrderId?.ToString(),
+            UserName = order?.User?.FullName ?? payment.User?.FullName,
+            UserEmail = order?.User?.Email ?? payment.User?.Email,
+            VnpayTransactionId = payment.TransactionNo,
+            VnpayResponseCode = payment.ResponseCode
         };
     }
 }
