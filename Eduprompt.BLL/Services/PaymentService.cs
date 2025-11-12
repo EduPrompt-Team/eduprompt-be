@@ -47,12 +47,6 @@ public class PaymentService : IPaymentService
         return list.Select(Map);
     }
 
-    public async Task<IEnumerable<PaymentServiceDto>> GetAllPaymentsAsync()
-    {
-        var list = await _paymentRepository.GetAllAsync();
-        return list.Select(Map);
-    }
-
     public async Task<string> CreateVnpayPaymentUrlAsync(int orderId, int userId, VnpayRequestServiceDto requestDto)
     {
         var order = await _orderRepository.GetByIdAsync(orderId);
@@ -166,6 +160,7 @@ public class PaymentService : IPaymentService
             payment.BankCode = cb.vnp_BankCode;
             payment.PayDate = cb.vnp_PayDate;
             var success = cb.vnp_ResponseCode == "00";
+            
             payment.Status = success ? "Paid" : "Failed";
 
             if (success)
@@ -206,57 +201,61 @@ public class PaymentService : IPaymentService
                         catch { /* ignore optional transaction creation errors */ }
                     }
                 }
-                // Check if this is a transaction payment (TxnRef starts with "TXN-")
-                else if (payment.TxnRef?.StartsWith("TXN-", StringComparison.OrdinalIgnoreCase) == true)
+                // Only process non-top-up payments immediately
+                else
                 {
-                    // Handle transaction payment - amount already processed, just create transaction record
-                    try
+                    // Process order payments and other non-top-up payments
+                    // Check if this is a transaction payment (TxnRef starts with "TXN-")
+                    if (payment.TxnRef?.StartsWith("TXN-", StringComparison.OrdinalIgnoreCase) == true)
                     {
-                        var methods = await _paymentMethodRepository.GetAllAsync();
-                        var vnpMethod = methods.FirstOrDefault(m => (m.Provider ?? "").Equals("VNPay", StringComparison.OrdinalIgnoreCase) || (m.MethodName ?? "").Contains("vnp", StringComparison.OrdinalIgnoreCase));
-                        if (vnpMethod != null && payment.UserId.HasValue)
+                        // Handle transaction payment - amount already processed, just create transaction record
+                        try
                         {
-                            var wallet = await _walletRepository.GetByUserIdAsync(payment.UserId.Value);
-                            if (wallet != null)
+                            var methods = await _paymentMethodRepository.GetAllAsync();
+                            var vnpMethod = methods.FirstOrDefault(m => (m.Provider ?? "").Equals("VNPay", StringComparison.OrdinalIgnoreCase) || (m.MethodName ?? "").Contains("vnp", StringComparison.OrdinalIgnoreCase));
+                            if (vnpMethod != null && payment.UserId.HasValue)
                             {
-                                var trx = new Transaction
+                                var wallet = await _walletRepository.GetByUserIdAsync(payment.UserId.Value);
+                                if (wallet != null)
                                 {
-                                    PaymentMethodId = vnpMethod.PaymentMethodId,
-                                    WalletId = wallet.WalletId,
-                                    OrderId = null, // Transaction payment may not have OrderId
-                                    Amount = payment.Amount,
-                                    TransactionType = "ExternalPayment",
-                                    TransactionDate = DateTime.UtcNow,
-                                    Status = "Completed",
-                                    TransactionReference = payment.TransactionNo ?? payment.TxnRef
-                                };
-                                await _transactionRepository.CreateAsync(trx);
+                                    var trx = new Transaction
+                                    {
+                                        PaymentMethodId = vnpMethod.PaymentMethodId,
+                                        WalletId = wallet.WalletId,
+                                        OrderId = null, // Transaction payment may not have OrderId
+                                        Amount = payment.Amount,
+                                        TransactionType = "ExternalPayment",
+                                        TransactionDate = DateTime.UtcNow,
+                                        Status = "Completed",
+                                        TransactionReference = payment.TransactionNo ?? payment.TxnRef
+                                    };
+                                    await _transactionRepository.CreateAsync(trx);
+                                }
                             }
                         }
+                        catch { /* ignore optional transaction creation errors */ }
                     }
-                    catch { /* ignore optional transaction creation errors */ }
-                }
-                // Regular order payment
-                else if (payment.OrderId.HasValue && payment.OrderId.Value != 0)
-                {
-                    // Update order status
-                    var order = await _orderRepository.GetByIdAsync(payment.OrderId.Value);
-                    if (order != null)
+                    // Regular order payment
+                    else if (payment.OrderId.HasValue && payment.OrderId.Value != 0)
                     {
-                        order.Status = "Paid";
-                        await _orderRepository.UpdateAsync(order);
-                    }
-
-                    // Create transaction if possible (optional, no wallet balance mutation)
-                    try
-                    {
-                        var methods = await _paymentMethodRepository.GetAllAsync();
-                        var vnpMethod = methods.FirstOrDefault(m => (m.Provider ?? "").Equals("VNPay", StringComparison.OrdinalIgnoreCase) || (m.MethodName ?? "").Contains("vnp", StringComparison.OrdinalIgnoreCase));
-                        if (vnpMethod != null && payment.UserId.HasValue)
+                        // Update order status
+                        var order = await _orderRepository.GetByIdAsync(payment.OrderId.Value);
+                        if (order != null)
                         {
-                            var wallet = await _walletRepository.GetByUserIdAsync(payment.UserId.Value);
-                            if (wallet != null)
+                            order.Status = "Paid";
+                            await _orderRepository.UpdateAsync(order);
+                        }
+
+                        // Create transaction if possible (optional, no wallet balance mutation)
+                        try
+                        {
+                            var methods = await _paymentMethodRepository.GetAllAsync();
+                            var vnpMethod = methods.FirstOrDefault(m => (m.Provider ?? "").Equals("VNPay", StringComparison.OrdinalIgnoreCase) || (m.MethodName ?? "").Contains("vnp", StringComparison.OrdinalIgnoreCase));
+                            if (vnpMethod != null && payment.UserId.HasValue)
                             {
+                                var wallet = await _walletRepository.GetByUserIdAsync(payment.UserId.Value);
+                                if (wallet != null)
+                                {
                                     var trx = new Transaction
                                     {
                                         PaymentMethodId = vnpMethod.PaymentMethodId,
@@ -268,12 +267,14 @@ public class PaymentService : IPaymentService
                                         Status = "Completed",
                                         TransactionReference = payment.TransactionNo ?? payment.TxnRef
                                     };
-                                await _transactionRepository.CreateAsync(trx);
+                                    await _transactionRepository.CreateAsync(trx);
+                                }
                             }
                         }
+                        catch { /* ignore optional transaction creation errors */ }
                     }
-                    catch { /* ignore optional transaction creation errors */ }
                 }
+                // Top-up payments: Do nothing here - wait for admin approval
             }
         }
         payment.UpdatedAt = DateTime.UtcNow;
