@@ -71,6 +71,9 @@ public class PaymentService : IPaymentService
         var createDate = nowGmt7.ToString("yyyyMMddHHmmss");
         var ipAddr = string.IsNullOrWhiteSpace(requestDto.IpAddr) ? "127.0.0.1" : requestDto.IpAddr;
 
+        // Create SortedDictionary to ensure parameters are sorted A-Z (required for VNPay signature)
+        // IMPORTANT: vnp_BankCode must be added to dict BEFORE calculating hash
+        // When vnp_BankCode="VNPAYQR", VNPay will display QR code screen directly
         var dict = new SortedDictionary<string, string>(StringComparer.Ordinal)
         {
             ["vnp_Version"] = "2.1.0",
@@ -86,19 +89,26 @@ public class PaymentService : IPaymentService
             ["vnp_IpAddr"] = ipAddr,
             ["vnp_ReturnUrl"] = returnUrl
         };
+        
+        // Add vnp_BankCode if provided (e.g., "VNPAYQR" for QR code, "VNBANK" for ATM, "INTCARD" for international cards)
+        // SortedDictionary will automatically place it in correct A-Z position for hash calculation
         if (!string.IsNullOrWhiteSpace(requestDto.BankCode))
         {
             dict["vnp_BankCode"] = requestDto.BankCode!;
         }
 
-        // build signData (no URL-encode for signing)
-        var raw = string.Join("&", dict.Select(kv => $"{kv.Key}={kv.Value}"));
+        // Build query string with URL-encoded values (VNPay requires signature from encoded query string)
+        // SortedDictionary ensures vnp_BankCode (if present) is in correct A-Z order
+        var queryString = string.Join("&", dict.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value)}"));
+        
+        // Calculate signature from URL-encoded query string (as per VNPay spec)
+        // This includes vnp_BankCode if it was added above
         using var hmac = new System.Security.Cryptography.HMACSHA512(System.Text.Encoding.UTF8.GetBytes(hashSecret));
-        var signature = BitConverter.ToString(hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(raw))).Replace("-", string.Empty).ToLowerInvariant();
+        var hashBytes = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(queryString));
+        var signature = BitConverter.ToString(hashBytes).Replace("-", string.Empty).ToLowerInvariant();
 
-        // build final url with URL-encoded values plus vnp_SecureHash
-        var encoded = string.Join("&", dict.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value)}"));
-        var url = $"{baseUrl}?{encoded}&vnp_SecureHash={signature}";
+        // build final url with query string plus vnp_SecureHash
+        var url = $"{baseUrl}?{queryString}&vnp_SecureHash={signature}";
 
         // create pending payment record
         var payment = new Payment
@@ -382,6 +392,16 @@ public class PaymentService : IPaymentService
         var returnUrl = requestDto.ReturnUrl ?? vnp["ReturnUrl"] ?? string.Empty;
         var hashSecret = vnp["HashSecret"] ?? string.Empty;
 
+        // Validate VNPay configuration
+        if (string.IsNullOrWhiteSpace(baseUrl))
+            throw new InvalidOperationException("VNPay URL is not configured");
+        if (string.IsNullOrWhiteSpace(tmnCode))
+            throw new InvalidOperationException("VNPay TmnCode is not configured");
+        if (string.IsNullOrWhiteSpace(hashSecret))
+            throw new InvalidOperationException("VNPay HashSecret is not configured");
+        if (string.IsNullOrWhiteSpace(returnUrl))
+            throw new InvalidOperationException("VNPay ReturnUrl is not configured");
+
         var txnRef = $"WLT-{walletId}-{DateTime.UtcNow:yyyyMMddHHmmss}";
         var vnpAmount = (long)(amount * 100);
 
@@ -389,6 +409,9 @@ public class PaymentService : IPaymentService
         var createDate = nowGmt7.ToString("yyyyMMddHHmmss");
         var ipAddr = string.IsNullOrWhiteSpace(requestDto.IpAddr) ? "127.0.0.1" : requestDto.IpAddr;
 
+        // Create SortedDictionary to ensure parameters are sorted A-Z (required for VNPay signature)
+        // IMPORTANT: vnp_BankCode must be added to dict BEFORE calculating hash
+        // When vnp_BankCode="VNPAYQR", VNPay will display QR code screen directly
         var dict = new SortedDictionary<string, string>(StringComparer.Ordinal)
         {
             ["vnp_Version"] = "2.1.0",
@@ -404,33 +427,50 @@ public class PaymentService : IPaymentService
             ["vnp_IpAddr"] = ipAddr,
             ["vnp_ReturnUrl"] = returnUrl
         };
+        
+        // Add vnp_BankCode if provided (e.g., "VNPAYQR" for QR code, "VNBANK" for ATM, "INTCARD" for international cards)
+        // SortedDictionary will automatically place it in correct A-Z position for hash calculation
         if (!string.IsNullOrWhiteSpace(requestDto.BankCode))
         {
             dict["vnp_BankCode"] = requestDto.BankCode!;
         }
 
-        // build signData (no URL-encode for signing)
-        var raw = string.Join("&", dict.Select(kv => $"{kv.Key}={kv.Value}"));
+        // Build query string with URL-encoded values (VNPay requires signature from encoded query string)
+        // SortedDictionary ensures vnp_BankCode (if present) is in correct A-Z order
+        var queryString = string.Join("&", dict.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value)}"));
+        
+        // Calculate signature from URL-encoded query string (as per VNPay spec)
+        // This includes vnp_BankCode if it was added above
         using var hmac = new System.Security.Cryptography.HMACSHA512(System.Text.Encoding.UTF8.GetBytes(hashSecret));
-        var signature = BitConverter.ToString(hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(raw))).Replace("-", string.Empty).ToLowerInvariant();
+        var hashBytes = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(queryString));
+        var signature = BitConverter.ToString(hashBytes).Replace("-", string.Empty).ToLowerInvariant();
 
-        // build final url with URL-encoded values plus vnp_SecureHash
-        var encoded = string.Join("&", dict.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value)}"));
-        var url = $"{baseUrl}?{encoded}&vnp_SecureHash={signature}";
+        // build final url with query string plus vnp_SecureHash
+        var url = $"{baseUrl}?{queryString}&vnp_SecureHash={signature}";
 
         // create pending payment record (OrderId = null for wallet top-up)
-        var payment = new Payment
+        try
         {
-            OrderId = null, // Nullable - wallet top-up doesn't require OrderId
-            UserId = userId,
-            Amount = amount,
-            PaymentMethod = "Online",
-            Provider = "VNPay",
-            Status = "Pending",
-            CreatedAt = DateTime.UtcNow,
-            TxnRef = txnRef
-        };
-        await _paymentRepository.CreateAsync(payment);
+            var payment = new Payment
+            {
+                OrderId = null, // Nullable - wallet top-up doesn't require OrderId
+                UserId = userId,
+                Amount = amount,
+                PaymentMethod = "Online",
+                Provider = "VNPay",
+                Status = "Pending",
+                CreatedAt = DateTime.UtcNow,
+                TxnRef = txnRef
+            };
+            await _paymentRepository.CreateAsync(payment);
+        }
+        catch (Exception ex)
+        {
+            // Log payment creation error but still return URL (payment can be created later via callback)
+            // This allows VNPay flow to continue even if payment record creation fails
+            System.Diagnostics.Debug.WriteLine($"Warning: Failed to create payment record: {ex.Message}");
+            // Don't throw - return URL anyway so user can proceed with payment
+        }
 
         return url;
     }
@@ -456,6 +496,9 @@ public class PaymentService : IPaymentService
         var createDate = nowGmt7.ToString("yyyyMMddHHmmss");
         var ipAddr = string.IsNullOrWhiteSpace(requestDto.IpAddr) ? "127.0.0.1" : requestDto.IpAddr;
 
+        // Create SortedDictionary to ensure parameters are sorted A-Z (required for VNPay signature)
+        // IMPORTANT: vnp_BankCode must be added to dict BEFORE calculating hash
+        // When vnp_BankCode="VNPAYQR", VNPay will display QR code screen directly
         var dict = new SortedDictionary<string, string>(StringComparer.Ordinal)
         {
             ["vnp_Version"] = "2.1.0",
@@ -471,19 +514,26 @@ public class PaymentService : IPaymentService
             ["vnp_IpAddr"] = ipAddr,
             ["vnp_ReturnUrl"] = returnUrl
         };
+        
+        // Add vnp_BankCode if provided (e.g., "VNPAYQR" for QR code, "VNBANK" for ATM, "INTCARD" for international cards)
+        // SortedDictionary will automatically place it in correct A-Z position for hash calculation
         if (!string.IsNullOrWhiteSpace(requestDto.BankCode))
         {
             dict["vnp_BankCode"] = requestDto.BankCode!;
         }
 
-        // build signData (no URL-encode for signing)
-        var raw = string.Join("&", dict.Select(kv => $"{kv.Key}={kv.Value}"));
+        // Build query string with URL-encoded values (VNPay requires signature from encoded query string)
+        // SortedDictionary ensures vnp_BankCode (if present) is in correct A-Z order
+        var queryString = string.Join("&", dict.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value)}"));
+        
+        // Calculate signature from URL-encoded query string (as per VNPay spec)
+        // This includes vnp_BankCode if it was added above
         using var hmac = new System.Security.Cryptography.HMACSHA512(System.Text.Encoding.UTF8.GetBytes(hashSecret));
-        var signature = BitConverter.ToString(hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(raw))).Replace("-", string.Empty).ToLowerInvariant();
+        var hashBytes = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(queryString));
+        var signature = BitConverter.ToString(hashBytes).Replace("-", string.Empty).ToLowerInvariant();
 
-        // build final url with URL-encoded values plus vnp_SecureHash
-        var encoded = string.Join("&", dict.Select(kv => $"{kv.Key}={Uri.EscapeDataString(kv.Value)}"));
-        var url = $"{baseUrl}?{encoded}&vnp_SecureHash={signature}";
+        // build final url with query string plus vnp_SecureHash
+        var url = $"{baseUrl}?{queryString}&vnp_SecureHash={signature}";
 
         // create pending payment record (OrderId = null for transaction payment)
         var payment = new Payment

@@ -19,6 +19,12 @@ public class TemplateArchitectureService : ITemplateArchitectureService
         return e == null ? null : Map(e);
     }
 
+    public async Task<IEnumerable<TemplateArchitectureDto>> GetAllAsync()
+    {
+        var list = await _architectureRepository.GetAllAsync();
+        return list.Select(Map);
+    }
+
     public async Task<IEnumerable<TemplateArchitectureDto>> GetByInstanceIdAsync(int InstanceId)
     {
         var list = await _architectureRepository.GetByInstanceIdAsync(InstanceId);

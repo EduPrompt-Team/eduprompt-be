@@ -16,4 +16,5 @@ public interface IPostService
     Task<bool> IncrementViewCountAsync(int postId);
     Task<bool> IncrementLikeCountAsync(int postId);
     Task<double> GetAverageRatingAsync(int postId);
+    Task<PostPurchaseResult> PurchasePostAsync(int postId, int buyerUserId);
 }

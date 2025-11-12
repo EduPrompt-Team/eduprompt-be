@@ -9,6 +9,7 @@ public interface IOrderService
     Task<IEnumerable<OrderServiceDto>> GetAllOrdersAsync(); // Admin
     Task<OrderServiceDto> CancelOrderAsync(int orderId, int userId);
     Task<OrderServiceDto> UpdateOrderStatusAsync(int orderId, string status); // Admin
+    Task<OrderServiceDto> PayOrderWithWalletAsync(int orderId, int userId); // Pay order directly with wallet
 }
 
 public class OrderServiceDto

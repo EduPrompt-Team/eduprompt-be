@@ -20,17 +20,20 @@ public class AuthService : IAuthService
     private readonly IRoleRepository _roleRepository;
     private readonly IMapper _mapper;
     private readonly IConfiguration _configuration;
+    private readonly IWalletService _walletService;
 
     public AuthService(
         IUserRepository userRepository,
         IRoleRepository roleRepository,
         IMapper mapper,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IWalletService walletService)
     {
         _userRepository = userRepository;
         _roleRepository = roleRepository;
         _mapper = mapper;
         _configuration = configuration;
+        _walletService = walletService;
     }
 
     public async Task<AuthResponseDto> RegisterAsync(RegisterRequestDto request)
@@ -56,6 +59,28 @@ public class AuthService : IAuthService
         };
 
         var createdUser = await _userRepository.CreateAsync(user);
+        
+        // Auto-create wallet for new user
+        try
+        {
+            // Check if wallet already exists
+            var existingWallet = await _walletService.GetByUserIdAsync(createdUser.UserId);
+            if (existingWallet == null)
+            {
+                await _walletService.CreateAsync(new Domain.DTOs.Wallet.CreateWalletDto
+                {
+                    UserId = createdUser.UserId,
+                    Currency = "VND",
+                    Status = "Active"
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't fail registration if wallet creation fails
+            // User can create wallet manually later
+            Console.WriteLine($"Warning: Failed to auto-create wallet for user {createdUser.UserId}: {ex.Message}");
+        }
         
         // Generate token
         var response = _mapper.Map<AuthResponseDto>(createdUser);

@@ -25,4 +25,10 @@ public class CreatePostDto
 
     // Link to TemplateArchitecture when posting a template for sale/exchange
     public int? TemplateArchitectureId { get; set; }
+
+    // Link to StorageTemplate when posting a template for sale/exchange
+    public int? StorageId { get; set; }
+
+    // Price for selling template (0 for exchange/free)
+    public decimal? Price { get; set; }
 }

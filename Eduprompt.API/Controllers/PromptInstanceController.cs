@@ -20,22 +20,33 @@ public class PromptInstanceController : ControllerBase
     }
 
     /// <summary>
-    /// Get prompt instance by ID
+    /// Get prompt instance by ID (only owner or admin)
     /// </summary>
     /// <param name="InstanceId">Prompt instance ID</param>
     /// <returns>Prompt instance details</returns>
     /// <response code="200">Instance found</response>
     /// <response code="400">Error retrieving instance</response>
     /// <response code="401">User not authenticated</response>
+    /// <response code="403">User not authorized</response>
     /// <response code="404">Instance not found</response>
     [HttpGet("{InstanceId}")]
     public async Task<IActionResult> GetById(int InstanceId)
     {
         try
         {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "Missing or invalid user claim" });
+            }
+
             var instance = await _promptInstanceService.GetByIdAsync(InstanceId);
             if (instance == null)
                 return NotFound(new { message = "Prompt instance not found" });
+
+            // Only allow viewing own instances unless admin
+            if (instance.UserId != userId && !User.IsInRole("Admin"))
+                return StatusCode(403, new { message = "You can only view your own instances" });
 
             return Ok(instance);
         }
@@ -46,18 +57,52 @@ public class PromptInstanceController : ControllerBase
     }
 
     /// <summary>
-    /// Get prompt instances by user ID
+    /// Get prompt instances by user ID (only own instances)
     /// </summary>
-    /// <param name="UserId">User ID</param>
-    /// <returns>List of user's prompt instances</returns>
+    /// <returns>List of current user's prompt instances</returns>
     /// <response code="200">Instances retrieved successfully</response>
     /// <response code="400">Error retrieving instances</response>
     /// <response code="401">User not authenticated</response>
+    [HttpGet("my-instances")]
+    public async Task<IActionResult> GetMyInstances()
+    {
+        try
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "Missing or invalid user claim" });
+            }
+
+            var instances = await _promptInstanceService.GetByUserIdAsync(userId);
+            return Ok(instances);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Get prompt instances by user ID (Admin only or own instances)
+    /// </summary>
     [HttpGet("user/{UserId}")]
     public async Task<IActionResult> GetByUserId(int UserId)
     {
         try
         {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var currentUserId))
+            {
+                return Unauthorized(new { message = "Missing or invalid user claim" });
+            }
+
+            // Only allow viewing own instances unless admin
+            if (UserId != currentUserId && !User.IsInRole("Admin"))
+            {
+                return StatusCode(403, new { message = "You can only view your own instances" });
+            }
+
             var instances = await _promptInstanceService.GetByUserIdAsync(UserId);
             return Ok(instances);
         }
@@ -126,6 +171,16 @@ public class PromptInstanceController : ControllerBase
     {
         try
         {
+            // Verify userId from token matches request
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "Missing or invalid user claim" });
+            }
+
+            // Override UserId from token to prevent user creating instance for others
+            createPromptInstanceDto.UserId = userId;
+
             var instance = await _promptInstanceService.CreateAsync(createPromptInstanceDto);
             return CreatedAtAction(nameof(GetById), new { InstanceId = instance.InstanceId }, instance);
         }
@@ -136,13 +191,27 @@ public class PromptInstanceController : ControllerBase
     }
 
     /// <summary>
-    /// Cập nhật instance
+    /// Cập nhật instance (only owner or admin)
     /// </summary>
     [HttpPut("{InstanceId}")]
     public async Task<IActionResult> Update(int InstanceId, [FromBody] UpdatePromptInstanceDto updatePromptInstanceDto)
     {
         try
         {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "Missing or invalid user claim" });
+            }
+
+            // Verify ownership
+            var existingInstance = await _promptInstanceService.GetByIdAsync(InstanceId);
+            if (existingInstance == null)
+                return NotFound(new { message = "Prompt instance not found" });
+
+            if (existingInstance.UserId != userId && !User.IsInRole("Admin"))
+                return StatusCode(403, new { message = "You can only update your own instances" });
+
             var instance = await _promptInstanceService.UpdateAsync(InstanceId, updatePromptInstanceDto);
             return Ok(instance);
         }
@@ -157,13 +226,27 @@ public class PromptInstanceController : ControllerBase
     }
 
     /// <summary>
-    /// Xóa instance
+    /// Xóa instance (only owner or admin)
     /// </summary>
     [HttpDelete("{InstanceId}")]
     public async Task<IActionResult> Delete(int InstanceId)
     {
         try
         {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "Missing or invalid user claim" });
+            }
+
+            // Verify ownership
+            var existingInstance = await _promptInstanceService.GetByIdAsync(InstanceId);
+            if (existingInstance == null)
+                return NotFound(new { message = "Prompt instance not found" });
+
+            if (existingInstance.UserId != userId && !User.IsInRole("Admin"))
+                return StatusCode(403, new { message = "You can only delete your own instances" });
+
             var result = await _promptInstanceService.DeleteAsync(InstanceId);
             if (!result)
                 return NotFound(new { message = "Prompt instance not found" });
@@ -177,13 +260,27 @@ public class PromptInstanceController : ControllerBase
     }
 
     /// <summary>
-    /// Hoàn thành instance với output data
+    /// Hoàn thành instance với output data (only owner or admin)
     /// </summary>
     [HttpPost("{InstanceId}/complete")]
     public async Task<IActionResult> CompleteInstance(int InstanceId, [FromBody] CompleteInstanceRequest request)
     {
         try
         {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "Missing or invalid user claim" });
+            }
+
+            // Verify ownership
+            var existingInstance = await _promptInstanceService.GetByIdAsync(InstanceId);
+            if (existingInstance == null)
+                return NotFound(new { message = "Prompt instance not found" });
+
+            if (existingInstance.UserId != userId && !User.IsInRole("Admin"))
+                return StatusCode(403, new { message = "You can only complete your own instances" });
+
             var result = await _promptInstanceService.CompleteInstanceAsync(InstanceId, request.OutputData);
             if (!result)
                 return NotFound(new { message = "Prompt instance not found" });
