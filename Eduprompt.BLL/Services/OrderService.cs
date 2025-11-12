@@ -1,4 +1,5 @@
 using Eduprompt.Domain.DTOs.Order;
+using Eduprompt.Domain.DTOs.Transaction;
 using Eduprompt.Domain.Entities;
 using Eduprompt.Domain.Interface.Repository;
 using Eduprompt.Domain.Interface.Service;
@@ -12,17 +13,26 @@ public class OrderService : IOrderService
     private readonly IOrderRepository _orderRepository;
     private readonly ICartRepository _cartRepository;
     private readonly IWalletService _walletService;
+    private readonly ITransactionService _transactionService;
+    private readonly IPaymentMethodRepository _paymentMethodRepository;
+    private readonly IWalletRepository _walletRepository;
     private readonly EdupromptV2Context _db;
 
     public OrderService(
         IOrderRepository orderRepository, 
         ICartRepository cartRepository,
         IWalletService walletService,
+        ITransactionService transactionService,
+        IPaymentMethodRepository paymentMethodRepository,
+        IWalletRepository walletRepository,
         EdupromptV2Context db)
     {
         _orderRepository = orderRepository;
         _cartRepository = cartRepository;
         _walletService = walletService;
+        _transactionService = transactionService;
+        _paymentMethodRepository = paymentMethodRepository;
+        _walletRepository = walletRepository;
         _db = db;
     }
 
@@ -124,6 +134,41 @@ public class OrderService : IOrderService
             // Update order status
             order.Status = "Paid";
             var updated = await _orderRepository.UpdateAsync(order);
+            
+            // Create transaction record for wallet payment
+            try
+            {
+                var wallet = await _walletRepository.GetByUserIdAsync(UserId);
+                if (wallet != null)
+                {
+                    // Find Wallet payment method (or use default)
+                    var paymentMethods = await _paymentMethodRepository.GetAllAsync();
+                    var walletMethod = paymentMethods.FirstOrDefault(m => 
+                        (m.MethodName ?? "").Contains("Wallet", StringComparison.OrdinalIgnoreCase) ||
+                        (m.Provider ?? "").Contains("Wallet", StringComparison.OrdinalIgnoreCase) ||
+                        (m.Provider ?? "").Contains("Internal", StringComparison.OrdinalIgnoreCase)
+                    ) ?? paymentMethods.FirstOrDefault();
+                    
+                    var paymentMethodId = walletMethod?.PaymentMethodId ?? 1;
+                    
+                    await _transactionService.CreateAsync(new CreateTransactionDto
+                    {
+                        PaymentMethodId = paymentMethodId,
+                        WalletId = wallet.WalletId,
+                        OrderId = order.OrderId,
+                        Amount = order.TotalAmount,
+                        TransactionType = "Payment",
+                        Status = "Completed", // Wallet payment is completed immediately
+                        TransactionReference = $"Order #{order.OrderId} - Wallet Payment"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't fail the payment
+                // Transaction creation is optional for wallet payments
+                Console.WriteLine($"Warning: Failed to create transaction record for order {OrderId}: {ex.Message}");
+            }
             
             await tx.CommitAsync();
             return MapToServiceDto(updated);
