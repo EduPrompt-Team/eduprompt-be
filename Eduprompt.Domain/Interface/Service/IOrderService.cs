@@ -26,6 +26,9 @@ public class OrderServiceDto
     
     // Payments
     public List<PaymentServiceDto>? Payments { get; set; }
+    
+    // PackageId - for single package orders or primary package in cart orders
+    public int? PackageId { get; set; }
 }
 
 public class OrderItemServiceDto

@@ -134,9 +134,25 @@ public class FeedbackController : ControllerBase
             var feedback = await _feedbackService.CreateAsync(createDto);
             return CreatedAtAction(nameof(GetById), new { id = feedback.FeedbackId }, feedback);
         }
+        catch (KeyNotFoundException ex)
+        {
+            // Return 404 for not found entities (StorageTemplate, Post, Package)
+            return NotFound(new { message = ex.Message, statusCode = 404 });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            // Return 401 for user not found
+            return Unauthorized(new { message = ex.Message, statusCode = 401 });
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Return 400 for validation errors (duplicate feedback, missing required fields)
+            return BadRequest(new { message = ex.Message, statusCode = 400 });
+        }
         catch (Exception ex)
         {
-            return BadRequest(new { message = ex.Message });
+            // Return 400 for other errors
+            return BadRequest(new { message = ex.Message, statusCode = 400 });
         }
     }
 

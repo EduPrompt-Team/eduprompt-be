@@ -45,6 +45,27 @@ public class PaymentMethodController : ControllerBase
     }
 
     /// <summary>
+    /// Get active payment methods (Public - for authenticated users)
+    /// </summary>
+    /// <returns>List of active payment methods</returns>
+    /// <response code="200">Payment methods retrieved successfully</response>
+    /// <response code="401">User not authenticated</response>
+    [HttpGet("public")]
+    [Authorize]
+    public async Task<IActionResult> GetActive()
+    {
+        try
+        {
+            var paymentMethods = await _paymentMethodService.GetActiveAsync();
+            return Ok(paymentMethods);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Get payment methods by user ID
     /// </summary>
     /// <param name="UserId">User ID</param>

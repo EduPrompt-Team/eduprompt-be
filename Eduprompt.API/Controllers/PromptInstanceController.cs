@@ -2,6 +2,8 @@ using Eduprompt.Domain.DTOs.PromptInstance;
 using Eduprompt.Domain.Interface.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Security.Claims;
 
 namespace Eduprompt.API.Controllers;
 
@@ -68,7 +70,9 @@ public class PromptInstanceController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy instances theo Template ID
+    /// Lấy instances theo Template ID (PackageId)
+    /// Note: templateId in this endpoint refers to PackageId
+    /// For StorageTemplate-based queries, use /storage/{storageId} endpoint
     /// </summary>
     [HttpGet("template/{templateId}")]
     public async Task<IActionResult> GetByTemplateId(int templateId)
@@ -76,6 +80,43 @@ public class PromptInstanceController : ControllerBase
         try
         {
             var instances = await _promptInstanceService.GetByTemplateIdAsync(templateId);
+            return Ok(instances);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Lấy instances theo StorageTemplate ID (StorageId)
+    /// Note: Returns ALL instances with matching PackageId, not filtered by UserId
+    /// For user-specific instances, use /storage/{storageId}/my endpoint
+    /// </summary>
+    [HttpGet("storage/{storageId}")]
+    public async Task<IActionResult> GetByStorageId(int storageId)
+    {
+        try
+        {
+            var instances = await _promptInstanceService.GetByStorageIdAsync(storageId);
+            return Ok(instances);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Lấy instances theo StorageTemplate ID (StorageId) của user hiện tại
+    /// </summary>
+    [HttpGet("storage/{storageId}/my")]
+    public async Task<IActionResult> GetMyInstancesByStorageId(int storageId)
+    {
+        try
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var instances = await _promptInstanceService.GetByStorageIdAndUserIdAsync(storageId, userId);
             return Ok(instances);
         }
         catch (Exception ex)
@@ -129,6 +170,22 @@ public class PromptInstanceController : ControllerBase
             var instance = await _promptInstanceService.CreateAsync(createPromptInstanceDto);
             return CreatedAtAction(nameof(GetById), new { InstanceId = instance.InstanceId }, instance);
         }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new 
+            { 
+                message = ex.Message,
+                errors = new Dictionary<string, string[]>
+                {
+                    { "packageId", new[] { ex.Message } },
+                    { "storageId", new[] { ex.Message } }
+                }
+            });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
         catch (Exception ex)
         {
             return BadRequest(new { message = ex.Message });
@@ -180,24 +237,37 @@ public class PromptInstanceController : ControllerBase
     /// Hoàn thành instance với output data
     /// </summary>
     [HttpPost("{InstanceId}/complete")]
-    public async Task<IActionResult> CompleteInstance(int InstanceId, [FromBody] CompleteInstanceRequest request)
+    public async Task<IActionResult> CompleteInstance(int InstanceId, [FromBody] CompletePromptInstanceDto completeDto)
     {
         try
         {
-            var result = await _promptInstanceService.CompleteInstanceAsync(InstanceId, request.OutputData);
-            if (!result)
-                return NotFound(new { message = "Prompt instance not found" });
-
-            return Ok(new { message = "Instance completed successfully" });
+            // Log received data for debugging
+            var outputJsonLength = completeDto.OutputJson?.Length ?? 0;
+            var hasOutputJson = !string.IsNullOrEmpty(completeDto.OutputJson);
+            
+            var instance = await _promptInstanceService.CompleteAsync(InstanceId, completeDto);
+            
+            // Verify outputJson was saved
+            if (hasOutputJson && string.IsNullOrEmpty(instance.OutputJson))
+            {
+                // Log warning if outputJson was provided but not saved
+                return BadRequest(new 
+                { 
+                    message = "OutputJson was provided but not saved. Please check backend logs.",
+                    receivedOutputJsonLength = outputJsonLength,
+                    savedOutputJsonLength = instance.OutputJson?.Length ?? 0
+                });
+            }
+            
+            return Ok(instance);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
         }
         catch (Exception ex)
         {
             return BadRequest(new { message = ex.Message });
         }
     }
-}
-
-public class CompleteInstanceRequest
-{
-    public string OutputData { get; set; } = string.Empty;
 }

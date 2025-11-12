@@ -60,18 +60,56 @@ public class FeedbackRepository : IFeedbackRepository
             .ToListAsync();
     }
 
+    public async Task<Feedback?> GetByUserAndStorageIdAsync(int userId, int storageId)
+    {
+        return await _context.Feedbacks
+            .AsNoTracking()
+            .Include(f => f.User)
+            .Include(f => f.Post)
+            .Include(f => f.StorageTemplate)
+            .FirstOrDefaultAsync(f => f.UserId == userId && f.StorageId == storageId);
+    }
+
     public async Task<Feedback> CreateAsync(Feedback feedback)
     {
         _context.Feedbacks.Add(feedback);
         await _context.SaveChangesAsync();
-        return feedback;
+        
+        // Ensure FeedbackId is set (should be set by EF Core after SaveChanges)
+        if (feedback.FeedbackId <= 0)
+        {
+            // If ID is not set, something went wrong - return the feedback as-is
+            return feedback;
+        }
+        
+        // Try to get fresh feedback with includes, but if it fails, return the created feedback
+        try
+        {
+            var freshFeedback = await GetFreshAsync(feedback.FeedbackId);
+            return freshFeedback;
+        }
+        catch (InvalidOperationException)
+        {
+            // If GetFreshAsync fails (e.g., feedback not found immediately after creation),
+            // reload from context without tracking to get navigation properties
+            var reloaded = await _context.Feedbacks
+                .AsNoTracking()
+                .Include(f => f.User)
+                .Include(f => f.Post)
+                .Include(f => f.StorageTemplate)
+                .FirstOrDefaultAsync(f => f.FeedbackId == feedback.FeedbackId);
+            
+            // If still not found, return the feedback we just created (without navigation properties)
+            // This should rarely happen, but prevents throwing exception
+            return reloaded ?? feedback;
+        }
     }
 
     public async Task<Feedback> UpdateAsync(Feedback feedback)
     {
         _context.Feedbacks.Update(feedback);
         await _context.SaveChangesAsync();
-        return feedback;
+        return await GetFreshAsync(feedback.FeedbackId);
     }
 
     public async Task<bool> DeleteAsync(int FeedbackId)
@@ -149,5 +187,33 @@ public class FeedbackRepository : IFeedbackRepository
             .OrderByDescending(f => f.CreatedDate)
             .Take(count)
             .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Feedback>> GetAllAsync()
+    {
+        return await _context.Feedbacks
+            .AsNoTracking()
+            .Include(f => f.User)
+            .Include(f => f.Post)
+            .Include(f => f.StorageTemplate)
+            .OrderByDescending(f => f.CreatedDate)
+            .ToListAsync();
+    }
+
+    private async Task<Feedback> GetFreshAsync(int feedbackId)
+    {
+        var feedback = await _context.Feedbacks
+            .AsNoTracking()
+            .Include(f => f.User)
+            .Include(f => f.Post)
+            .Include(f => f.StorageTemplate)
+            .FirstOrDefaultAsync(f => f.FeedbackId == feedbackId);
+
+        if (feedback == null)
+        {
+            throw new InvalidOperationException($"Feedback with ID {feedbackId} could not be loaded.");
+        }
+
+        return feedback;
     }
 }

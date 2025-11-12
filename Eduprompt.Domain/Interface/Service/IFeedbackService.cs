@@ -8,6 +8,8 @@ public interface IFeedbackService
     Task<IEnumerable<FeedbackDto>> GetByPostIdAsync(int postId);
     Task<IEnumerable<FeedbackDto>> GetByStorageIdAsync(int storageId);
     Task<IEnumerable<FeedbackDto>> GetByUserIdAsync(int userId);
+    Task<FeedbackDto?> GetByUserAndStorageIdAsync(int userId, int storageId);
+    Task<IEnumerable<FeedbackDto>> GetAllAsync();
     Task<FeedbackDto> CreateAsync(CreateFeedbackDto createDto);
     Task<FeedbackDto> UpdateAsync(int feedbackId, CreateFeedbackDto updateDto);
     Task<bool> DeleteAsync(int feedbackId);

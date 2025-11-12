@@ -21,6 +21,9 @@ public interface IPaymentService
     // Wallet Top-up & Transaction Payment (without Order)
     Task<string> CreateVnpayUrlForWalletTopupAsync(int walletId, decimal amount, int userId, VnpayRequestServiceDto requestDto);
     Task<string> CreateVnpayUrlForTransactionAsync(int transactionId, int userId, VnpayRequestServiceDto requestDto);
+    
+    // Check payment status for a package
+    Task<PackagePaymentStatusDto> CheckPackagePaymentAsync(int packageId, int userId);
 }
 
 // Service DTOs
@@ -85,4 +88,16 @@ public class VnpayRefundRequestDto
     public string TransactionDate { get; set; } = string.Empty;
     public string CreateBy { get; set; } = "system";
     public string? IpAddr { get; set; }
+}
+
+public class PackagePaymentStatusDto
+{
+    public int PackageId { get; set; }
+    public bool IsPaid { get; set; }
+    public int? OrderId { get; set; }
+    public int? PaymentId { get; set; }
+    public DateTime? PaidAt { get; set; }
+    public decimal? Amount { get; set; }
+    public string? PaymentMethod { get; set; }
+    public string? Status { get; set; }
 }

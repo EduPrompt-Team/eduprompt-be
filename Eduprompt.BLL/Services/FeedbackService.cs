@@ -10,15 +10,21 @@ public class FeedbackService : IFeedbackService
     private readonly IFeedbackRepository _feedbackRepository;
     private readonly IPostRepository _postRepository;
     private readonly IStorageTemplateRepository _storageTemplateRepository;
+    private readonly IPackageRepository _packageRepository;
+    private readonly IUserRepository _userRepository;
 
     public FeedbackService(
         IFeedbackRepository feedbackRepository,
         IPostRepository postRepository,
-        IStorageTemplateRepository storageTemplateRepository)
+        IStorageTemplateRepository storageTemplateRepository,
+        IPackageRepository packageRepository,
+        IUserRepository userRepository)
     {
         _feedbackRepository = feedbackRepository;
         _postRepository = postRepository;
         _storageTemplateRepository = storageTemplateRepository;
+        _packageRepository = packageRepository;
+        _userRepository = userRepository;
     }
 
     public async Task<FeedbackDto?> GetByIdAsync(int FeedbackId)
@@ -33,6 +39,18 @@ public class FeedbackService : IFeedbackService
     {
         var feedbacks = await _feedbackRepository.GetByUserIdAsync(UserId);
         return feedbacks.Select(MapToDto);
+    }
+
+    public async Task<IEnumerable<FeedbackDto>> GetAllAsync()
+    {
+        var feedbacks = await _feedbackRepository.GetAllAsync();
+        return feedbacks.Select(MapToDto);
+    }
+
+    public async Task<FeedbackDto?> GetByUserAndStorageIdAsync(int userId, int storageId)
+    {
+        var feedback = await _feedbackRepository.GetByUserAndStorageIdAsync(userId, storageId);
+        return feedback != null ? MapToDto(feedback) : null;
     }
 
     public async Task<IEnumerable<FeedbackDto>> GetByPostIdAsync(int PostId)
@@ -55,13 +73,19 @@ public class FeedbackService : IFeedbackService
             throw new InvalidOperationException("PostId or StorageId is required");
         }
 
+        // Normalize optional identifiers
+        if (createDto.PackageId.HasValue && createDto.PackageId.Value <= 0)
+        {
+            createDto.PackageId = null;
+        }
+
         // Validate PostId exists (if provided)
         if (createDto.PostId.HasValue && createDto.PostId.Value > 0)
         {
             var post = await _postRepository.GetByIdAsync(createDto.PostId.Value);
             if (post == null)
             {
-                throw new InvalidOperationException($"Post with ID {createDto.PostId} not found");
+                throw new KeyNotFoundException($"Post with ID {createDto.PostId.Value} not found");
             }
         }
 
@@ -71,14 +95,40 @@ public class FeedbackService : IFeedbackService
             var storage = await _storageTemplateRepository.GetByIdAsync(createDto.StorageId.Value);
             if (storage == null)
             {
-                throw new InvalidOperationException($"StorageTemplate with ID {createDto.StorageId} not found");
+                throw new KeyNotFoundException($"StorageTemplate with ID {createDto.StorageId.Value} not found");
             }
         }
 
-        // Validate UserId is provided
+        // Validate PackageId exists (if provided)
+        if (createDto.PackageId.HasValue)
+        {
+            var package = await _packageRepository.GetByIdAsync(createDto.PackageId.Value);
+            if (package == null)
+            {
+                throw new KeyNotFoundException($"Package with ID {createDto.PackageId.Value} not found");
+            }
+        }
+
+        // Validate UserId is provided and exists
         if (!createDto.UserId.HasValue || createDto.UserId.Value <= 0)
         {
             throw new InvalidOperationException("UserId is required");
+        }
+
+        var user = await _userRepository.GetByIdAsync(createDto.UserId.Value);
+        if (user == null)
+        {
+            throw new UnauthorizedAccessException("User not found");
+        }
+
+        // Ensure user does not already have a review for this storage template
+        if (createDto.StorageId.HasValue)
+        {
+            var existing = await _feedbackRepository.GetByUserAndStorageIdAsync(createDto.UserId.Value, createDto.StorageId.Value);
+            if (existing != null)
+            {
+                throw new InvalidOperationException("You have already reviewed this template");
+            }
         }
 
         var feedback = new Feedback
@@ -93,10 +143,6 @@ public class FeedbackService : IFeedbackService
             Status = createDto.Status ?? "Active",
             CreatedDate = DateTime.UtcNow
         };
-        
-        // If PostId should be NULL, we need to use reflection or update entity
-        // For now, EF Core with IsRequired(false) should handle 0 as NULL
-        // But better: check if PostId = 0 and createDto.PostId is null, then don't set PostId
 
         var createdFeedback = await _feedbackRepository.CreateAsync(feedback);
         return MapToDto(createdFeedback);
@@ -169,6 +215,8 @@ public class FeedbackService : IFeedbackService
             IsVerified = feedback.IsVerified,
             Status = feedback.Status,
             UserName = feedback.User?.FullName,
+            UserEmail = feedback.User?.Email,
+            UserProfileUrl = feedback.User?.ProfileUrl,
             PostTitle = feedback.Post?.Title,
             StorageTemplateName = feedback.StorageTemplate?.TemplateName
         };

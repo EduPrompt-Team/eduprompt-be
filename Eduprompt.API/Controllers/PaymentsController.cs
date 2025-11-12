@@ -166,6 +166,24 @@ public class PaymentsController : ControllerBase
         var url = await _paymentService.CreateVnpayUrlForTransactionAsync(transactionId, userId, dto);
         return Ok(new { url });
     }
+
+    /// <summary>
+    /// Kiểm tra trạng thái thanh toán của một package cho user hiện tại
+    /// </summary>
+    /// <param name="packageId">ID của package cần kiểm tra</param>
+    /// <returns>Thông tin trạng thái thanh toán</returns>
+    /// <response code="200">Trả về thông tin payment status (isPaid có thể là true hoặc false)</response>
+    /// <response code="401">User chưa đăng nhập</response>
+    [HttpGet("check-package/{packageId}")]
+    [Authorize]
+    [ProducesResponseType(typeof(PackagePaymentStatusDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> CheckPackagePayment(int packageId)
+    {
+        var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+        var status = await _paymentService.CheckPackagePaymentAsync(packageId, userId);
+        return Ok(status);
+    }
 }
 
 // DTO for wallet top-up request

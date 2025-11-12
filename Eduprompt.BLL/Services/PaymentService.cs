@@ -4,6 +4,7 @@ using Eduprompt.Domain.Interface.Service;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Linq;
 
 namespace Eduprompt.BLL.Services;
 
@@ -433,6 +434,80 @@ public class PaymentService : IPaymentService
         await _paymentRepository.CreateAsync(payment);
 
         return url;
+    }
+
+    public async Task<PackagePaymentStatusDto> CheckPackagePaymentAsync(int packageId, int userId)
+    {
+        // 1. Lấy tất cả orders Completed/Paid của user
+        var allOrders = await _orderRepository.GetByUserIdAsync(userId);
+        var completedOrders = allOrders
+            .Where(o => o.Status == "Completed" || o.Status == "Paid")
+            .ToList();
+        
+        // 2. Tìm order có PackageId matching trực tiếp
+        var orderWithPackage = completedOrders.FirstOrDefault(o => 
+            o.PackageId == packageId
+        );
+
+        // 3. Nếu không tìm thấy, check trong CartDetails (fallback - chỉ work nếu cart chưa bị clear)
+        //    Note: Sau khi order được tạo, cart thường bị clear, nên check này có thể không work
+        //    Nhưng vẫn check để handle edge cases
+        if (orderWithPackage == null)
+        {
+            // Check trong CartDetails nếu có (chỉ work nếu cart chưa bị clear)
+            // For now, skip this check as cart is cleared after order creation
+            // Main fix: Ensure PackageId is set when creating order from cart
+        }
+
+        // 4. Kiểm tra payment status nếu tìm thấy order
+        if (orderWithPackage != null)
+        {
+            var payments = await _paymentRepository.GetByOrderIdAsync(orderWithPackage.OrderId);
+            var paidPayment = payments.FirstOrDefault(p => 
+                p.Status == "Paid" || p.Status == "Completed"
+            );
+            
+            // Nếu có payment Paid/Completed, trả về isPaid = true
+            if (paidPayment != null)
+            {
+                return new PackagePaymentStatusDto
+                {
+                    PackageId = packageId,
+                    IsPaid = true,
+                    OrderId = orderWithPackage.OrderId,
+                    PaymentId = paidPayment.PaymentId,
+                    PaidAt = paidPayment.CreatedAt,
+                    Amount = paidPayment.Amount,
+                    PaymentMethod = paidPayment.PaymentMethod,
+                    Status = paidPayment.Status
+                };
+            }
+            
+            // Nếu order status là Completed/Paid nhưng chưa có payment record
+            // (có thể payment được tạo tự động sau), vẫn coi như đã thanh toán
+            if (orderWithPackage.Status == "Completed" || orderWithPackage.Status == "Paid")
+            {
+                return new PackagePaymentStatusDto
+                {
+                    PackageId = packageId,
+                    IsPaid = true,
+                    OrderId = orderWithPackage.OrderId,
+                    PaymentId = null,
+                    PaidAt = orderWithPackage.OrderDate,
+                    Amount = orderWithPackage.TotalAmount,
+                    PaymentMethod = null,
+                    Status = orderWithPackage.Status
+                };
+            }
+        }
+
+        // 5. Nếu không tìm thấy, trả về isPaid = false
+        //    Lưu ý: Nếu orders cũ trong database không có PackageId, cần data migration
+        return new PackagePaymentStatusDto
+        {
+            PackageId = packageId,
+            IsPaid = false
+        };
     }
 
     public async Task<string> CreateVnpayUrlForTransactionAsync(int transactionId, int userId, VnpayRequestServiceDto requestDto)

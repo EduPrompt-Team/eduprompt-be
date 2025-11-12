@@ -8,6 +8,8 @@ public interface IFeedbackRepository
     Task<IEnumerable<Feedback>> GetByPostIdAsync(int postId);
     Task<IEnumerable<Feedback>> GetByStorageIdAsync(int storageId);
     Task<IEnumerable<Feedback>> GetByUserIdAsync(int userId);
+    Task<Feedback?> GetByUserAndStorageIdAsync(int userId, int storageId);
+    Task<IEnumerable<Feedback>> GetAllAsync();
     Task<Feedback> CreateAsync(Feedback feedback);
     Task<Feedback> UpdateAsync(Feedback feedback);
     Task<bool> DeleteAsync(int feedbackId);

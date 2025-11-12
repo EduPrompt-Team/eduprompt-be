@@ -489,7 +489,15 @@ public partial class EdupromptV2Context : DbContext
 
             entity.Property(e => e.InstanceId).HasColumnName("InstanceID");
             entity.Property(e => e.ExecutedAt).HasDefaultValueSql("(getutcdate())");
-            entity.Property(e => e.PackageId).HasColumnName("PackageID");
+            
+            // PackageId: Map int (entity) to int? (database) using 0 as sentinel for NULL
+            entity.Property(e => e.PackageId)
+                .HasColumnName("PackageID")
+                .HasConversion(
+                    v => v == 0 ? (int?)null : v,  // Entity (int) -> DB (int?)
+                    v => v ?? 0                     // DB (int?) -> Entity (int)
+                );
+            
             entity.Property(e => e.PromptName)
                 .IsRequired()
                 .HasMaxLength(200);
@@ -501,7 +509,8 @@ public partial class EdupromptV2Context : DbContext
             entity.HasOne(d => d.Package).WithMany(p => p.PromptInstances)
                 .HasForeignKey(d => d.PackageId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_PromptInstances_Packages");
+                .HasConstraintName("FK_PromptInstances_Packages")
+                .IsRequired(false); // Allow null in database (0 in entity maps to NULL)
 
             entity.HasOne(d => d.User).WithMany(p => p.PromptInstances)
                 .HasForeignKey(d => d.UserId)
@@ -689,15 +698,33 @@ public partial class EdupromptV2Context : DbContext
             entity.HasKey(e => e.WishlistId).HasName("PK__Wishlist__233189EBA75C6810");
 
             entity.HasIndex(e => e.PackageId, "IX_Wishlists_PackageID");
-
+            entity.HasIndex(e => e.StorageId, "IX_Wishlists_StorageID");
             entity.HasIndex(e => e.UserId, "IX_Wishlists_UserId");
 
             entity.Property(e => e.AddedAt).HasDefaultValueSql("(getutcdate())");
-            entity.Property(e => e.PackageId).HasColumnName("PackageID");
+            
+            // PackageId: Map int (entity) to int? (database) using 0 as sentinel for NULL
+            // Note: Cannot use IsRequired(false) on non-nullable int, so we use HasConversion only
+            entity.Property(e => e.PackageId)
+                .HasColumnName("PackageID")
+                .HasConversion(
+                    v => v == 0 ? (int?)null : v,  // Entity (int) -> DB (int?)
+                    v => v ?? 0                     // DB (int?) -> Entity (int)
+                );
+            
+            entity.Property(e => e.StorageId).HasColumnName("StorageID").IsRequired(false);  // Nullable
 
+            // Package relationship - only valid when PackageId != 0 (after conversion)
             entity.HasOne(d => d.Package).WithMany(p => p.Wishlists)
                 .HasForeignKey(d => d.PackageId)
-                .HasConstraintName("FK_Wishlists_Packages");
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_Wishlists_Packages")
+                .IsRequired(false);  // Allow null in database (0 in entity maps to NULL)
+
+            entity.HasOne(d => d.StorageTemplate).WithMany()
+                .HasForeignKey(d => d.StorageId)
+                .OnDelete(DeleteBehavior.NoAction)  // Changed from Cascade to avoid multiple cascade paths
+                .HasConstraintName("FK_Wishlists_StorageTemplates");
 
             entity.HasOne(d => d.User).WithMany(p => p.Wishlists)
                 .HasForeignKey(d => d.UserId)

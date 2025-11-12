@@ -67,9 +67,42 @@ public class PromptInstanceRepository : IPromptInstanceRepository
 
     public async Task<PromptInstance> UpdateAsync(PromptInstance PromptInstance)
     {
-        _context.PromptInstances.Update(PromptInstance);
-        await _context.SaveChangesAsync();
-        return PromptInstance;
+        // Since DbContext uses NoTracking, we need to explicitly attach and mark as modified
+        // First, check if entity is already tracked
+        var existingEntity = await _context.PromptInstances
+            .AsTracking() // Use tracking for update
+            .FirstOrDefaultAsync(p => p.InstanceId == PromptInstance.InstanceId);
+        
+        if (existingEntity != null)
+        {
+            // Update properties from the provided entity
+            existingEntity.OutputJson = PromptInstance.OutputJson;
+            existingEntity.Status = PromptInstance.Status;
+            existingEntity.ProcessingTimeMs = PromptInstance.ProcessingTimeMs;
+            existingEntity.ExecutedAt = PromptInstance.ExecutedAt;
+            existingEntity.PromptName = PromptInstance.PromptName;
+            existingEntity.InputJson = PromptInstance.InputJson;
+            
+            await _context.SaveChangesAsync();
+            
+            // Reload with navigation properties
+            return await _context.PromptInstances
+                .Include(p => p.PromptInstanceDetails)
+                .Include(p => p.Package)
+                .FirstOrDefaultAsync(p => p.InstanceId == PromptInstance.InstanceId) ?? existingEntity;
+        }
+        else
+        {
+            // If not found, attach and update
+            _context.PromptInstances.Update(PromptInstance);
+            await _context.SaveChangesAsync();
+            
+            // Reload with navigation properties
+            return await _context.PromptInstances
+                .Include(p => p.PromptInstanceDetails)
+                .Include(p => p.Package)
+                .FirstOrDefaultAsync(p => p.InstanceId == PromptInstance.InstanceId) ?? PromptInstance;
+        }
     }
 
     public async Task<bool> DeleteAsync(int PromptInstanceId)
@@ -131,7 +164,7 @@ public class PromptInstanceRepository : IPromptInstanceRepository
         return await _context.PromptInstances
             .Include(p => p.PromptInstanceDetails)
             .Include(p => p.Package)
-            .Where(p => p.PackageId == TemplateId) // Assuming TemplateId maps to PackageId
+            .Where(p => p.PackageId == TemplateId || (TemplateId == 0 && p.PackageId == 0)) // Handle null PackageId (0 in entity = NULL in DB)
             .OrderByDescending(p => p.ExecutedAt)
             .ToListAsync();
     }

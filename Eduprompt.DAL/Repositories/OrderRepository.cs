@@ -20,7 +20,8 @@ public class OrderRepository : IOrderRepository
             // .Include(o => o.OrderDetails) // Removed - OrderDetails navigation property deleted
             //     .ThenInclude(od => od.Template) // Removed - OrderDetails navigation property deleted
             .Include(o => o.User)
-            // .Include(o => o.Payments) // Removed - Payments navigation property deleted
+            .Include(o => o.Payments) // Added - Include Payments
+            .Include(o => o.Package) // Added - Include Package
             .FirstOrDefaultAsync(o => o.OrderId == orderId);
     }
 
@@ -40,8 +41,20 @@ public class OrderRepository : IOrderRepository
             // .Include(o => o.OrderDetails) // Removed - OrderDetails navigation property deleted
             //     .ThenInclude(od => od.Template) // Removed - OrderDetails navigation property deleted
             .Include(o => o.User)
-            // .Include(o => o.Payments) // Removed - Payments navigation property deleted
+            .Include(o => o.Payments) // Added - Include Payments
+            .Include(o => o.Package) // Added - Include Package
             .Where(o => o.UserId == UserId)
+            .OrderByDescending(o => o.OrderDate)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Order>> GetByUserIdAndPackageIdAsync(int userId, int packageId)
+    {
+        return await _context.Orders
+            .Include(o => o.User)
+            .Include(o => o.Payments)
+            .Include(o => o.Package)
+            .Where(o => o.UserId == userId && o.PackageId == packageId)
             .OrderByDescending(o => o.OrderDate)
             .ToListAsync();
     }
@@ -74,6 +87,18 @@ public class OrderRepository : IOrderRepository
         await _context.SaveChangesAsync();
 
         return await GetByIdAsync(order.OrderId) ?? order;
+    }
+
+    public async Task<bool> OrderHasPackageInCartDetailsAsync(int orderId, int packageId)
+    {
+        // Check if there's a cart that was used to create this order
+        // Note: This is a fallback check - after order is created, cart is cleared
+        // So this might not work for existing orders
+        // This is mainly for future orders or if cart data is preserved
+        
+        // For now, return false as we can't reliably check cart details after order creation
+        // The main check should be in Orders.PackageId
+        return false;
     }
 
     public async Task<string> GenerateOrderNumberAsync()

@@ -8,5 +8,7 @@ public interface IWishlistService
     Task<WishlistDto?> GetByIdAsync(int wishlistId);
     Task<WishlistDto> CreateAsync(int userId, WishlistCreateDto wishlistDto);
     Task<bool> DeleteAsync(int wishlistId);
-    Task<bool> IsInWishlistAsync(int userId, int packageId);
+    Task<bool> DeleteByStorageIdAsync(int userId, int storageId);  // New - delete by StorageId
+    Task<bool> IsInWishlistAsync(int userId, int packageId);  // Legacy - by PackageId
+    Task<bool> IsInWishlistByStorageIdAsync(int userId, int storageId);  // New - by StorageId
 } 

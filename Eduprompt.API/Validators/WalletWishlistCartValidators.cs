@@ -27,8 +27,16 @@ public class CreateWishlistValidator : AbstractValidator<WishlistCreateDto>
 {
     public CreateWishlistValidator()
     {
-        RuleFor(x => x.PackageId).GreaterThan(0);
-        RuleFor(x => x.Notes).MaximumLength(500).When(x => x.Notes != null);
+        // StorageId is required (for prompt templates)
+        RuleFor(x => x.StorageId).GreaterThan(0).WithMessage("Storage ID is required and must be greater than 0");
+        
+        // PackageId is optional (for backward compatibility)
+        RuleFor(x => x.PackageId).GreaterThan(0).When(x => x.PackageId.HasValue)
+            .WithMessage("Package ID must be greater than 0 if provided");
+        
+        // Notes validation
+        RuleFor(x => x.Notes).MaximumLength(500).When(x => x.Notes != null)
+            .WithMessage("Notes cannot exceed 500 characters");
     }
 }
 

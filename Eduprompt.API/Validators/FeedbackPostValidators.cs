@@ -14,7 +14,7 @@ public class CreateFeedbackValidator : AbstractValidator<CreateFeedbackDto>
             .WithMessage("PostId or StorageId is required");
 
         RuleFor(x => x.Rating).InclusiveBetween(1, 5);
-        When(x => x.Comment != null, () => RuleFor(x => x.Comment!).MaximumLength(1000));
+        When(x => x.Comment != null, () => RuleFor(x => x.Comment!).MaximumLength(5000));
         
         // UserId will be set from token, but validate if provided
         When(x => x.UserId.HasValue, () => 

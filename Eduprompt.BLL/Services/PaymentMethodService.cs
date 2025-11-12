@@ -35,6 +35,14 @@ public class PaymentMethodService : IPaymentMethodService
         return paymentMethods.Select(MapToDto);
     }
 
+    public async Task<IEnumerable<PaymentMethodDto>> GetActiveAsync()
+    {
+        var paymentMethods = await _paymentMethodRepository.GetAllAsync();
+        return paymentMethods
+            .Where(pm => pm.IsActive)
+            .Select(MapToDto);
+    }
+
     public async Task<PaymentMethodDto> CreateAsync(CreatePaymentMethodDto createDto)
     {
         var paymentMethod = new PaymentMethod

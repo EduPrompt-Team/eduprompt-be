@@ -8,8 +8,31 @@ public class CreatePromptInstanceValidator : AbstractValidator<CreatePromptInsta
 {
     public CreatePromptInstanceValidator()
     {
-        RuleFor(x => x.UserId).GreaterThan(0);
-        RuleFor(x => x.PromptName).NotEmpty().MaximumLength(200);
+        RuleFor(x => x.UserId).GreaterThan(0).WithMessage("UserId is required and must be greater than 0");
+        
+        RuleFor(x => x.PromptName).NotEmpty().WithMessage("PromptName is required")
+            .MaximumLength(200).WithMessage("PromptName cannot exceed 200 characters");
+        
+        // PackageId is optional - can be null or 0
+        // If provided, must be > 0
+        When(x => x.PackageId.HasValue, () => 
+        {
+            RuleFor(x => x.PackageId!.Value)
+                .GreaterThan(0)
+                .WithMessage("PackageId must be greater than 0 if provided");
+        });
+        
+        // StorageId is optional - can be null or 0
+        // If provided, must be > 0
+        When(x => x.StorageId.HasValue, () => 
+        {
+            RuleFor(x => x.StorageId!.Value)
+                .GreaterThan(0)
+                .WithMessage("StorageId must be greater than 0 if provided");
+        });
+        
+        // At least one of PackageId or StorageId should be provided (or both can be null/0 for instances without package)
+        // This is handled in service layer, not in validation
     }
 }
 

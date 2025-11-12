@@ -20,6 +20,7 @@ public class WishlistRepository : IWishlistRepository
         return await _context.Wishlists
             .Include(w => w.User)
             .Include(w => w.Package)
+            .Include(w => w.StorageTemplate)
             .FirstOrDefaultAsync(w => w.WishlistId == id);
     }
 
@@ -28,6 +29,7 @@ public class WishlistRepository : IWishlistRepository
         return await _context.Wishlists
             .Include(w => w.User)
             .Include(w => w.Package)
+            .Include(w => w.StorageTemplate)
             .Where(w => w.UserId == UserId)
             .OrderByDescending(w => w.AddedAt)
             .ToListAsync();
@@ -35,10 +37,21 @@ public class WishlistRepository : IWishlistRepository
 
     public async Task<Wishlist?> GetUserWishlistItemAsync(int UserId, int templateId)
     {
+        // Legacy method - check by PackageId
         return await _context.Wishlists
             .Include(w => w.User)
             .Include(w => w.Package)
+            .Include(w => w.StorageTemplate)
             .FirstOrDefaultAsync(w => w.UserId == UserId && w.PackageId == templateId);
+    }
+
+    public async Task<Wishlist?> GetUserWishlistItemByStorageIdAsync(int userId, int storageId)
+    {
+        return await _context.Wishlists
+            .Include(w => w.User)
+            .Include(w => w.Package)
+            .Include(w => w.StorageTemplate)
+            .FirstOrDefaultAsync(w => w.UserId == userId && w.StorageId == storageId);
     }
 
     public async Task<Wishlist> CreateAsync(Wishlist wishlist)
@@ -64,7 +77,27 @@ public class WishlistRepository : IWishlistRepository
 
     public async Task<bool> ExistsAsync(int UserId, int templateId)
     {
+        // Legacy method - check by PackageId
         return await _context.Wishlists
             .AnyAsync(w => w.UserId == UserId && w.PackageId == templateId);
+    }
+
+    public async Task<bool> ExistsByStorageIdAsync(int userId, int storageId)
+    {
+        return await _context.Wishlists
+            .AnyAsync(w => w.UserId == userId && w.StorageId == storageId);
+    }
+
+    public async Task<bool> DeleteByStorageIdAsync(int userId, int storageId)
+    {
+        var wishlist = await _context.Wishlists
+            .FirstOrDefaultAsync(w => w.UserId == userId && w.StorageId == storageId);
+        
+        if (wishlist == null)
+            return false;
+
+        _context.Wishlists.Remove(wishlist);
+        await _context.SaveChangesAsync();
+        return true;
     }
 } 

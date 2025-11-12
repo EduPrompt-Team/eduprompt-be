@@ -1,6 +1,8 @@
 using Eduprompt.Domain.Interface.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Linq;
 
 namespace Eduprompt.API.Controllers;
 
@@ -56,12 +58,52 @@ public class OrderController : ControllerBase
         return Ok(orders);
     }
 
+    /// <summary>
+    /// Get current user's orders with optional filtering
+    /// </summary>
+    /// <param name="status">Filter by order status (e.g., "Completed", "Paid", "Pending")</param>
+    /// <param name="paid">Filter by payment status (true = paid orders only, false = unpaid orders only, null = all)</param>
+    /// <returns>List of user's orders with payment information</returns>
+    /// <response code="200">Orders retrieved successfully</response>
+    /// <response code="401">User not authenticated</response>
     [HttpGet("my")]
     [Authorize]
-    public async Task<IActionResult> GetMyOrders()
+    public async Task<IActionResult> GetMyOrders([FromQuery] string? status = null, [FromQuery] bool? paid = null)
     {
         var UserId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
         var orders = await _orderService.GetUserOrdersAsync(UserId);
+        
+        // Apply status filter
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            orders = orders.Where(o => 
+                string.Equals(o.Status, status, StringComparison.OrdinalIgnoreCase)
+            );
+        }
+        
+        // Apply payment filter
+        if (paid.HasValue)
+        {
+            if (paid.Value)
+            {
+                // Only orders with paid status or paid payment records
+                orders = orders.Where(o => 
+                    string.Equals(o.Status, "Completed", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(o.Status, "Paid", StringComparison.OrdinalIgnoreCase) ||
+                    (o.Payments != null && o.Payments.Any(p => p.Status == "Paid"))
+                );
+            }
+            else
+            {
+                // Only unpaid orders
+                orders = orders.Where(o => 
+                    !string.Equals(o.Status, "Completed", StringComparison.OrdinalIgnoreCase) &&
+                    !string.Equals(o.Status, "Paid", StringComparison.OrdinalIgnoreCase) &&
+                    (o.Payments == null || !o.Payments.Any(p => p.Status == "Paid"))
+                );
+            }
+        }
+        
         return Ok(orders);
     }
 
