@@ -31,10 +31,15 @@ public class ExpectedOutputService : IExpectedOutputService
         var output = new ExpectedOutput
         {
             PromptInstanceId = createDto.PromptInstanceId,
-            OutputName = createDto.OutputName
+            OutputName = createDto.OutputName,
+            ExampleOutput = createDto.OutputDetails?.FirstOrDefault()?.Description // Store first detail as ExampleOutput
         };
 
         var createdOutput = await _expectedOutputRepository.CreateAsync(output);
+        
+        // Note: OutputDetails creation would need OutputDetailRepository
+        // For now, we store the main content in ExampleOutput field
+        
         return MapToDto(createdOutput);
     }
 

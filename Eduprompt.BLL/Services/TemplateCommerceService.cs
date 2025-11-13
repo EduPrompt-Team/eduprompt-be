@@ -16,7 +16,9 @@ public class TemplateCommerceService : ITemplateCommerceService
 {
     private readonly EdupromptV2Context _db;
     private readonly IWalletService _walletService;
+    private readonly IWalletRepository _walletRepository;
     private readonly ITransactionService _transactionService;
+    private readonly IPaymentMethodRepository _paymentMethodRepository;
     private readonly IStorageTemplateRepository _storageTemplateRepository;
     private readonly IPromptInstanceRepository _promptInstanceRepository;
     private readonly IPromptInstanceDetailRepository _promptInstanceDetailRepository;
@@ -27,7 +29,9 @@ public class TemplateCommerceService : ITemplateCommerceService
     public TemplateCommerceService(
         EdupromptV2Context db,
         IWalletService walletService,
+        IWalletRepository walletRepository,
         ITransactionService transactionService,
+        IPaymentMethodRepository paymentMethodRepository,
         IStorageTemplateRepository storageTemplateRepository,
         IPromptInstanceRepository promptInstanceRepository,
         IPromptInstanceDetailRepository promptInstanceDetailRepository,
@@ -37,7 +41,9 @@ public class TemplateCommerceService : ITemplateCommerceService
     {
         _db = db;
         _walletService = walletService;
+        _walletRepository = walletRepository;
         _transactionService = transactionService;
+        _paymentMethodRepository = paymentMethodRepository;
         _storageTemplateRepository = storageTemplateRepository;
         _promptInstanceRepository = promptInstanceRepository;
         _promptInstanceDetailRepository = promptInstanceDetailRepository;
@@ -67,31 +73,20 @@ public class TemplateCommerceService : ITemplateCommerceService
         if (sellerUserId == buyerUserId) throw new InvalidOperationException("Cannot purchase your own template");
 
         // 1) Money movement
+        // Get wallets for transaction records
+        var buyerWallet = await _walletService.GetByUserIdAsync(buyerUserId);
+        var sellerWallet = await _walletService.GetByUserIdAsync(sellerUserId);
+        
+        if (buyerWallet == null)
+            throw new InvalidOperationException("Buyer wallet not found");
+        if (sellerWallet == null)
+            throw new InvalidOperationException("Seller wallet not found");
+
         // Deduct buyer, credit seller
         await _walletService.DeductFundsByUserIdAsync(buyerUserId, price);
         await _walletService.AddFundsByUserIdAsync(sellerUserId, price);
 
-        // Create transaction records (minimal)
-        await _transactionService.CreateAsync(new Domain.DTOs.Transaction.CreateTransactionDto
-        {
-            PaymentMethodId = 0,
-            WalletId = 0,
-            OrderId = 0,
-            Amount = price,
-            TransactionType = "DEBIT",
-            Status = "Completed"
-        });
-        await _transactionService.CreateAsync(new Domain.DTOs.Transaction.CreateTransactionDto
-        {
-            PaymentMethodId = 0,
-            WalletId = 0,
-            OrderId = 0,
-            Amount = price,
-            TransactionType = "CREDIT",
-            Status = "Completed"
-        });
-
-        // 2) Create order record (template type)
+        // 2) Create order record (template type) - Status = "Paid" because payment is immediate
         var order = new Order
         {
             UserId = buyerUserId,
@@ -99,11 +94,55 @@ public class TemplateCommerceService : ITemplateCommerceService
             TotalAmount = price,
             OrderDate = DateTime.UtcNow,
             Notes = $"Purchase template architecture #{templateArchitectureId}",
-            Status = "Completed"
+            Status = "Paid" // Payment is immediate via wallet, so status = "Paid" (consistent with OrderService)
         };
         order = await _orderRepository.CreateAsync(order);
 
-        // 3) Grant ownership: create a StorageTemplate for buyer (copy meta)
+        // 3) Create transaction records with actual wallet IDs (consistent with PostService)
+        try
+        {
+            // Find Wallet payment method (or use default)
+            var paymentMethods = await _paymentMethodRepository.GetAllAsync();
+            var walletMethod = paymentMethods.FirstOrDefault(m => 
+                (m.MethodName ?? "").Contains("Wallet", StringComparison.OrdinalIgnoreCase) ||
+                (m.Provider ?? "").Contains("Wallet", StringComparison.OrdinalIgnoreCase) ||
+                (m.Provider ?? "").Contains("Internal", StringComparison.OrdinalIgnoreCase)
+            ) ?? paymentMethods.FirstOrDefault();
+            
+            var paymentMethodId = walletMethod?.PaymentMethodId ?? 1;
+            
+            // Buyer transaction: Payment (money going out)
+            await _transactionService.CreateAsync(new Domain.DTOs.Transaction.CreateTransactionDto
+            {
+                PaymentMethodId = paymentMethodId,
+                WalletId = buyerWallet.WalletId,
+                OrderId = order.OrderId,
+                Amount = price,
+                TransactionType = "Payment", // Consistent with PostService and OrderService
+                Status = "Completed", // Wallet payment is completed immediately
+                TransactionReference = $"Purchase template architecture #{templateArchitectureId}"
+            });
+            
+            // Seller transaction: Deposit (money coming in)
+            await _transactionService.CreateAsync(new Domain.DTOs.Transaction.CreateTransactionDto
+            {
+                PaymentMethodId = paymentMethodId,
+                WalletId = sellerWallet.WalletId,
+                OrderId = null, // Seller doesn't have OrderId
+                Amount = price,
+                TransactionType = "Deposit", // Consistent with PostService
+                Status = "Completed", // Wallet payment is completed immediately
+                TransactionReference = $"Sale template architecture #{templateArchitectureId}"
+            });
+        }
+        catch (Exception ex)
+        {
+            // Log error but don't fail the purchase
+            // Transaction creation is important but shouldn't block the purchase
+            Console.WriteLine($"Warning: Failed to create transaction records for template purchase {templateArchitectureId}: {ex.Message}");
+        }
+
+        // 4) Grant ownership: create a StorageTemplate for buyer (copy meta)
         var buyerStorage = new StorageTemplate
         {
             UserId = buyerUserId,
@@ -119,7 +158,7 @@ public class TemplateCommerceService : ITemplateCommerceService
         _db.StorageTemplates.Add(buyerStorage);
         await _db.SaveChangesAsync(cancellationToken);
 
-        // 4) Clone PromptInstance to buyer (simple instance with name)
+        // 5) Clone PromptInstance to buyer (simple instance with name)
         var newInstance = new PromptInstance
         {
             UserId = buyerUserId,

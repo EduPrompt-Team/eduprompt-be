@@ -19,6 +19,23 @@ public class TemplateArchitectureController : ControllerBase
     }
 
     /// <summary>
+    /// Get template architecture by ID (Public)
+    /// </summary>
+    /// <param name="id">Template architecture ID</param>
+    /// <returns>Template architecture details</returns>
+    /// <response code="200">Template architecture retrieved successfully</response>
+    /// <response code="404">Template architecture not found</response>
+    [HttpGet("{id}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var result = await _service.GetByIdAsync(id);
+        if (result == null)
+            return NotFound(new { message = "Template architecture not found" });
+        return Ok(result);
+    }
+
+    /// <summary>
     /// Get template architecture by instance ID (Public)
     /// </summary>
     /// <param name="InstanceId">Prompt instance ID</param>
@@ -41,15 +58,15 @@ public class TemplateArchitectureController : ControllerBase
     /// <response code="401">User not authenticated</response>
     /// <response code="403">User not authorized (Admin role required)</response>
     [HttpPost]
-    [Authorize]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> Create([FromBody] CreateTemplateArchitectureDto dto)
     {
         var created = await _service.CreateAsync(dto);
-        return Ok(created);
+        return CreatedAtAction(nameof(GetById), new { id = created.ArchitectureId }, created);
     }
 
     [HttpPut("{architectureId}")]
-    [Authorize]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> Update(int architectureId, [FromBody] CreateTemplateArchitectureDto dto)
     {
         var updated = await _service.UpdateAsync(architectureId, dto);
@@ -57,11 +74,22 @@ public class TemplateArchitectureController : ControllerBase
     }
 
     [HttpDelete("{architectureId}")]
-    [Authorize]
+    [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> Delete(int architectureId)
     {
         var ok = await _service.DeleteAsync(architectureId);
         return ok ? Ok() : NotFound();
+    }
+
+    /// <summary>
+    /// Get all template architectures (Admin only)
+    /// </summary>
+    [HttpGet]
+    [Authorize(Policy = "AdminOnly")]
+    public async Task<IActionResult> GetAll()
+    {
+        var result = await _service.GetAllAsync();
+        return Ok(result);
     }
 }
 

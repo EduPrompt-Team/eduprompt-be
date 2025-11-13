@@ -116,7 +116,7 @@ public class PaymentsController : ControllerBase
     /// <param name="dto">Thông tin nạp tiền</param>
     /// <returns>VNPay payment URL</returns>
     /// <response code="200">Trả về payment URL thành công</response>
-    /// <response code="400">Amount <= 0 hoặc wallet không hợp lệ</response>
+    /// <response code="400">Amount nhỏ hơn hoặc bằng 0 hoặc wallet không hợp lệ</response>
     /// <response code="401">User chưa đăng nhập</response>
     /// <response code="403">Wallet không thuộc về user hiện tại</response>
     /// <response code="404">Wallet không tồn tại</response>
@@ -129,16 +129,59 @@ public class PaymentsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> CreateVnpayUrlForWalletTopup(int walletId, [FromBody] WalletTopupRequestDto dto)
     {
-        var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
-        var requestDto = new VnpayRequestServiceDto
+        try
         {
-            BankCode = dto.BankCode,
-            Language = dto.Language ?? "vn",
-            ReturnUrl = dto.ReturnUrl,
-            IpAddr = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1"
-        };
-        var url = await _paymentService.CreateVnpayUrlForWalletTopupAsync(walletId, dto.Amount, userId, requestDto);
-        return Ok(new { url });
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Unauthorized(new { message = "Missing or invalid user claim" });
+            }
+
+            if (dto == null)
+            {
+                return BadRequest(new { message = "Request body is required" });
+            }
+
+            if (dto.Amount <= 0)
+            {
+                return BadRequest(new { message = "Amount must be greater than 0" });
+            }
+
+            var requestDto = new VnpayRequestServiceDto
+            {
+                BankCode = dto.BankCode,
+                Language = dto.Language ?? "vn",
+                ReturnUrl = dto.ReturnUrl,
+                IpAddr = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1"
+            };
+            var url = await _paymentService.CreateVnpayUrlForWalletTopupAsync(walletId, dto.Amount, userId, requestDto);
+            return Ok(new { url });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(403, new { message = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            // Log full exception for debugging
+            System.Diagnostics.Debug.WriteLine($"VNPay Topup Error: {ex}");
+            Console.WriteLine($"VNPay Topup Error: {ex}");
+            
+            // Return detailed error message for debugging
+            return StatusCode(500, new { 
+                message = $"Internal server error: {ex.Message}", 
+                type = ex.GetType().Name,
+                stackTrace = ex.StackTrace
+            });
+        }
     }
 
     /// <summary>
