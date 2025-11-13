@@ -3,6 +3,7 @@ using Eduprompt.Domain.Interface.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Linq;
 
 namespace Eduprompt.API.Controllers;
 
@@ -104,13 +105,27 @@ public class StorageTemplatesController : ControllerBase
     /// Publish a storage template (Admin only)
     /// </summary>
     [HttpPost("{id}/publish")]
-    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Publish(int id)
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        var ok = await _storageService.PublishAsync(id, true, userId, true);
-        if (!ok) return BadRequest(new { message = "Publish failed (missing content or not found)" });
-        return Ok(new { message = "Published" });
+        var isAdmin = User.IsInRole("Admin");
+
+        // Allow owners to publish their own templates; admins can publish any template
+        if (!isAdmin)
+        {
+            var myStorage = await _storageService.GetUserStorageAsync(userId);
+            var ownsTemplate = myStorage.Any(t => t.StorageId == id);
+            if (!ownsTemplate)
+            {
+                return StatusCode(403, new { message = "You can only publish your own templates" });
+            }
+        }
+
+        var updated = await _storageService.PublishAsync(id, true, userId, isAdmin);
+        if (updated == null)
+            return BadRequest(new { message = "Publish failed (missing content, not found, or not owner)" });
+
+        return Ok(new { message = "Published", template = updated });
     }
 
     /// <summary>
@@ -121,8 +136,9 @@ public class StorageTemplatesController : ControllerBase
     {
         var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         var isAdmin = User.IsInRole("Admin");
-        var ok = await _storageService.PublishAsync(id, false, userId, isAdmin);
-        if (!ok) return Forbid();
-        return Ok(new { message = "Unpublished" });
+        var updated = await _storageService.PublishAsync(id, false, userId, isAdmin);
+        if (updated == null)
+            return Forbid();
+        return Ok(new { message = "Unpublished", template = updated });
     }
 } 

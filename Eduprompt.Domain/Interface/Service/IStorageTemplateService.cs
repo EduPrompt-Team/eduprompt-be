@@ -8,7 +8,7 @@ public interface IStorageTemplateService
     Task<bool> IsInStorageAsync(int userId, int templateId);
     Task<IEnumerable<StorageTemplateServiceDto>> GetPublicAsync(int? packageId, string? grade, string? subject, string? chapter);
     Task<StorageTemplateServiceDto?> UpdateAsync(int id, int currentUserId, StorageTemplateUpdateServiceDto updateDto, bool currentUserIsAdmin);
-    Task<bool> PublishAsync(int id, bool isPublish, int currentUserId, bool currentUserIsAdmin);
+    Task<StorageTemplateServiceDto?> PublishAsync(int id, bool isPublish, int currentUserId, bool currentUserIsAdmin);
 }
 
 public class StorageTemplateServiceDto

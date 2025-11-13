@@ -100,14 +100,19 @@ public class StorageTemplateService : IStorageTemplateService
             return saved == null ? null : MapToDto(saved);
         }
 
-        public async Task<bool> PublishAsync(int id, bool isPublish, int currentUserId, bool currentUserIsAdmin)
-        {
-            var entity = await _storageRepository.GetByIdAsync(id);
-            if (entity == null) return false;
-            if (!currentUserIsAdmin && entity.UserId != currentUserId) return false;
-            if (isPublish && string.IsNullOrWhiteSpace(entity.TemplateContent)) return false;
-            return await _storageRepository.SetPublishAsync(id, isPublish);
-        }
+    public async Task<StorageTemplateServiceDto?> PublishAsync(int id, bool isPublish, int currentUserId, bool currentUserIsAdmin)
+    {
+        var entity = await _storageRepository.GetByIdAsync(id);
+        if (entity == null) return null;
+        if (!currentUserIsAdmin && entity.UserId != currentUserId) return null;
+        if (isPublish && string.IsNullOrWhiteSpace(entity.TemplateContent)) return null;
+
+        var updated = await _storageRepository.SetPublishAsync(id, isPublish);
+        if (!updated) return null;
+
+        var refreshed = await _storageRepository.GetByIdAsync(id);
+        return refreshed == null ? null : MapToDto(refreshed);
+    }
 
     private static StorageTemplateServiceDto MapToDto(StorageTemplate s)
     {
