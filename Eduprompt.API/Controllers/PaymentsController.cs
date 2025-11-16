@@ -2,6 +2,7 @@ using Eduprompt.Domain.Interface.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace Eduprompt.API.Controllers;
 
@@ -12,10 +13,12 @@ namespace Eduprompt.API.Controllers;
 public class PaymentsController : ControllerBase
 {
     private readonly IPaymentService _paymentService;
+    private readonly IConfiguration _configuration;
 
-    public PaymentsController(IPaymentService paymentService)
+    public PaymentsController(IPaymentService paymentService, IConfiguration configuration)
     {
         _paymentService = paymentService;
+        _configuration = configuration;
     }
 
     [HttpGet]
@@ -55,8 +58,90 @@ public class PaymentsController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> VnpayCallback([FromQuery] VnpayCallbackServiceDto cb)
     {
-        var result = await _paymentService.ProcessVnpayCallbackAsync(cb);
-        return Ok(result);
+        try
+        {
+            // Log callback received - FORCE OUTPUT TO CONSOLE
+            var logMessage = $"========== VNPay Callback Received ==========\nTxnRef: {cb.vnp_TxnRef}\nResponseCode: {cb.vnp_ResponseCode}\nAmount: {cb.vnp_Amount}\nTransactionNo: {cb.vnp_TransactionNo}\n==========================================";
+            Console.WriteLine(logMessage);
+            Console.Error.WriteLine(logMessage); // Also write to stderr to ensure visibility
+            System.Diagnostics.Debug.WriteLine(logMessage);
+            
+            // Process callback first - this will update wallet if payment is successful
+            var result = await _paymentService.ProcessVnpayCallbackAsync(cb);
+            
+            var processedMessage = $"========== VNPay Callback Processed ==========\nPaymentId: {result.PaymentId}\nStatus: {result.Status}\nAmount: {result.Amount}\n==========================================";
+            Console.WriteLine(processedMessage);
+            Console.Error.WriteLine(processedMessage);
+            System.Diagnostics.Debug.WriteLine(processedMessage);
+            
+            // Redirect to frontend with callback parameters
+            // Frontend will handle the callback and refresh wallet
+            var frontendUrl = _configuration["VNPay:FrontendUrl"] ?? "http://localhost:5173";
+            var redirectUrl = $"{frontendUrl}/wallet?vnp_ResponseCode={cb.vnp_ResponseCode}&vnp_Amount={cb.vnp_Amount}&vnp_TransactionNo={cb.vnp_TransactionNo}&vnp_TxnRef={cb.vnp_TxnRef}&vnp_OrderInfo={Uri.EscapeDataString(cb.vnp_OrderInfo ?? "")}&vnp_TransactionStatus={Uri.EscapeDataString(cb.vnp_TransactionStatus ?? "")}";
+            
+            Console.WriteLine($"Redirecting to: {redirectUrl}");
+            Console.Error.WriteLine($"Redirecting to: {redirectUrl}");
+            
+            return Redirect(redirectUrl);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"========== ERROR in VNPay Callback ==========\nMessage: {ex.Message}\nStack Trace: {ex.StackTrace}\n==========================================";
+            Console.WriteLine(errorMessage);
+            Console.Error.WriteLine(errorMessage);
+            System.Diagnostics.Debug.WriteLine(errorMessage);
+            
+            // Still redirect to frontend but with error status
+            var frontendUrl = _configuration["VNPay:FrontendUrl"] ?? "http://localhost:5173";
+            var redirectUrl = $"{frontendUrl}/wallet?vnp_ResponseCode=99&vnp_Amount={cb.vnp_Amount}&vnp_TxnRef={cb.vnp_TxnRef}&error={Uri.EscapeDataString(ex.Message)}";
+            return Redirect(redirectUrl);
+        }
+    }
+
+    /// <summary>
+    /// Frontend calls this endpoint to process VNPay callback (when VNPay redirects directly to frontend)
+    /// </summary>
+    [HttpPost("vnpay-process-callback")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ProcessVnpayCallbackFromFrontend([FromBody] VnpayCallbackServiceDto cb)
+    {
+        try
+        {
+            // Log callback received - FORCE OUTPUT TO CONSOLE
+            var logMessage = $"========== VNPay Callback from Frontend ==========\nTxnRef: {cb.vnp_TxnRef}\nResponseCode: {cb.vnp_ResponseCode}\nAmount: {cb.vnp_Amount}\nTransactionNo: {cb.vnp_TransactionNo}\n==========================================";
+            Console.WriteLine(logMessage);
+            Console.Error.WriteLine(logMessage);
+            System.Diagnostics.Debug.WriteLine(logMessage);
+            
+            // Process callback - this will update wallet if payment is successful
+            var result = await _paymentService.ProcessVnpayCallbackAsync(cb);
+            
+            var processedMessage = $"========== VNPay Callback Processed ==========\nPaymentId: {result.PaymentId}\nStatus: {result.Status}\nAmount: {result.Amount}\n==========================================";
+            Console.WriteLine(processedMessage);
+            Console.Error.WriteLine(processedMessage);
+            System.Diagnostics.Debug.WriteLine(processedMessage);
+            
+            return Ok(new { 
+                success = true, 
+                paymentId = result.PaymentId, 
+                status = result.Status,
+                amount = result.Amount,
+                message = "Payment processed successfully"
+            });
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"========== ERROR in VNPay Callback from Frontend ==========\nMessage: {ex.Message}\nStack Trace: {ex.StackTrace}\n==========================================";
+            Console.WriteLine(errorMessage);
+            Console.Error.WriteLine(errorMessage);
+            System.Diagnostics.Debug.WriteLine(errorMessage);
+            
+            return StatusCode(500, new { 
+                success = false, 
+                message = ex.Message,
+                error = ex.GetType().Name
+            });
+        }
     }
 
     [HttpPost("querydr")]

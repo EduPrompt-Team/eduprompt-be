@@ -191,7 +191,17 @@ public class PaymentService : IPaymentService
         var secure = (cb.vnp_SecureHash ?? string.Empty).ToLowerInvariant();
 
         var all = await _paymentRepository.GetAllAsync();
-        var payment = all.FirstOrDefault(p => p.TxnRef == cb.vnp_TxnRef) ?? throw new InvalidOperationException("Payment not found");
+        var payment = all.FirstOrDefault(p => p.TxnRef == cb.vnp_TxnRef);
+        if (payment == null)
+        {
+            Console.WriteLine($"ERROR: Payment not found for TxnRef: {cb.vnp_TxnRef}");
+            System.Diagnostics.Debug.WriteLine($"ERROR: Payment not found for TxnRef: {cb.vnp_TxnRef}");
+            throw new InvalidOperationException($"Payment not found for TxnRef: {cb.vnp_TxnRef}");
+        }
+        
+        Console.WriteLine($"Found payment - PaymentId: {payment.PaymentId}, UserId: {payment.UserId}, Amount: {payment.Amount}, TxnRef: {payment.TxnRef}, Status: {payment.Status}");
+        System.Diagnostics.Debug.WriteLine($"Found payment - PaymentId: {payment.PaymentId}, UserId: {payment.UserId}, Amount: {payment.Amount}, TxnRef: {payment.TxnRef}, Status: {payment.Status}");
+        
         Order? relatedOrder = null;
 
         if (signed != secure)
@@ -216,7 +226,27 @@ public class PaymentService : IPaymentService
                     // Handle wallet top-up
                     if (payment.UserId.HasValue)
                     {
-                        await _walletService.AddFundsByUserIdAsync(payment.UserId.Value, payment.Amount);
+                        try
+                        {
+                            var addFundsResult = await _walletService.AddFundsByUserIdAsync(payment.UserId.Value, payment.Amount);
+                            if (!addFundsResult)
+                            {
+                                // Log error if wallet not found or update failed
+                                System.Diagnostics.Debug.WriteLine($"ERROR: Failed to add funds to wallet. UserId: {payment.UserId.Value}, Amount: {payment.Amount}, TxnRef: {payment.TxnRef}");
+                                Console.WriteLine($"ERROR: Failed to add funds to wallet. UserId: {payment.UserId.Value}, Amount: {payment.Amount}, TxnRef: {payment.TxnRef}");
+                            }
+                            else
+                            {
+                                System.Diagnostics.Debug.WriteLine($"SUCCESS: Added {payment.Amount} to wallet for UserId: {payment.UserId.Value}, TxnRef: {payment.TxnRef}");
+                                Console.WriteLine($"SUCCESS: Added {payment.Amount} to wallet for UserId: {payment.UserId.Value}, TxnRef: {payment.TxnRef}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"EXCEPTION: Error adding funds to wallet. UserId: {payment.UserId.Value}, Amount: {payment.Amount}, Error: {ex.Message}");
+                            Console.WriteLine($"EXCEPTION: Error adding funds to wallet. UserId: {payment.UserId.Value}, Amount: {payment.Amount}, Error: {ex.Message}");
+                            throw; // Re-throw to ensure payment status is not marked as successful if wallet update fails
+                        }
                         
                         // Create transaction record for top-up
                         try
@@ -243,7 +273,17 @@ public class PaymentService : IPaymentService
                                 }
                             }
                         }
-                        catch { /* ignore optional transaction creation errors */ }
+                        catch (Exception ex)
+                        {
+                            // Log but don't fail the payment if transaction record creation fails
+                            System.Diagnostics.Debug.WriteLine($"WARNING: Failed to create transaction record. Error: {ex.Message}");
+                            Console.WriteLine($"WARNING: Failed to create transaction record. Error: {ex.Message}");
+                        }
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"ERROR: Payment.UserId is null for TxnRef: {payment.TxnRef}");
+                        Console.WriteLine($"ERROR: Payment.UserId is null for TxnRef: {payment.TxnRef}");
                     }
                 }
                 // Only process non-top-up payments immediately
@@ -514,12 +554,15 @@ public class PaymentService : IPaymentService
                 TxnRef = txnRef
             };
             await _paymentRepository.CreateAsync(payment);
+            Console.WriteLine($"Created payment record - TxnRef: {txnRef}, UserId: {userId}, Amount: {amount}");
+            System.Diagnostics.Debug.WriteLine($"Created payment record - TxnRef: {txnRef}, UserId: {userId}, Amount: {amount}");
         }
         catch (Exception ex)
         {
             // Log payment creation error but still return URL (payment can be created later via callback)
             // This allows VNPay flow to continue even if payment record creation fails
-            System.Diagnostics.Debug.WriteLine($"Warning: Failed to create payment record: {ex.Message}");
+            Console.WriteLine($"ERROR: Failed to create payment record: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"ERROR: Failed to create payment record: {ex.Message}");
             // Don't throw - return URL anyway so user can proceed with payment
         }
 
